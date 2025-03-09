@@ -1,0 +1,533 @@
+/* Variables CSS */
+:root {
+    --bs-primary: #1e56a0;
+    --bs-primary-rgb: 30, 86, 160;
+    --bs-primary-hover: #163172;
+    --bs-secondary: #d6802a;
+    --bs-success: #28a745;
+    --bs-light-gray: #f8f9fa;
+    --bs-card-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
+    --bs-transition: all 0.3s ease;
+    --bs-border-radius: 6px;
+}
+
+/* Styles globaux */
+body {
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+}
+
+/* Améliorer l'animation hover de la navbar */
+.navbar .nav-link {
+    position: relative;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    transition: color 0.3s ease;
+}
+
+/* Effet de couleur au survol */
+.navbar .nav-link:hover {
+    color: var(--bs-primary) !important;
+}
+
+/* Effet de ligne animée sous les éléments au survol */
+.navbar .nav-link::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 3px;
+    bottom: -5px;
+    left: 0;
+    background-color: var(--bs-primary);
+    transform: scaleX(0);
+    transform-origin: bottom center;
+    transition: transform 0.3s ease-out;
+    border-radius: 2px;
+}
+
+.navbar .nav-link:hover::after {
+    transform: scaleX(1);
+}
+
+/* Style pour le lien actif */
+.navbar .nav-link.active {
+    color: var(--bs-primary) !important;
+}
+
+.navbar .nav-link.active::after {
+    transform: scaleX(1);
+}
+
+/* Supprimer tous les effets de focus indésirables */
+.navbar .nav-link:focus,
+.navbar .nav-item a:focus,
+.navbar-toggler:focus,
+.navbar .btn:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+/* Suppression du focus rectangulaire de Bootstrap */
+.navbar a:focus {
+    outline: 0 !important;
+}
+
+/* Pour les écrans tactiles, supprimer l'effet de focus tactile */
+/* Améliorations du menu mobile */
+
+/* Personnalisation du bouton hamburger */
+.navbar-toggler {
+    border: none;
+    padding: 0.5rem;
+    transition: all 0.3s ease;
+    background-color: transparent;
+}
+
+.navbar-toggler:focus {
+    box-shadow: none;
+    outline: none;
+}
+
+/* Animation du bouton hamburger */
+.navbar-toggler-icon {
+    transition: transform 0.3s ease;
+}
+
+.navbar-toggler[aria-expanded="true"] .navbar-toggler-icon {
+    transform: rotate(90deg);
+}
+
+/* Style du menu déroulant mobile */
+@media (max-width: 991.98px) {
+    /* Ajout d'une animation fluide pour l'ouverture/fermeture */
+    .navbar-collapse {
+        transition: all 0.3s ease-out;
+        max-height: 0;
+        overflow: hidden;
+    }
+
+    .navbar-collapse.show {
+        max-height: 80vh; /* Hauteur max pour éviter de cacher tout l'écran */
+        overflow-y: auto; /* Permettre de défiler si le menu est long */
+    }
+
+    /* Amélioration de l'espacement des éléments */
+    .navbar-nav {
+        padding: 1rem 0;
+    }
+
+    .navbar-nav .nav-item {
+        margin: 0.5rem 0;
+    }
+
+    /* Style des liens avec bordure au lieu de ligne en dessous */
+    .navbar .nav-link {
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .navbar .nav-link:hover,
+    .navbar .nav-link.active {
+        background-color: rgba(var(--bs-primary-rgb), 0.1);
+        padding-left: 1.5rem;
+    }
+
+    /* Désactiver l'effet de ligne sous le texte pour mobile */
+    .navbar .nav-link::after,
+    .navbar .nav-link:hover::after,
+    .navbar .nav-link.active::after {
+        display: none;
+    }
+
+    /* Style des boutons dans le menu mobile */
+    .navbar .d-flex.gap-2 {
+        flex-direction: column;
+        width: 100%;
+        margin-top: 0.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .navbar .d-flex.gap-2 .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+        padding: 0.75rem;
+    }
+
+    /* Ombre sous le menu ouvert */
+    .navbar-collapse.show {
+        box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+    }
+}
+
+/* Animation du menu lors de l'ouverture */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 991.98px) {
+    .navbar-collapse.show .nav-item {
+        animation: slideDown 0.3s forwards;
+        opacity: 0;
+    }
+
+    /* Animation séquentielle des éléments du menu */
+    .navbar-collapse.show .nav-item:nth-child(1) { animation-delay: 0.05s; }
+    .navbar-collapse.show .nav-item:nth-child(2) { animation-delay: 0.1s; }
+    .navbar-collapse.show .nav-item:nth-child(3) { animation-delay: 0.15s; }
+    .navbar-collapse.show .nav-item:nth-child(4) { animation-delay: 0.2s; }
+    .navbar-collapse.show .nav-item:nth-child(5) { animation-delay: 0.25s; }
+    .navbar-collapse.show .nav-item:nth-child(6) { animation-delay: 0.3s; }
+
+    /* Animation des boutons */
+    .navbar-collapse.show .d-flex.gap-2 {
+        animation: slideDown 0.3s forwards;
+        animation-delay: 0.35s;
+        opacity: 0;
+    }
+}
+/* Amélioration du bouton de recherche */
+.hero .search-container .card {
+    border: none;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25) !important;
+    backdrop-filter: blur(5px);
+}
+
+/* Style spécifique pour le bouton de recherche */
+.hero .search-container .btn-primary {
+    border-radius: 0;  /* Coins droits pour s'aligner avec la carte */
+    height: 100%;
+    transition: background-color 0.3s ease;  /* Transition plus douce */
+    box-shadow: none !important;  /* Supprime l'ombre au survol */
+}
+
+.hero .search-container .btn-primary:hover {
+    background-color: var(--bs-primary-hover) !important;
+    transform: none;  /* Empêche tout mouvement indésirable */
+}
+
+/* Style des champs de saisie dans la barre de recherche */
+.hero .search-container .form-control {
+    transition: background-color 0.3s ease;
+    border: none;
+    height: 100%;
+    padding-left: 0;  /* Ajustement pour mieux aligner avec l'icône */
+}
+
+
+
+/* Boutons */
+.btn {
+    border-radius: var(--bs-border-radius);
+    padding: 0.5rem 1.25rem;
+    font-weight: 500;
+    transition: var(--bs-transition);
+}
+
+.btn-primary, .bg-primary {
+    background-color: var(--bs-primary) !important;
+    border-color: var(--bs-primary) !important;
+}
+
+.btn-primary:hover, .btn-primary:focus {
+    background-color: var(--bs-primary-hover) !important;
+    border-color: var(--bs-primary-hover) !important;
+    box-shadow: 0 4px 10px rgba(30, 86, 160, 0.3) !important;
+}
+
+.btn-outline-primary {
+    color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+    box-shadow: 0 4px 10px rgba(30, 86, 160, 0.3);
+}
+
+/* Hero section */
+/* Style pour la section Hero avec l'image d'entretien d'embauche */
+.hero {
+    position: relative;
+    padding: 6rem 0;
+    min-height: 600px;
+    display: flex;
+    align-items: center;
+
+    /* Le cadre reste fixe, seule l'image est ajustée */
+    overflow: hidden; /* Empêche l'image de déborder du cadre */
+}
+
+/* L'image d'arrière-plan est appliquée à un pseudo-élément pour pouvoir la positionner indépendamment */
+.hero::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 120%; /* Image plus grande que le conteneur */
+    background-image: url('/image/home.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center top; /* Positionne l'image en haut */
+    z-index: 0;
+    transform: translateY(0.1%); /* Descend l'image dans le cadre fixe */
+}
+
+/* L'overlay est maintenant sur un autre pseudo-élément */
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.6));
+    z-index: 1;
+}
+
+/* Contenu au-dessus des pseudo-éléments */
+.hero .container {
+    position: relative;
+    z-index: 2;
+}
+
+/* Styles pour le texte */
+.hero .text-white {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+
+.hero .display-4 {
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+/* Style pour la boîte de recherche avec légère opacité */
+/* Élargissement du bouton de recherche */
+.hero .search-container .col-md-2 {
+    min-width: 120px; /* Largeur minimale pour accommoder le texte "Recherche" */
+}
+
+/* Ajustement responsive pour le bouton de recherche */
+@media (max-width: 767.98px) {
+    .hero .search-container .col-md-2 {
+        width: 100%; /* En mode mobile, le bouton prend toute la largeur */
+    }
+
+    /* Ajuster les bordures et l'espacement en version mobile */
+    .hero .search-container .row g-0 {
+        flex-direction: column;
+    }
+
+    .hero .search-container .col-md-5 {
+        border-right: none !important;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .hero .search-container .btn-primary {
+        border-radius: 0 0 8px 8px; /* Arrondir uniquement les coins inférieurs en mode mobile */
+        padding: 10px; /* Augmenter légèrement le padding vertical */
+    }
+}
+
+/* Assurer que le texte du bouton est bien centré */
+.hero .search-container .btn-primary {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    letter-spacing: 0.03em; /* Améliore légèrement la lisibilité */
+}
+/* Statistiques avec fond semi-transparent */
+.hero .stat {
+    background-color: rgba(30, 86, 160, 0.3); /* Couleur primaire avec transparence */
+    padding: 15px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(3px);
+}
+
+.hero .stat:hover {
+    background-color: rgba(30, 86, 160, 0.5);
+    transform: translateY(-5px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 991.98px) {
+    .hero {
+        text-align: center;
+        padding: 4rem 0;
+    }
+
+    .hero .row {
+        justify-content: center;
+    }
+}
+/* Search container */
+.search-container .card {
+    border-radius: var(--bs-border-radius);
+    box-shadow: var(--bs-card-shadow);
+    overflow: hidden;
+}
+
+.search-container .input-group {
+    transition: var(--bs-transition);
+}
+
+.search-container .form-control:focus {
+    background-color: #f8f9fa;
+}
+
+/* Stats */
+.stat {
+    display: flex;
+    flex-direction: column;
+}
+
+.counter {
+    transition: color 0.5s ease;
+}
+
+/* Cards */
+.card {
+    border-radius: var(--bs-border-radius);
+}
+
+.hover-card {
+    transition: var(--bs-transition);
+    border-radius: var(--bs-border-radius);
+}
+
+.hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Job cards badges */
+.badge {
+    padding: 0.5em 0.8em;
+    font-weight: 500;
+    border-radius: 4px;
+}
+
+.badge.rounded-pill {
+    font-weight: 400;
+    font-size: 0.75rem;
+}
+
+/* Bookmark button */
+.bookmark {
+    border: none;
+    background: transparent;
+    transition: var(--bs-transition);
+}
+
+.bookmark:hover {
+    transform: scale(1.1);
+}
+
+.bookmark i.fas {
+    color: var(--bs-secondary);
+}
+
+/* Testimonial carousel */
+#testimonialCarousel .card {
+    border-radius: var(--bs-border-radius);
+    box-shadow: var(--bs-card-shadow);
+}
+
+.carousel-indicators [data-bs-target] {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: rgba(30, 86, 160, 0.5);
+    margin: 0 5px;
+}
+
+.carousel-indicators .active {
+    background-color: var(--bs-primary);
+}
+
+/* Footer */
+footer {
+    background-color: #121212 !important;
+}
+
+footer a {
+    transition: var(--bs-transition);
+    color: #adb5bd !important;
+}
+
+footer a:hover {
+    color: #fff !important;
+}
+
+footer .text-muted {
+    color: #adb5bd !important;
+}
+
+footer h2, footer h3, footer .h4, footer .h5 {
+    color: #fff !important;
+}
+
+footer .btn-outline-light {
+    border-width: 1px;
+}
+
+footer .btn-outline-light:hover {
+    background-color: white;
+    color: #212529 !important;
+}
+
+/* Media queries */
+@media (max-width: 767.98px) {
+    .hero {
+        padding: 3rem 0;
+    }
+
+    .display-4 {
+        font-size: 2.5rem;
+    }
+
+    .search-container .card-body {
+        padding: 0.5rem;
+    }
+}
+
+/* Animation pour les éléments lors du défilement */
+.animated-element {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.animated-element.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Améliorations pour l'accessibilité */
+a:focus, button:focus, input:focus {
+    outline: 2px solid var(--bs-primary) !important;
+    outline-offset: 2px;
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
