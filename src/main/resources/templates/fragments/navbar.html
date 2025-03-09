@@ -17,22 +17,22 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto me-auto">
                 <li class="nav-item">
-                    <a class="nav-link" th:classappend="${activeTab == 'home'} ? 'active' : ''" href="#" aria-current="page">Accueil</a>
+                    <a class="nav-link" th:classappend="${activeTab == 'home'} ? 'active' : ''" th:href="@{/}" aria-current="page">Accueil</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" th:classappend="${activeTab == 'jobs'} ? 'active' : ''" href="#">Offres d'emploi</a>
+                    <a class="nav-link" th:classappend="${activeTab == 'jobs'} ? 'active' : ''" th:href="@{/jobs}">Offres d'emploi</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" th:classappend="${activeTab == 'companies'} ? 'active' : ''" href="#">Entreprises</a>
+                    <a class="nav-link" th:classappend="${activeTab == 'companies'} ? 'active' : ''" th:href="@{/companies}">Entreprises</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" th:classappend="${activeTab == 'candidates'} ? 'active' : ''" href="#">Candidats</a>
+                    <a class="nav-link" th:classappend="${activeTab == 'candidates'} ? 'active' : ''" th:href="@{/candidates}">Candidats</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" th:classappend="${activeTab == 'blog'} ? 'active' : ''" href="#">Blog</a>
+                    <a class="nav-link" th:classappend="${activeTab == 'blog'} ? 'active' : ''" th:href="@{/blog}">Blog</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" th:classappend="${activeTab == 'about'} ? 'active' : ''" href="#">À propos</a>
+                    <a class="nav-link" th:classappend="${activeTab == 'about'} ? 'active' : ''" th:href="@{/about}">À propos</a>
                 </li>
             </ul>
             <div class="d-flex gap-2">
