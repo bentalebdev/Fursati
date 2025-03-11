@@ -18,7 +18,7 @@ public class HomeController {
         return "home";
     }
 
-    // Routes dédiées pour chaque section (optionnel mais utile pour les URL propres)
+
     @GetMapping("/jobs")
     public String jobs(Model model) {
         model.addAttribute("activeTab", "jobs");
@@ -46,6 +46,11 @@ public class HomeController {
     @GetMapping("/about")
     public String about(Model model) {
         model.addAttribute("activeTab", "about");
+        return "home";
+    }
+    @GetMapping("/signup")
+    public String signup(Model model){
+        model.addAttribute("activeTab","signup");
         return "home";
     }
 }
