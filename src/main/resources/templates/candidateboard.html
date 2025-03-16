@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fursati | Tableau de Bord</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Styles personnalisés -->
+    <link rel="stylesheet" th:href="@{/styles.css}">
+
+    <style>
+        /* Styles pour la sidebar - basés sur les variables de la page d'accueil */
+        :root {
+            --bs-primary: #1e56a0;
+            --bs-primary-rgb: 30, 86, 160;
+            --bs-primary-hover: #163172;
+            --bs-secondary: #d6802a;
+            --bs-success: #28a745;
+            --bs-light-gray: #f8f9fa;
+            --bs-card-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
+            --bs-transition: all 0.3s ease;
+            --bs-border-radius: 6px;
+        }
+
+        /* Contenu principal */
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+            min-height: 100vh;
+            transition: var(--bs-transition);
+            background-color: var(--bs-light-gray);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 250px;
+            background-color: #1e2f4a; /* Légèrement plus foncé que --bs-primary */
+            z-index: 999;
+            transition: var(--bs-transition);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+            flex-grow: 1;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: var(--bs-transition);
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border-left-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .sidebar-link.active {
+            color: #ffffff;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left: 3px solid var(--bs-primary);
+        }
+
+        .sidebar-link i {
+            width: 20px;
+            margin-right: 12px;
+            text-align: center;
+        }
+
+        /* Cache/affiche les pages de contenu */
+        .page-content {
+            display: block;
+        }
+
+        .page-content.d-none {
+            display: none !important;
+        }
+
+        /* Cartes du dashboard */
+        .dashboard-card {
+            border-radius: var(--bs-border-radius);
+            box-shadow: var(--bs-card-shadow);
+            border: none;
+            transition: var(--bs-transition);
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Badges de statut */
+        .status-badge {
+            padding: 0.5em 0.8em;
+            font-weight: 500;
+            border-radius: 4px;
+        }
+
+        /* Style pour les statistiques */
+        .stat-card {
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            color: #fff;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .sidebar-toggle {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Sidebar Menu -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h5 class="text-white mb-0">Fursati</h5>
+        <p class="text-white-50 mb-0 small">Espace Candidat</p>
+    </div>
+
+    <!-- Menu de navigation -->
+    <div class="sidebar-menu">
+        <a href="#dashboard" class="sidebar-link active" data-page="dashboard">
+            <i class="fas fa-tachometer-alt"></i>Tableau de bord
+        </a>
+        <a href="#jobs" class="sidebar-link" data-page="jobs">
+            <i class="fas fa-briefcase"></i>Offres d'emploi
+        </a>
+        <a href="#applications" class="sidebar-link" data-page="applications">
+            <i class="fas fa-list-ul"></i>Mes candidatures
+        </a>
+        <a href="#profile" class="sidebar-link" data-page="profile">
+            <i class="fas fa-user"></i>Mon profil
+        </a>
+        <a href="#documents" class="sidebar-link" data-page="documents">
+            <i class="fas fa-file"></i>Mes documents
+        </a>
+        <a href="#settings" class="sidebar-link" data-page="settings">
+            <i class="fas fa-cog"></i>Paramètres
+        </a>
+    </div>
+
+    <!-- Bouton de déconnexion -->
+    <div class="mt-auto p-3 border-top border-secondary">
+        <a href="#" class="btn btn-outline-light w-100">
+            <i class="fas fa-sign-out-alt me-2"></i>Déconnexion
+        </a>
+    </div>
+</div>
+
+<!-- Bouton pour afficher/masquer la sidebar en mode mobile -->
+<button id="toggleSidebar" class="btn btn-primary d-md-none position-fixed" style="top: 10px; left: 10px; z-index: 1000;">
+    <i class="fas fa-bars"></i>
+</button>
+
+<!-- Contenu principal -->
+<div class="main-content">
+    <!-- Page d'accueil (Dashboard) -->
+    <div class="page-content" id="dashboard">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="mb-0">Tableau de bord</h3>
+                <p class="text-muted">Bienvenue sur votre espace candidat</p>
+            </div>
+            <button class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Nouvelle candidature
+            </button>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3 mb-md-0">
+                <div class="card dashboard-card h-100">
+                    <div class="card-body stat-card">
+                        <div class="stat-icon bg-primary">
+                            <i class="fas fa-paper-plane"></i>
+                        </div>
+                        <h5 class="fw-bold mb-0">12</h5>
+                        <p class="text-muted mb-0">Candidatures</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3 mb-md-0">
+                <div class="card dashboard-card h-100">
+                    <div class="card-body stat-card">
+                        <div class="stat-icon bg-success">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <h5 class="fw-bold mb-0">3</h5>
+                        <p class="text-muted mb-0">Entretiens</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3 mb-md-0">
+                <div class="card dashboard-card h-100">
+                    <div class="card-body stat-card">
+                        <div class="stat-icon" style="background-color: #17a2b8;">
+                            <i class="fas fa-bookmark"></i>
+                        </div>
+                        <h5 class="fw-bold mb-0">8</h5>
+                        <p class="text-muted mb-0">Offres sauvegardées</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card dashboard-card h-100">
+                    <div class="card-body stat-card">
+                        <div class="stat-icon" style="background-color: #ffc107;">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <h5 class="fw-bold mb-0">42</h5>
+                        <p class="text-muted mb-0">Vues du profil</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenu du tableau de bord -->
+        <div class="row">
+            <div class="col-md-8 mb-4">
+                <div class="card dashboard-card">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                        <h5 class="mb-0">Activité récente</h5>
+                        <a href="#" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-ellipsis-h"></i>
+                        </a>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item p-3">
+                                <div class="d-flex">
+                                    <div class="bg-primary bg-opacity-10 p-2 rounded me-3">
+                                        <i class="fas fa-paper-plane text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <p class="mb-0">Vous avez postulé à <strong>Développeur Full Stack</strong> chez <strong>TechMagic SARL</strong></p>
+                                        <small class="text-muted">Il y a 2 jours</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="list-group-item p-3">
+                                <div class="d-flex">
+                                    <div class="bg-success bg-opacity-10 p-2 rounded me-3">
+                                        <i class="fas fa-calendar-check text-success"></i>
+                                    </div>
+                                    <div>
+                                        <p class="mb-0">Entretien confirmé avec <strong>MarketPro</strong> pour le poste de <strong>Responsable Marketing</strong></p>
+                                        <small class="text-muted">Il y a 3 jours</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="list-group-item p-3">
+                                <div class="d-flex">
+                                    <div class="bg-info bg-opacity-10 p-2 rounded me-3">
+                                        <i class="fas fa-bookmark text-info"></i>
+                                    </div>
+                                    <div>
+                                        <p class="mb-0">Vous avez enregistré <strong>Chef de projet Digital</strong> chez <strong>DigiTech</strong></p>
+                                        <small class="text-muted">Il y a 5 jours</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white text-center py-3">
+                        <a href="#" class="text-decoration-none">Voir toutes les activités</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-4">
+                <div class="card dashboard-card">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">Entretiens à venir</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3 pb-3 border-bottom">
+                            <div class="d-flex justify-content-between mb-2">
+                                <strong>MarketPro</strong>
+                                <span class="badge bg-primary">22 Mars</span>
+                            </div>
+                            <p class="mb-0">Responsable Marketing</p>
+                        </div>
+                        <div class="mb-3 pb-3 border-bottom">
+                            <div class="d-flex justify-content-between mb-2">
+                                <strong>DigiTech</strong>
+                                <span class="badge bg-primary">25 Mars</span>
+                            </div>
+                            <p class="mb-0">Développeur Front-end</p>
+                        </div>
+                        <div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <strong>Tech Solutions</strong>
+                                <span class="badge bg-primary">28 Mars</span>
+                            </div>
+                            <p class="mb-0">Chef de Projet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Emplois recommandés -->
+        <div class="row">
+            <div class="col-12 mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5>Emplois recommandés pour vous</h5>
+                    <a href="#jobs" class="text-decoration-none">Voir tout</a>
+                </div>
+            </div>
+
+            <!-- Carte d'emploi 1 -->
+            <div class="col-md-4 mb-4">
+                <div class="card dashboard-card card-hover h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-3">
+                            <img src="https://via.placeholder.com/50" class="rounded" alt="Logo">
+                            <span class="badge bg-success">Nouveau</span>
+                        </div>
+                        <h5 class="mb-2">Développeur Front-end React</h5>
+                        <p class="text-muted mb-3">WebTech Solutions - Casablanca</p>
+                        <div class="mb-3">
+                            <span class="badge bg-light text-dark me-2 mb-1">React</span>
+                            <span class="badge bg-light text-dark me-2 mb-1">JavaScript</span>
+                            <span class="badge bg-light text-dark me-2 mb-1">CSS</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-primary fw-bold">25 000 MAD</span>
+                            <button class="btn btn-sm btn-outline-primary">Postuler</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Carte d'emploi 2 -->
+            <div class="col-md-4 mb-4">
+                <div class="card dashboard-card card-hover h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-3">
+                            <img src="https://via.placeholder.com/50" class="rounded" alt="Logo">
+                            <span class="badge bg-secondary">Il y a 2 jours</span>
+                        </div>
+                        <h5 class="mb-2">Data Analyst</h5>
+                        <p class="text-muted mb-3">Tech Industries - Tanger</p>
+                        <div class="mb-3">
+                            <span class="badge bg-light text-dark me-2 mb-1">Python</span>
+                            <span class="badge bg-light text-dark me-2 mb-1">SQL</span>
+                            <span class="badge bg-light text-dark me-2 mb-1">Tableau</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-primary fw-bold">20 000 MAD</span>
+                            <button class="btn btn-sm btn-outline-primary">Postuler</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Carte d'emploi 3 -->
+            <div class="col-md-4 mb-4">
+                <div class="card dashboard-card card-hover h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-3">
+                            <img src="https://via.placeholder.com/50" class="rounded" alt="Logo">
+                            <span class="badge bg-secondary">Il y a 3 jours</span>
+                        </div>
+                        <h5 class="mb-2">Chef de Projet Digital</h5>
+                        <p class="text-muted mb-3">DigiTech - Rabat</p>
+                        <div class="mb-3">
+                            <span class="badge bg-light text-dark me-2 mb-1">Gestion de projet</span>
+                            <span class="badge bg-light text-dark me-2 mb-1">Agile</span>
+                            <span class="badge bg-light text-dark me-2 mb-1">Marketing</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-primary fw-bold">30 000 MAD</span>
+                            <button class="btn btn-sm btn-primary">Postuler</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page Offres d'emploi -->
+    <div class="page-content d-none" id="jobs">
+        <!-- Contenu inséré par Thymeleaf th:replace -->
+        <div th:replace="~{fragments/jobsoffers :: jobsoffers}"></div>
+    </div>
+
+    <!-- Page Mes candidatures -->
+    <div class="page-content d-none" id="applications">
+        <h3 class="mb-4">Mes candidatures</h3>
+        <div class="card dashboard-card">
+            <div class="card-header bg-white py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Historique des candidatures</h5>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="filterApplications" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-filter me-1"></i>Filtrer
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="filterApplications">
+                            <li><a class="dropdown-item" href="#">Tous les statuts</a></li>
+                            <li><a class="dropdown-item" href="#">En cours</a></li>
+                            <li><a class="dropdown-item" href="#">Entretien</a></li>
+                            <li><a class="dropdown-item" href="#">Acceptée</a></li>
+                            <li><a class="dropdown-item" href="#">Refusée</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                        <tr>
+                            <th>Entreprise</th>
+                            <th>Poste</th>
+                            <th>Date</th>
+                            <th>Statut</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <!-- Candidature 1 -->
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img src="https://via.placeholder.com/40" class="rounded-circle me-2" alt="Logo">
+                                    <div>
+                                        <p class="mb-0 fw-medium">TechMagic SARL</p>
+                                        <small class="text-muted">Casablanca</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>Développeur Full Stack</td>
+                            <td>12/03/2025</td>
+                            <td>
+                                <span class="badge bg-info">En cours</span>
+                            </td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="tooltip" title="Voir détails">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="Retirer candidature">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <!-- Candidature 2 -->
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img src="https://via.placeholder.com/40" class="rounded-circle me-2" alt="Logo">
+                                    <div>
+                                        <p class="mb-0 fw-medium">MarketPro</p>
+                                        <small class="text-muted">Rabat</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>Responsable Marketing</td>
+                            <td>08/03/2025</td>
+                            <td>
+                                <span class="badge bg-success">Entretien</span>
+                            </td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="tooltip" title="Voir détails">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="Retirer candidature">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <!-- Candidature 3 -->
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img src="https://via.placeholder.com/40" class="rounded-circle me-2" alt="Logo">
+                                    <div>
+                                        <p class="mb-0 fw-medium">Nexia Finance</p>
+                                        <small class="text-muted">Marrakech</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>Comptable Confirmé</td>
+                            <td>25/02/2025</td>
+                            <td>
+                                <span class="badge bg-danger">Refusée</span>
+                            </td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="Voir détails">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-white py-3">
+                <nav>
+                    <ul class="pagination pagination-sm justify-content-center mb-0">
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1">Précédent</a>
+                        </li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">Suivant</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Autres pages - ajoutez le contenu nécessaire pour chaque page -->
+    <div class="page-content d-none" id="profile">
+        <h3 class="mb-4">Mon profil</h3>
+        <!-- Contenu du profil -->
+    </div>
+
+    <div class="page-content d-none" id="documents">
+        <h3 class="mb-4">Mes documents</h3>
+        <!-- Contenu des documents -->
+    </div>
+
+    <div class="page-content d-none" id="settings">
+        <h3 class="mb-4">Paramètres</h3>
+        <!-- Contenu des paramètres -->
+    </div>
+</div>
+
+<!-- Bootstrap JS et script personnalisé -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Toggle de la sidebar en mode mobile
+        const toggleSidebar = document.getElementById('toggleSidebar');
+        const sidebar = document.getElementById('sidebar');
+
+        if (toggleSidebar && sidebar) {
+            toggleSidebar.addEventListener('click', function() {
+                sidebar.classList.toggle('show');
+            });
+        }
+
+        // Initialisation des tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        // Gestion de la navigation entre les pages
+        const pageLinks = document.querySelectorAll('.sidebar-link');
+        const pageContents = document.querySelectorAll('.page-content');
+
+        // Fonction pour afficher une page spécifique
+        function showPage(pageId) {
+            // Masquer toutes les pages
+            pageContents.forEach(page => {
+                page.classList.add('d-none');
+            });
+
+            // Afficher la page demandée
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.remove('d-none');
+            }
+
+            // Mettre à jour les liens actifs
+            pageLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('data-page') === pageId) {
+                    link.classList.add('active');
+                }
+            });
+
+            // Fermer la sidebar en mode mobile après la navigation
+            if (window.innerWidth < 768) {
+                sidebar.classList.remove('show');
+            }
+        }
+
+        // Gestionnaire d'événements pour les liens de navigation
+        pageLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const pageId = this.getAttribute('data-page');
+
+                // Mise à jour de l'URL avec le fragment
+                window.location.hash = pageId;
+
+                showPage(pageId);
+            });
+        });
+
+        // Vérifier si un fragment est présent dans l'URL au chargement
+        if (window.location.hash) {
+            const pageId = window.location.hash.substring(1); // Enlever le #
+            showPage(pageId);
+        }
+
+        // Gérer les changements d'URL (navigation avec les boutons précédent/suivant)
+        window.addEventListener('hashchange', function() {
+            if (window.location.hash) {
+                const pageId = window.location.hash.substring(1);
+                showPage(pageId);
+            }
+        });
+    });
+</script>
+</body>
+</html>

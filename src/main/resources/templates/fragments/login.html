@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="login">
+  <!-- Section de connexion -->
+  <section class="py-5 bg-light">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-6">
+          <div class="card border-0 shadow-sm overflow-hidden">
+            <div class="card-body p-4 p-lg-5">
+              <h2 class="text-center mb-4">Connexion</h2>
+              <p class="text-center text-muted mb-4">Accédez à votre compte Fursati</p>
+
+              <!-- Formulaire de connexion -->
+              <form th:action="@{/login}" method="post" class="needs-validation" novalidate id="login-form">
+                <div class="mb-4">
+                  <label for="loginEmail" class="form-label">Email <span class="text-danger">*</span></label>
+                  <input type="email" class="form-control" id="loginEmail" name="email" required>
+                  <div class="invalid-feedback">Veuillez entrer une adresse email valide.</div>
+                </div>
+
+                <div class="mb-4">
+                  <label for="loginPassword" class="form-label">Mot de passe <span class="text-danger">*</span></label>
+                  <div class="input-group">
+                    <input type="password" class="form-control" id="loginPassword" name="password" required>
+                    <button class="btn btn-outline-secondary" type="button" id="toggleLoginPassword">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                  </div>
+                  <div class="invalid-feedback">Veuillez entrer votre mot de passe.</div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="rememberMe" name="rememberMe">
+                    <label class="form-check-label" for="rememberMe">
+                      Se souvenir de moi
+                    </label>
+                  </div>
+                  <a href="#" class="text-primary">Mot de passe oublié ?</a>
+                </div>
+
+                <div class="mb-4">
+                  <button type="submit" class="btn btn-primary w-100 py-2">Se connecter</button>
+                </div>
+              </form>
+
+              <!-- Séparateur -->
+              <div class="position-relative my-4">
+                <hr>
+                <span class="position-absolute top-50 start-50 translate-middle bg-light px-3 text-muted">ou</span>
+              </div>
+
+              <!-- Boutons de connexion avec réseaux sociaux -->
+              <div class="row g-3 mb-4">
+                <div class="col-6">
+                  <a href="#" class="btn btn-outline-secondary w-100">
+                    <i class="fab fa-google me-2"></i>Google
+                  </a>
+                </div>
+                <div class="col-6">
+                  <a href="#" class="btn btn-outline-secondary w-100">
+                    <i class="fab fa-linkedin-in me-2"></i>LinkedIn
+                  </a>
+                </div>
+              </div>
+
+              <div class="text-center">
+                <p>Vous n'avez pas de compte ? <a href="/signup" class="text-primary fw-bold">S'inscrire</a></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Informations supplémentaires
+          <div class="row mt-4 g-4">
+            <div class="col-md-4">
+              <div class="text-center">
+                <i class="fas fa-lock fa-2x text-primary mb-2"></i>
+                <h5>Sécurité</h5>
+                <p class="text-muted small">Vos données sont protégées et jamais partagées sans votre consentement.</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="text-center">
+                <i class="fas fa-bolt fa-2x text-primary mb-2"></i>
+                <h5>Rapide et facile</h5>
+                <p class="text-muted small">Connectez-vous en quelques secondes et reprenez où vous vous étiez arrêté.</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="text-center">
+                <i class="fas fa-headset fa-2x text-primary mb-2"></i>
+                <h5>Support</h5>
+                <p class="text-muted small">Notre équipe est disponible pour vous aider à tout moment.</p>
+              </div>
+            </div>
+          </div> -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Script pour la validation du formulaire et l'affichage du mot de passe -->
+  <script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+      // Validation Bootstrap
+      const form = document.getElementById('login-form');
+
+      if (form) {
+        form.addEventListener('submit', event => {
+          if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+
+          form.classList.add('was-validated');
+        }, false);
+      }
+
+      // Toggle visibilité du mot de passe
+      const togglePassword = document.getElementById('toggleLoginPassword');
+      const passwordInput = document.getElementById('loginPassword');
+
+      if (togglePassword && passwordInput) {
+        togglePassword.addEventListener('click', function() {
+          const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+          passwordInput.setAttribute('type', type);
+          this.querySelector('i').classList.toggle('fa-eye');
+          this.querySelector('i').classList.toggle('fa-eye-slash');
+        });
+      }
+    });
+  </script>
+</div>
+</body>
+</html>

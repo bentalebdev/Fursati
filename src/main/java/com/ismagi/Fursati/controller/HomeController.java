@@ -53,4 +53,5 @@ public class HomeController {
         model.addAttribute("activeTab","signup");
         return "home";
     }
+
 }
