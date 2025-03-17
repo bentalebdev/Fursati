@@ -1,21 +1,35 @@
 package com.ismagi.Fursati.controller;
 
+import com.ismagi.Fursati.entity.Candidat;
+import com.ismagi.Fursati.service.CandidatService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import java.util.List;
 
-@Controller
-@RequestMapping("/candidate")
+@RestController
+@RequestMapping("/candidats")
 public class CandidatController {
+    @Autowired
+    private CandidatService candidatService;
 
-    @GetMapping("/dashboard")
-    public String candidat(Model model) {
-        // Indiquer que l'onglet "candidates" est actif dans la navbar
-        model.addAttribute("activeTab", "candidates");
+    @GetMapping
+    public List<Candidat> getAllCandidats() {
+        return candidatService.getAllCandidats();
+    }
 
-        // Rediriger vers la page candidateboard
-        return "candidateboard";
+    @GetMapping("/{id}")
+    public Candidat getCandidatById(@PathVariable Long id) {
+        return candidatService.getCandidatById(id);
+    }
+
+    @PostMapping
+    public Candidat createCandidat(@RequestBody Candidat candidat) {
+        return candidatService.saveCandidat(candidat);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteCandidat(@PathVariable Long id) {
+        candidatService.deleteCandidat(id);
     }
 }
