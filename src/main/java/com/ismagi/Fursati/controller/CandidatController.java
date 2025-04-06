@@ -52,6 +52,12 @@ public class CandidatController {
         model.addAttribute("activeTab", "jobs");
         return "candidateboard";
     }
+    // Modification de la méthode dans CandidatController.java
+    @GetMapping("/jobs/details")
+    public String jobDetails(Model model) {
+        model.addAttribute("activeTab", "jobsdetails");
+        return "candidateboard"; // Retourner la page complète au lieu d'un fragment
+    }
 
     @GetMapping("/applications")
     public String applications(Model model) {

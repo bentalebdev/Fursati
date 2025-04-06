@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="dashboard">
+    <h2 class="mb-4">Tableau de bord</h2>
+
+    <!-- Dashboard content -->
+    <div class="row">
+        <!-- Stats cards -->
+        <div class="col-md-3 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle p-3 bg-primary bg-opacity-10 me-3">
+                            <i class="fas fa-paper-plane text-primary"></i>
+                        </div>
+                        <div>
+                            <h3 class="mb-0 fw-bold">12</h3>
+                            <p class="text-muted mb-0">Candidatures</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle p-3 bg-success bg-opacity-10 me-3">
+                            <i class="fas fa-calendar-check text-success"></i>
+                        </div>
+                        <div>
+                            <h3 class="mb-0 fw-bold">3</h3>
+                            <p class="text-muted mb-0">Entretiens</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle p-3 bg-info bg-opacity-10 me-3">
+                            <i class="fas fa-bookmark text-info"></i>
+                        </div>
+                        <div>
+                            <h3 class="mb-0 fw-bold">8</h3>
+                            <p class="text-muted mb-0">Offres sauvegardées</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle p-3 bg-warning bg-opacity-10 me-3">
+                            <i class="fas fa-eye text-warning"></i>
+                        </div>
+                        <div>
+                            <h3 class="mb-0 fw-bold">42</h3>
+                            <p class="text-muted mb-0">Vues du profil</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Example of dashboard content -->
+    <div class="row mt-4">
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Activité récente</h5>
+                    <button class="btn btn-sm btn-light">Voir tout</button>
+                </div>
+                <div class="card-body p-0">
+                    <!-- Activity list -->
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item p-3">
+                            <div class="d-flex">
+                                <div class="bg-primary bg-opacity-10 p-2 rounded me-3">
+                                    <i class="fas fa-paper-plane text-primary"></i>
+                                </div>
+                                <div>
+                                    <p class="mb-0">Vous avez postulé à <strong>Développeur Full Stack</strong> chez <strong>TechMagic SARL</strong></p>
+                                    <small class="text-muted">Il y a 2 jours</small>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="list-group-item p-3">
+                            <div class="d-flex">
+                                <div class="bg-success bg-opacity-10 p-2 rounded me-3">
+                                    <i class="fas fa-calendar-check text-success"></i>
+                                </div>
+                                <div>
+                                    <p class="mb-0">Entretien confirmé avec <strong>MarketPro</strong> pour le poste de <strong>Responsable Marketing</strong></p>
+                                    <small class="text-muted">Il y a 3 jours</small>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="list-group-item p-3">
+                            <div class="d-flex">
+                                <div class="bg-info bg-opacity-10 p-2 rounded me-3">
+                                    <i class="fas fa-bookmark text-info"></i>
+                                </div>
+                                <div>
+                                    <p class="mb-0">Vous avez enregistré <strong>Chef de projet Digital</strong> chez <strong>DigiTech</strong></p>
+                                    <small class="text-muted">Il y a 5 jours</small>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Entretiens à venir</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3 pb-3 border-bottom">
+                        <div class="d-flex justify-content-between mb-2">
+                            <strong>MarketPro</strong>
+                            <span class="badge bg-primary">22 Mars</span>
+                        </div>
+                        <p class="mb-0">Responsable Marketing</p>
+                    </div>
+                    <div class="mb-3 pb-3 border-bottom">
+                        <div class="d-flex justify-content-between mb-2">
+                            <strong>DigiTech</strong>
+                            <span class="badge bg-primary">25 Mars</span>
+                        </div>
+                        <p class="mb-0">Développeur Front-end</p>
+                    </div>
+                    <div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <strong>Tech Solutions</strong>
+                            <span class="badge bg-primary">28 Mars</span>
+                        </div>
+                        <p class="mb-0">Chef de Projet</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

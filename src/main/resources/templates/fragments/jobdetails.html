@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="jobdetails">
+    <div class="container py-4">
+        <!-- Bouton retour -->
+        <div class="mb-4">
+            <a th:href="@{/candidats/jobs}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Retour aux offres
+            </a>
+        </div>
+
+        <!-- Détails de l'offre -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <!-- Informations principales -->
+                    <div class="col-md-8">
+                        <div class="d-flex align-items-center mb-4">
+                            <img src="https://via.placeholder.com/80" class="rounded me-3" alt="Logo entreprise">
+                            <div>
+                                <h2 class="h3 mb-1">Développeur Full Stack Angular/Java</h2>
+                                <p class="text-muted mb-1">TechMagic SARL</p>
+                                <p class="mb-0"><i class="fas fa-map-marker-alt me-1 text-primary"></i>Casablanca</p>
+                            </div>
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-2 mb-4">
+                            <span class="badge bg-primary">CDI</span>
+                            <span class="badge bg-light text-dark">Informatique & Tech</span>
+                            <span class="badge bg-light text-dark">3-5 ans d'expérience</span>
+                            <span class="badge bg-light text-dark">Hybride</span>
+                        </div>
+
+                        <div class="mb-4">
+                            <h5>Description du poste</h5>
+                            <p>Nous recherchons un développeur Full Stack Angular/Java expérimenté pour rejoindre notre équipe technique en pleine croissance. Vous travaillerez sur des projets innovants dans un environnement collaboratif et dynamique.</p>
+
+                            <p>En tant que développeur Full Stack, vous serez responsable de la conception, du développement et de la maintenance de nos applications web. Vous collaborerez étroitement avec les autres membres de l'équipe pour livrer des solutions de haute qualité qui répondent aux besoins de nos clients.</p>
+                        </div>
+
+                        <div class="mb-4">
+                            <h5>Responsabilités principales</h5>
+                            <ul>
+                                <li>Développer des applications web modernes et réactives avec Angular</li>
+                                <li>Concevoir et implémenter des API RESTful avec Spring Boot</li>
+                                <li>Collaborer avec les designers UX/UI pour implémenter des interfaces intuitives</li>
+                                <li>Participer aux revues de code et assurer la qualité du code</li>
+                                <li>Travailler sur l'optimisation des performances et la résolution des bugs</li>
+                                <li>Rester à jour avec les nouvelles technologies et les meilleures pratiques</li>
+                            </ul>
+                        </div>
+
+                        <div class="mb-4">
+                            <h5>Qualifications requises</h5>
+                            <ul>
+                                <li>3-5 ans d'expérience en développement web Full Stack</li>
+                                <li>Maîtrise d'Angular (2+) et de TypeScript</li>
+                                <li>Solide expérience avec Java et Spring Boot</li>
+                                <li>Connaissance des bases de données SQL et NoSQL</li>
+                                <li>Expérience avec Git et les méthodologies Agile</li>
+                                <li>Bonne compréhension des principes de conception responsive</li>
+                                <li>Capacité à résoudre des problèmes complexes</li>
+                                <li>Bon niveau en français et en anglais technique</li>
+                            </ul>
+                        </div>
+
+                        <div class="mb-4">
+                            <h5>Compétences appréciées</h5>
+                            <ul>
+                                <li>Expérience avec Docker et Kubernetes</li>
+                                <li>Connaissance de l'architecture microservices</li>
+                                <li>Expérience avec les tests automatisés (JUnit, Jasmine)</li>
+                                <li>Contributions à des projets open source</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Sidebar avec informations complémentaires -->
+                    <div class="col-md-4">
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title">Aperçu rapide</h5>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span><i class="fas fa-money-bill-wave text-primary me-2"></i>Salaire</span>
+                                        <strong>15,000 - 20,000 MAD</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span><i class="fas fa-calendar-alt text-primary me-2"></i>Type de contrat</span>
+                                        <strong>CDI</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span><i class="fas fa-briefcase text-primary me-2"></i>Expérience</span>
+                                        <strong>3-5 ans</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span><i class="fas fa-clock text-primary me-2"></i>Date de publication</span>
+                                        <strong>Il y a 2 heures</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span><i class="fas fa-building text-primary me-2"></i>Secteur</span>
+                                        <strong>Informatique & Tech</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span><i class="fas fa-laptop-house text-primary me-2"></i>Mode de travail</span>
+                                        <strong>Hybride</strong>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title">À propos de l'entreprise</h5>
+                                <p>TechMagic SARL est une entreprise spécialisée dans le développement de solutions digitales innovantes pour les PME et les grandes entreprises. Fondée en 2015, notre équipe compte aujourd'hui plus de 50 collaborateurs passionnés.</p>
+                                <a href="#" class="btn btn-outline-primary w-100">Voir le profil de l'entreprise</a>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Intéressé par ce poste?</h5>
+                                <p class="card-text">Postulez maintenant et rejoignez une équipe dynamique!</p>
+                                <button class="btn btn-primary w-100 mb-2">Postuler maintenant</button>
+                                <button class="btn btn-outline-primary w-100">
+                                    <i class="far fa-bookmark me-2"></i>Sauvegarder l'offre
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+</body>
+</html>

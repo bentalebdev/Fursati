@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fursati | Style Upwork</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/candidate.css}">
+
+    <!-- Add CSS to ensure only active panels display -->
+
+</head>
+<body>
+<!-- Sidebar Overlay (for mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <!-- Logo section -->
+    <div class="sidebar-logo">
+        <a href="#" class="brand">Fursati</a>
+        <button class="sidebar-toggle" id="sidebarToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+
+    <!-- User profile section -->
+    <div class="sidebar-profile">
+        <div class="sidebar-profile-avatar">AM</div>
+        <div class="sidebar-profile-info">
+            <p class="sidebar-profile-name">Ahmed Mouhcine</p>
+            <p class="sidebar-profile-role">Candidat</p>
+        </div>
+    </div>
+
+    <!-- Sidebar menu -->
+    <div class="sidebar-menu">
+        <h6 class="sidebar-heading">Principal</h6>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${activeTab == 'dashboard' ? 'active' : ''}" th:href="@{/candidats/dashboard}">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Tableau de bord</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${activeTab == 'jobs' ? 'active' : ''}" th:href="@{/candidats/jobs}">
+                    <i class="fas fa-briefcase"></i>
+                    <span>Offres d'emploi</span>
+                    <span class="badge rounded-pill">14</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${activeTab == 'applications' ? 'active' : ''}" th:href="@{/candidats/applications}">
+                    <i class="fas fa-list-ul"></i>
+                    <span>Mes candidatures</span>
+                    <span class="badge rounded-pill">12</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${activeTab == 'messages' ? 'active' : ''}" href="#messages">
+                    <i class="fas fa-envelope"></i>
+                    <span>Messages</span>
+                    <span class="badge rounded-pill">3</span>
+                </a>
+            </li>
+        </ul>
+
+        <h6 class="sidebar-heading mt-4">Mon Compte</h6>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${activeTab == 'profile' ? 'active' : ''}" th:href="@{/candidats/profile}">
+                    <i class="fas fa-user"></i>
+                    <span>Mon profil</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${activeTab == 'documents' ? 'active' : ''}" th:href="@{/candidats/documents}">
+                    <i class="fas fa-file"></i>
+                    <span>Mes documents</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${activeTab == 'settings' ? 'active' : ''}" th:href="@{/candidats/settings}">
+                    <i class="fas fa-cog"></i>
+                    <span>Paramètres</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Déconnexion</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- Header/AppBar -->
+<div class="app-header app-header-expanded" id="appHeader">
+    <!-- Mobile sidebar toggle -->
+    <button class="d-lg-none me-3 btn btn-sm btn-light border" id="mobileToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Search bar -->
+    <div class="header-search d-none d-md-block">
+        <i class="fas fa-search"></i>
+        <input type="text" class="form-control" placeholder="Rechercher des offres, compétences...">
+    </div>
+
+    <!-- Header actions -->
+    <div class="header-actions">
+        <a href="#" class="header-icon">
+            <i class="fas fa-bell"></i>
+            <span class="badge rounded-pill">2</span>
+        </a>
+        <a href="#" class="header-icon">
+            <i class="fas fa-envelope"></i>
+            <span class="badge rounded-pill">3</span>
+        </a>
+        <a href="#" class="header-icon">
+            <i class="fas fa-question-circle"></i>
+        </a>
+
+        <!-- User dropdown -->
+        <div class="user-dropdown dropdown">
+            <div class="user-avatar" data-bs-toggle="dropdown" aria-expanded="false">
+                AM
+            </div>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" th:href="@{/candidats/profile}">Mon profil</a></li>
+                <li><a class="dropdown-item" th:href="@{/candidats/settings}">Paramètres</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#logout">Déconnexion</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Main content area -->
+<div class="main-content expanded" id="mainContent">
+    <div class="container-fluid main-content-container">
+        <!-- Single content container with fragments -->
+        <div th:if="${activeTab == 'dashboard'}" class="content-panel active" id="dashboard-panel">
+            <div th:replace="~{fragments/candidate/dashboard :: dashboard}"></div>
+        </div>
+
+        <div th:if="${activeTab == 'jobs'}" class="content-panel active" id="jobs-panel">
+            <div th:replace="~{fragments/jobsoffers}"></div>
+        </div>
+
+        <div th:if="${activeTab == 'applications'}" class="content-panel active" id="applications-panel">
+            <div th:replace="~{fragments/applications}"></div>
+        </div>
+
+        <div th:if="${activeTab == 'profile'}" class="content-panel active" id="profile-panel">
+            <div th:replace="~{fragments/profile}"></div>
+        </div>
+
+        <div th:if="${activeTab == 'documents'}" class="content-panel active" id="documents-panel">
+            <div th:replace="~{fragments/documents}"></div>
+        </div>
+
+        <div th:if="${activeTab == 'settings'}" class="content-panel active" id="settings-panel">
+            <div th:replace="~{fragments/settings}"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Elements
+        const sidebar = document.getElementById('sidebar');
+        const appHeader = document.getElementById('appHeader');
+        const mainContent = document.getElementById('mainContent');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const mobileToggle = document.getElementById('mobileToggle');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        // Toggle sidebar on desktop
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('collapsed');
+
+                if (sidebar.classList.contains('collapsed')) {
+                    appHeader.classList.remove('app-header-expanded');
+                    appHeader.classList.add('app-header-collapsed');
+
+                    mainContent.classList.remove('expanded');
+                    mainContent.classList.add('collapsed');
+                } else {
+                    appHeader.classList.remove('app-header-collapsed');
+                    appHeader.classList.add('app-header-expanded');
+
+                    mainContent.classList.remove('collapsed');
+                    mainContent.classList.add('expanded');
+                }
+            });
+        }
+
+        // Toggle sidebar on mobile
+        if (mobileToggle) {
+            mobileToggle.addEventListener('click', function() {
+                sidebar.classList.add('mobile-show');
+                sidebarOverlay.classList.add('show');
+            });
+        }
+
+        // Close sidebar when clicking on overlay
+        if (sidebarOverlay) {
+            sidebarOverlay.addEventListener('click', function() {
+                sidebar.classList.remove('mobile-show');
+                sidebarOverlay.classList.remove('show');
+            });
+        }
+
+        // Adjust layout on window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth < 992) {
+                sidebar.classList.remove('collapsed');
+                appHeader.classList.remove('app-header-collapsed');
+                appHeader.classList.add('app-header-expanded');
+                mainContent.classList.remove('collapsed');
+                mainContent.classList.add('expanded');
+            }
+        });
+
+        // Toggle dropdown for mobile user menu
+        const dropdownToggleList = document.querySelectorAll('[data-bs-toggle="dropdown"]');
+        dropdownToggleList.forEach(function(dropdownToggle) {
+            new bootstrap.Dropdown(dropdownToggle);
+        });
+
+        // Initialize tooltips
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltipTriggerList.forEach(function(tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+</body>
+</html>

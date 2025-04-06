@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,7 +13,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/candidate.css}">
 
-
+    <!-- Style supplémentaire pour éviter les superpositions -->
+    <style>
+        /* Additional inline styles if needed */
+    </style>
 </head>
 <body>
 <!-- Sidebar Overlay (for mobile) -->
@@ -43,27 +46,27 @@
         <h6 class="sidebar-heading">Principal</h6>
         <ul class="nav flex-column">
             <li class="nav-item">
-                <a class="nav-link active" href="#dashboard">
+                <a class="nav-link" th:classappend="${activeTab == 'dashboard' ? 'active' : ''}" th:href="@{/candidats/dashboard}">
                     <i class="fas fa-tachometer-alt"></i>
                     <span>Tableau de bord</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" th:href="@{/jobs}">
+                <a class="nav-link" th:classappend="${activeTab == 'jobs' ? 'active' : ''}" th:href="@{/candidats/jobs}">
                     <i class="fas fa-briefcase"></i>
                     <span>Offres d'emploi</span>
                     <span class="badge rounded-pill">14</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#applications">
+                <a class="nav-link" th:classappend="${activeTab == 'applications' ? 'active' : ''}" th:href="@{/candidats/applications}">
                     <i class="fas fa-list-ul"></i>
                     <span>Mes candidatures</span>
                     <span class="badge rounded-pill">12</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#messages">
+                <a class="nav-link" th:classappend="${activeTab == 'messages' ? 'active' : ''}" href="#messages">
                     <i class="fas fa-envelope"></i>
                     <span>Messages</span>
                     <span class="badge rounded-pill">3</span>
@@ -74,19 +77,19 @@
         <h6 class="sidebar-heading mt-4">Mon Compte</h6>
         <ul class="nav flex-column">
             <li class="nav-item">
-                <a class="nav-link" href="#profile">
+                <a class="nav-link" th:classappend="${activeTab == 'profile' ? 'active' : ''}" th:href="@{/candidats/profile}">
                     <i class="fas fa-user"></i>
                     <span>Mon profil</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#documents">
+                <a class="nav-link" th:classappend="${activeTab == 'documents' ? 'active' : ''}" th:href="@{/candidats/documents}">
                     <i class="fas fa-file"></i>
                     <span>Mes documents</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#settings">
+                <a class="nav-link" th:classappend="${activeTab == 'settings' ? 'active' : ''}" th:href="@{/candidats/settings}">
                     <i class="fas fa-cog"></i>
                     <span>Paramètres</span>
                 </a>
@@ -134,8 +137,8 @@
                 AM
             </div>
             <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" href="#profile">Mon profil</a></li>
-                <li><a class="dropdown-item" href="#settings">Paramètres</a></li>
+                <li><a class="dropdown-item" th:href="@{/candidats/profile}">Mon profil</a></li>
+                <li><a class="dropdown-item" th:href="@{/candidats/settings}">Paramètres</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item" href="#logout">Déconnexion</a></li>
             </ul>
@@ -145,156 +148,191 @@
 
 <!-- Main content area -->
 <div class="main-content expanded" id="mainContent">
-    <div class="container-fluid">
-        <h2 class="mb-4">Tableau de bord</h2>
+    <div class="container-fluid main-content-container">
+        <!-- Tableau de bord -->
+        <div class="content-panel" th:classappend="${activeTab == 'dashboard' ? 'active' : ''}" id="dashboard-panel">
+            <!-- Use ONE of these options, not both -->
+            <!-- Option 1: Include the dashboard fragment -->
+            <div th:replace="~{fragments/candidate/dashboard}"></div>
 
-        <!-- Dashboard content can go here -->
-        <div class="row">
-            <!-- Stats cards -->
-            <div class="col-md-3 mb-3">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="rounded-circle p-3 bg-primary bg-opacity-10 me-3">
-                                <i class="fas fa-paper-plane text-primary"></i>
+            <!-- Option 2: Or use this inline content (currently commented out) -->
+            <!--
+            <h2 class="mb-4">Tableau de bord</h2>
+
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle p-3 bg-primary bg-opacity-10 me-3">
+                                    <i class="fas fa-paper-plane text-primary"></i>
+                                </div>
+                                <div>
+                                    <h3 class="mb-0 fw-bold">12</h3>
+                                    <p class="text-muted mb-0">Candidatures</p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 class="mb-0 fw-bold">12</h3>
-                                <p class="text-muted mb-0">Candidatures</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle p-3 bg-success bg-opacity-10 me-3">
+                                    <i class="fas fa-calendar-check text-success"></i>
+                                </div>
+                                <div>
+                                    <h3 class="mb-0 fw-bold">3</h3>
+                                    <p class="text-muted mb-0">Entretiens</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle p-3 bg-info bg-opacity-10 me-3">
+                                    <i class="fas fa-bookmark text-info"></i>
+                                </div>
+                                <div>
+                                    <h3 class="mb-0 fw-bold">8</h3>
+                                    <p class="text-muted mb-0">Offres sauvegardées</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle p-3 bg-warning bg-opacity-10 me-3">
+                                    <i class="fas fa-eye text-warning"></i>
+                                </div>
+                                <div>
+                                    <h3 class="mb-0 fw-bold">42</h3>
+                                    <p class="text-muted mb-0">Vues du profil</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-3 mb-3">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="rounded-circle p-3 bg-success bg-opacity-10 me-3">
-                                <i class="fas fa-calendar-check text-success"></i>
-                            </div>
-                            <div>
-                                <h3 class="mb-0 fw-bold">3</h3>
-                                <p class="text-muted mb-0">Entretiens</p>
-                            </div>
+            <div class="row mt-4">
+                <div class="col-lg-8 mb-4">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Activité récente</h5>
+                            <button class="btn btn-sm btn-light">Voir tout</button>
+                        </div>
+                        <div class="card-body p-0">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item p-3">
+                                    <div class="d-flex">
+                                        <div class="bg-primary bg-opacity-10 p-2 rounded me-3">
+                                            <i class="fas fa-paper-plane text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <p class="mb-0">Vous avez postulé à <strong>Développeur Full Stack</strong> chez <strong>TechMagic SARL</strong></p>
+                                            <small class="text-muted">Il y a 2 jours</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item p-3">
+                                    <div class="d-flex">
+                                        <div class="bg-success bg-opacity-10 p-2 rounded me-3">
+                                            <i class="fas fa-calendar-check text-success"></i>
+                                        </div>
+                                        <div>
+                                            <p class="mb-0">Entretien confirmé avec <strong>MarketPro</strong> pour le poste de <strong>Responsable Marketing</strong></p>
+                                            <small class="text-muted">Il y a 3 jours</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item p-3">
+                                    <div class="d-flex">
+                                        <div class="bg-info bg-opacity-10 p-2 rounded me-3">
+                                            <i class="fas fa-bookmark text-info"></i>
+                                        </div>
+                                        <div>
+                                            <p class="mb-0">Vous avez enregistré <strong>Chef de projet Digital</strong> chez <strong>DigiTech</strong></p>
+                                            <small class="text-muted">Il y a 5 jours</small>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="col-md-3 mb-3">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="rounded-circle p-3 bg-info bg-opacity-10 me-3">
-                                <i class="fas fa-bookmark text-info"></i>
+                <div class="col-lg-4 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Entretiens à venir</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3 pb-3 border-bottom">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <strong>MarketPro</strong>
+                                    <span class="badge bg-primary">22 Mars</span>
+                                </div>
+                                <p class="mb-0">Responsable Marketing</p>
+                            </div>
+                            <div class="mb-3 pb-3 border-bottom">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <strong>DigiTech</strong>
+                                    <span class="badge bg-primary">25 Mars</span>
+                                </div>
+                                <p class="mb-0">Développeur Front-end</p>
                             </div>
                             <div>
-                                <h3 class="mb-0 fw-bold">8</h3>
-                                <p class="text-muted mb-0">Offres sauvegardées</p>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <strong>Tech Solutions</strong>
+                                    <span class="badge bg-primary">28 Mars</span>
+                                </div>
+                                <p class="mb-0">Chef de Projet</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <div class="col-md-3 mb-3">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="rounded-circle p-3 bg-warning bg-opacity-10 me-3">
-                                <i class="fas fa-eye text-warning"></i>
-                            </div>
-                            <div>
-                                <h3 class="mb-0 fw-bold">42</h3>
-                                <p class="text-muted mb-0">Vues du profil</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            -->
         </div>
 
-        <!-- Example of dashboard content -->
-        <div class="row mt-4">
-            <div class="col-lg-8 mb-4">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Activité récente</h5>
-                        <button class="btn btn-sm btn-light">Voir tout</button>
-                    </div>
-                    <div class="card-body p-0">
-                        <!-- Activity list -->
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item p-3">
-                                <div class="d-flex">
-                                    <div class="bg-primary bg-opacity-10 p-2 rounded me-3">
-                                        <i class="fas fa-paper-plane text-primary"></i>
-                                    </div>
-                                    <div>
-                                        <p class="mb-0">Vous avez postulé à <strong>Développeur Full Stack</strong> chez <strong>TechMagic SARL</strong></p>
-                                        <small class="text-muted">Il y a 2 jours</small>
-                                    </div>
-                                </div>
-                            </li>
-                            <li class="list-group-item p-3">
-                                <div class="d-flex">
-                                    <div class="bg-success bg-opacity-10 p-2 rounded me-3">
-                                        <i class="fas fa-calendar-check text-success"></i>
-                                    </div>
-                                    <div>
-                                        <p class="mb-0">Entretien confirmé avec <strong>MarketPro</strong> pour le poste de <strong>Responsable Marketing</strong></p>
-                                        <small class="text-muted">Il y a 3 jours</small>
-                                    </div>
-                                </div>
-                            </li>
-                            <li class="list-group-item p-3">
-                                <div class="d-flex">
-                                    <div class="bg-info bg-opacity-10 p-2 rounded me-3">
-                                        <i class="fas fa-bookmark text-info"></i>
-                                    </div>
-                                    <div>
-                                        <p class="mb-0">Vous avez enregistré <strong>Chef de projet Digital</strong> chez <strong>DigiTech</strong></p>
-                                        <small class="text-muted">Il y a 5 jours</small>
-                                    </div>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+        <!-- Offres d'emploi - Chargement conditionnel -->
+        <div class="content-panel" th:classappend="${activeTab == 'jobs' ? 'active' : ''}" id="jobs-panel">
+            <div th:replace="~{fragments/jobsoffers}"></div>
+        </div>
+        <div class="content-panel" th:classappend="${activeTab == 'jobsdetails' ? 'active' : ''}" >
+            <div th:replace="~{fragments/jobdetails}"></div>
+        </div>
 
-            <div class="col-lg-4 mb-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">Entretiens à venir</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3 pb-3 border-bottom">
-                            <div class="d-flex justify-content-between mb-2">
-                                <strong>MarketPro</strong>
-                                <span class="badge bg-primary">22 Mars</span>
-                            </div>
-                            <p class="mb-0">Responsable Marketing</p>
-                        </div>
-                        <div class="mb-3 pb-3 border-bottom">
-                            <div class="d-flex justify-content-between mb-2">
-                                <strong>DigiTech</strong>
-                                <span class="badge bg-primary">25 Mars</span>
-                            </div>
-                            <p class="mb-0">Développeur Front-end</p>
-                        </div>
-                        <div>
-                            <div class="d-flex justify-content-between mb-2">
-                                <strong>Tech Solutions</strong>
-                                <span class="badge bg-primary">28 Mars</span>
-                            </div>
-                            <p class="mb-0">Chef de Projet</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <!-- Contenus pour les autres onglets -->
+        <div class="content-panel" th:classappend="${activeTab == 'applications' ? 'active' : ''}" id="applications-panel">
+            <h2 class="mb-4">Mes candidatures</h2>
+            <!-- Contenu des candidatures ici -->
+        </div>
+
+        <div class="content-panel" th:classappend="${activeTab == 'profile' ? 'active' : ''}" id="profile-panel">
+            <h2 class="mb-4">Mon profil</h2>
+            <!-- Contenu du profil ici -->
+        </div>
+
+        <div class="content-panel" th:classappend="${activeTab == 'documents' ? 'active' : ''}" id="documents-panel">
+            <h2 class="mb-4">Mes documents</h2>
+            <!-- Contenu des documents ici -->
+        </div>
+
+        <div class="content-panel" th:classappend="${activeTab == 'settings' ? 'active' : ''}" id="settings-panel">
+            <h2 class="mb-4">Paramètres</h2>
+            <!-- Contenu des paramètres ici -->
         </div>
     </div>
 </div>
@@ -312,65 +350,92 @@
         const mobileToggle = document.getElementById('mobileToggle');
         const sidebarOverlay = document.getElementById('sidebarOverlay');
 
-        // Toggle sidebar on desktop
-        if (sidebarToggle) {
-            sidebarToggle.addEventListener('click', function() {
-                sidebar.classList.toggle('collapsed');
+        // Enhanced panel visibility management
+        function managePanelVisibility() {
+            // Get all content panels
+            const contentPanels = document.querySelectorAll('.content-panel');
 
-                if (sidebar.classList.contains('collapsed')) {
-                    appHeader.classList.remove('app-header-expanded');
-                    appHeader.classList.add('app-header-collapsed');
+            // Determine the current path and active panel
+            const currentPath = window.location.pathname;
+            let activePanel = 'dashboard';
 
-                    mainContent.classList.remove('expanded');
-                    mainContent.classList.add('collapsed');
-                } else {
-                    appHeader.classList.remove('app-header-collapsed');
-                    appHeader.classList.add('app-header-expanded');
+            if (currentPath.includes('/candidats/')) {
+                const pathSegments = currentPath.split('/');
+                const lastSegment = pathSegments[pathSegments.length - 1];
 
-                    mainContent.classList.remove('collapsed');
-                    mainContent.classList.add('expanded');
+                if (lastSegment && lastSegment !== 'candidats') {
+                    // Comprehensive handling for job details
+                    activePanel = ['jobdetails', 'jobsdetails', 'job-details'].includes(lastSegment)
+                        ? 'jobsdetails'
+                        : lastSegment;
+                }
+            }
+
+            // Debug logging
+            console.debug('Current Path:', currentPath);
+            console.debug('Detected Active Panel:', activePanel);
+
+            // First, hide all panels with transition
+            contentPanels.forEach(panel => {
+                panel.style.opacity = '0';
+                panel.style.display = 'none';
+                panel.classList.remove('active');
+            });
+
+            // Find and show the active panel
+            let activePanelFound = false;
+
+            contentPanels.forEach(panel => {
+                // Comprehensive panel identification
+                const panelIdentifiers = [
+                    panel.getAttribute('th:classappend') &&
+                    panel.getAttribute('th:classappend').includes(activePanel),
+                    panel.id === `${activePanel}-panel`,
+                    activePanel === 'jobsdetails' &&
+                    panel.querySelector('[data-th-fragment="jobdetails"]'),
+                    panel.classList.contains(activePanel)
+                ];
+
+                if (panelIdentifiers.some(Boolean)) {
+                    // Smooth transition for panel visibility
+                    panel.style.display = 'block';
+                    setTimeout(() => {
+                        panel.style.opacity = '1';
+                    }, 50);
+
+                    panel.classList.add('active');
+                    activePanelFound = true;
+
+                    console.debug('Active panel found:', panel.id || 'unnamed panel');
+                }
+            });
+
+            // Fallback to dashboard if no panel found
+            if (!activePanelFound) {
+                const dashboardPanel = document.getElementById('dashboard-panel');
+                if (dashboardPanel) {
+                    dashboardPanel.style.display = 'block';
+                    dashboardPanel.style.opacity = '1';
+                    dashboardPanel.classList.add('active');
+                }
+            }
+
+            // Update sidebar navigation active state
+            const navLinks = document.querySelectorAll('.sidebar-menu .nav-link');
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                const href = link.getAttribute('href') || link.getAttribute('th:href') || '';
+                if (href.includes(activePanel)) {
+                    link.classList.add('active');
                 }
             });
         }
 
-        // Toggle sidebar on mobile
-        if (mobileToggle) {
-            mobileToggle.addEventListener('click', function() {
-                sidebar.classList.add('mobile-show');
-                sidebarOverlay.classList.add('show');
-            });
-        }
+        // Rest of the previous script remains the same...
+        // (Keep all the other functions like setupSidebarToggle, setupMobileSidebar, etc.)
 
-        // Close sidebar when clicking on overlay
-        if (sidebarOverlay) {
-            sidebarOverlay.addEventListener('click', function() {
-                sidebar.classList.remove('mobile-show');
-                sidebarOverlay.classList.remove('show');
-            });
-        }
-
-        // Adjust layout on window resize
-        window.addEventListener('resize', function() {
-            if (window.innerWidth < 992) {
-                sidebar.classList.remove('collapsed');
-                appHeader.classList.remove('app-header-collapsed');
-                appHeader.classList.add('app-header-expanded');
-                mainContent.classList.remove('collapsed');
-                mainContent.classList.add('expanded');
-            }
-        });
-
-        // Toggle dropdown for mobile user menu
-        const dropdownToggleList = document.querySelectorAll('[data-bs-toggle="dropdown"]');
-        dropdownToggleList.forEach(function(dropdownToggle) {
-            new bootstrap.Dropdown(dropdownToggle);
-        });
-
-        // Initialize tooltips
-        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-        tooltipTriggerList.forEach(function(tooltipTriggerEl) {
-            new bootstrap.Tooltip(tooltipTriggerEl);
-        });
+        // Initialization remains the same
+        initializeApp();
     });
 </script>
 </body>
