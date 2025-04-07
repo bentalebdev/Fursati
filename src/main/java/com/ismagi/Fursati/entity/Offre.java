@@ -2,6 +2,8 @@ package com.ismagi.Fursati.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -9,17 +11,20 @@ import java.util.List;
 public class Offre {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idOffre;
+    private Long id;
 
-    private String description;
-    private String typeContrat;
-    private String experience;
-    private String formation;
-    private String langues;
-    private int nbRecruteurs;
-    private Double salaire;
-    private String specialite;
-    private String villeTravail;
+    private String title;               // Job title (e.g., "Full Stack Developer")
+    private String description;         // Job description (TEXT in PostgreSQL)
+    private String companyName;        // Company name (e.g., "TechMagic SARL")
+    private String location;           // Location (e.g., "Casablanca")
+    private Double minSalary;          // Minimum salary (MAD)
+    private Double maxSalary;          // Maximum salary (MAD)
+    private String logoUrl;            // Logo path/URL (e.g., "/uploads/logo.png")
+    private String contractType;       // Contract type (e.g., "CDI", "Freelance")
+    private String experienceLevel;    // Experience (e.g., "3-5 years")
+    private String workMode;           // Work mode (e.g., "Hybrid", "Remote")
+    private String industry;           // Industry (e.g., "IT & Technology")
+    private LocalDateTime postedAt;    // Posting timestamp
 
     @OneToMany(mappedBy = "offre", cascade = CascadeType.ALL)
     private List<Demande> demandes; // A job offer can have multiple applications

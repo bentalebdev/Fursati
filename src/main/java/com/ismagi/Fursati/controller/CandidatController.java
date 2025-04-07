@@ -1,7 +1,9 @@
 package com.ismagi.Fursati.controller;
 
 import com.ismagi.Fursati.entity.Candidat;
+import com.ismagi.Fursati.entity.Offre;
 import com.ismagi.Fursati.service.CandidatService;
+import com.ismagi.Fursati.service.OffreService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -9,11 +11,15 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
+
 @Controller
 @RequestMapping("/candidats")
 public class CandidatController {
     @Autowired
     private CandidatService candidatService;
+    @Autowired
+    private OffreService offreService;
 
     // API endpoints
     @GetMapping("/api")
@@ -49,14 +55,18 @@ public class CandidatController {
 
     @GetMapping("/jobs")
     public String jobs(Model model) {
+        List<Offre> offres = offreService.getAllOffres();
+        model.addAttribute("offres", offres);
         model.addAttribute("activeTab", "jobs");
         return "candidateboard";
     }
     // Modification de la méthode dans CandidatController.java
-    @GetMapping("/jobs/details")
-    public String jobDetails(Model model) {
+    @GetMapping("/jobs/details/{id}")
+    public String jobDetails(@PathVariable Long id, Model model) {
+        Offre offre = offreService.getOffreById(id);
+        model.addAttribute("offre", offre);
         model.addAttribute("activeTab", "jobsdetails");
-        return "candidateboard"; // Retourner la page complète au lieu d'un fragment
+        return "candidateboard";
     }
 
     @GetMapping("/applications")

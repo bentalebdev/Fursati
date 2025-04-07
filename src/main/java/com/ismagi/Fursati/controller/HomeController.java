@@ -1,13 +1,25 @@
 package com.ismagi.Fursati.controller;
 
+import com.ismagi.Fursati.entity.Offre;
+import com.ismagi.Fursati.repository.OffreRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
+
 @Controller
 public class HomeController {
+    private final OffreRepository offreRepository;
+
+    @Autowired
+    public HomeController(OffreRepository offreRepository) {
+        this.offreRepository = offreRepository;
+    }
+
 
     @GetMapping("/")
     public String home(@RequestParam(name = "tab", required = false, defaultValue = "home") String activeTab,
@@ -21,6 +33,8 @@ public class HomeController {
 
     @GetMapping("/jobs")
     public String jobs(Model model) {
+        List<Offre> offres = offreRepository.findAll();
+        model.addAttribute("offres", offres);
         model.addAttribute("activeTab", "jobs");
         return "home";
     }

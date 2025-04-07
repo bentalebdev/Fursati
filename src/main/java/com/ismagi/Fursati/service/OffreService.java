@@ -17,9 +17,9 @@ public class OffreService {
     }
 
     public Offre getOffreById(Long id) {
-        return offreRepository.findById(id).orElse(null);
+        return offreRepository.findById(id).orElseThrow(() ->
+                new RuntimeException("Offre non trouvée avec l'id: " + id));
     }
-
     public Offre saveOffre(Offre offre) {
         return offreRepository.save(offre);
     }
