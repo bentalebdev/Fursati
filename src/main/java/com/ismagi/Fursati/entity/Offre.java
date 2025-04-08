@@ -13,18 +13,18 @@ public class Offre {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String title;               // Job title (e.g., "Full Stack Developer")
-    private String description;         // Job description (TEXT in PostgreSQL)
-    private String companyName;        // Company name (e.g., "TechMagic SARL")
-    private String location;           // Location (e.g., "Casablanca")
-    private Double minSalary;          // Minimum salary (MAD)
-    private Double maxSalary;          // Maximum salary (MAD)
-    private String logoUrl;            // Logo path/URL (e.g., "/uploads/logo.png")
-    private String contractType;       // Contract type (e.g., "CDI", "Freelance")
-    private String experienceLevel;    // Experience (e.g., "3-5 years")
-    private String workMode;           // Work mode (e.g., "Hybrid", "Remote")
-    private String industry;           // Industry (e.g., "IT & Technology")
-    private LocalDateTime postedAt;    // Posting timestamp
+    private String title;
+    private String description;
+    private String companyName;
+    private String location;
+    private Double minSalary;
+    private Double maxSalary;
+    private String logoUrl;
+    private String contractType;
+    private String experienceLevel;
+    private String workMode;
+    private String industry;
+    private LocalDateTime postedAt;
 
     @OneToMany(mappedBy = "offre", cascade = CascadeType.ALL)
     private List<Demande> demandes; // A job offer can have multiple applications
