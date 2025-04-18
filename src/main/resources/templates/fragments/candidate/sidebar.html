@@ -1,0 +1,31 @@
+<div th:fragment="sidebar" class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <a href="#" class="brand">Fursati</a>
+        <button class="sidebar-toggle" id="sidebarToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+
+    <div class="sidebar-profile">
+        <div class="sidebar-profile-avatar" th:text="${#strings.substring(user.fullName,0,2)}">AM</div>
+        <div class="sidebar-profile-info">
+            <p class="sidebar-profile-name" th:text="${user.fullName}">Ahmed Mouhcine</p>
+            <p class="sidebar-profile-role" th:text="${user.role}">Candidat</p>
+        </div>
+    </div>
+
+    <div class="sidebar-menu">
+        <h6 class="sidebar-heading">Principal</h6>
+        <ul class="nav flex-column">
+            <li class="nav-item" th:each="menuItem : ${menuItems}">
+                <a class="nav-link" 
+                   th:classappend="${activeTab == menuItem.id ? 'active' : ''}"
+                   th:href="@{${menuItem.url}}">
+                    <i th:class="${menuItem.icon}"></i>
+                    <span th:text="${menuItem.label}">Menu Item</span>
+                    <span class="badge rounded-pill" th:if="${menuItem.badge}" th:text="${menuItem.badge}"></span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
