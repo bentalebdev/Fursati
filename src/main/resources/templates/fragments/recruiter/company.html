@@ -1,0 +1,345 @@
+<!-- Company Profile Fragment -->
+<div th:fragment="company">
+    <!-- Content Container -->
+    <div class="row">
+        <!-- Left Column - Company Profile Form -->
+        <div class="col-xl-8 col-lg-7">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Informations de l'entreprise</h5>
+                    <span class="badge bg-primary">Profil Vérifié</span>
+                </div>
+                <div class="card-body">
+                    <form>
+                        <!-- Logo Upload -->
+                        <div class="mb-4 text-center">
+                            <div class="company-logo-upload">
+                                <div class="company-logo-preview">
+                                    <div class="company-logo-placeholder">
+                                        <i class="fas fa-building fa-3x"></i>
+                                        <span>Logo</span>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <label for="companyLogo" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-upload me-1"></i> Changer le logo
+                                    </label>
+                                    <input type="file" id="companyLogo" class="d-none">
+                                    <button type="button" class="btn btn-sm btn-outline-danger ms-2">
+                                        <i class="fas fa-trash-alt me-1"></i> Supprimer
+                                    </button>
+                                </div>
+                                <small class="form-text text-muted">Format recommandé: PNG, JPG (300x300px)</small>
+                            </div>
+                        </div>
+
+                        <!-- Company Details -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Nom de l'entreprise*</label>
+                                <input type="text" class="form-control" value="TechMaghrébine" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Secteur d'activité*</label>
+                                <select class="form-select" required>
+                                    <option selected>Technologies de l'information</option>
+                                    <option>Finance & Banque</option>
+                                    <option>Santé & Médical</option>
+                                    <option>Éducation</option>
+                                    <option>Commerce & Distribution</option>
+                                    <option>Industrie & Production</option>
+                                    <option>Services aux entreprises</option>
+                                    <option>Autre</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Taille de l'entreprise</label>
+                                <select class="form-select">
+                                    <option>1-10 employés</option>
+                                    <option selected>11-50 employés</option>
+                                    <option>51-200 employés</option>
+                                    <option>201-500 employés</option>
+                                    <option>501-1000 employés</option>
+                                    <option>Plus de 1000 employés</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Année de création</label>
+                                <input type="number" class="form-control" value="2018">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Site web</label>
+                                <input type="url" class="form-control" value="https://techmaghrebine.com">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email de contact*</label>
+                                <input type="email" class="form-control" value="careers@techmaghrebine.com" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Description de l'entreprise*</label>
+                            <textarea class="form-control" rows="4" required>TechMaghrébine est une entreprise innovante spécialisée dans le développement de solutions numériques pour les entreprises du Maghreb. Fondée en 2018, notre mission est de favoriser la transformation digitale des organisations locales en proposant des solutions adaptées au contexte régional.</textarea>
+                            <small class="form-text text-muted">4000 caractères maximum</small>
+                        </div>
+
+                        <!-- Contact Information -->
+                        <h6 class="mt-4 mb-3">Informations de contact</h6>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Adresse*</label>
+                                <input type="text" class="form-control" value="23 Rue des Entrepreneurs, Technopole" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Ville*</label>
+                                <input type="text" class="form-control" value="Casablanca" required>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Pays*</label>
+                                <select class="form-select" required>
+                                    <option selected>Maroc</option>
+                                    <option>Algérie</option>
+                                    <option>Tunisie</option>
+                                    <option>France</option>
+                                    <option>Autre</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Code postal</label>
+                                <input type="text" class="form-control" value="20250">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Téléphone</label>
+                                <input type="tel" class="form-control" value="+212 522 123 456">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Numéro RC / SIRET</label>
+                                <input type="text" class="form-control" value="RC123456789">
+                            </div>
+                        </div>
+
+                        <!-- Social Media -->
+                        <h6 class="mt-4 mb-3">Réseaux sociaux</h6>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fab fa-linkedin me-1"></i> LinkedIn</label>
+                                <input type="url" class="form-control" value="https://linkedin.com/company/techmaghrebine">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fab fa-twitter me-1"></i> Twitter</label>
+                                <input type="url" class="form-control" value="https://twitter.com/techmaghrebine">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fab fa-facebook me-1"></i> Facebook</label>
+                                <input type="url" class="form-control" value="https://facebook.com/techmaghrebine">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label"><i class="fab fa-instagram me-1"></i> Instagram</label>
+                                <input type="url" class="form-control" value="https://instagram.com/techmaghrebine">
+                            </div>
+                        </div>
+
+                        <!-- Company Culture -->
+                        <h6 class="mt-4 mb-3">Culture d'entreprise</h6>
+                        <div class="mb-3">
+                            <label class="form-label">Valeurs de l'entreprise</label>
+                            <textarea class="form-control" rows="3">Innovation, Excellence, Collaboration, Intégrité, Engagement local</textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Avantages et bénéfices</label>
+                            <textarea class="form-control" rows="3">Horaires flexibles, Télétravail partiel, Formation continue, Assurance maladie complémentaire, Prime de performance, Événements d'équipe réguliers</textarea>
+                        </div>
+
+                        <!-- Save Button -->
+                        <div class="text-end mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> Enregistrer les modifications
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Company Preview and Settings -->
+        <div class="col-xl-4 col-lg-5">
+            <!-- Company Profile Preview -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Aperçu du profil</h5>
+                </div>
+                <div class="card-body">
+                    <div class="company-preview">
+                        <div class="company-preview-header">
+                            <div class="company-logo-container">
+                                <div class="company-logo-placeholder">
+                                    <i class="fas fa-building"></i>
+                                </div>
+                            </div>
+                            <h5 class="company-name">TechMaghrébine</h5>
+                            <p class="company-sector">Technologies de l'information</p>
+                            <div class="company-location">
+                                <i class="fas fa-map-marker-alt me-1"></i> Casablanca, Maroc
+                            </div>
+                            <div class="company-size mt-1">
+                                <i class="fas fa-users me-1"></i> 11-50 employés
+                            </div>
+                        </div>
+                        <div class="company-preview-body mt-3">
+                            <p class="company-description">TechMaghrébine est une entreprise innovante spécialisée dans le développement de solutions numériques pour les entreprises du Maghreb...</p>
+                            <div class="company-preview-stats">
+                                <div class="stat-item">
+                                    <span class="stat-value">5</span>
+                                    <span class="stat-label">Offres actives</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value">98%</span>
+                                    <span class="stat-label">Taux de réponse</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn btn-sm btn-outline-primary mt-3 w-100">
+                                <i class="fas fa-eye me-1"></i> Voir le profil public
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Company Settings -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Paramètres du profil</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label d-block">Visibilité du profil</label>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="profileVisibility" checked>
+                            <label class="form-check-label" for="profileVisibility">Profil public</label>
+                        </div>
+                        <small class="form-text text-muted">Si désactivé, votre entreprise ne sera pas visible dans les recherches</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label d-block">Recevoir des candidatures</label>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="receiveApplications" checked>
+                            <label class="form-check-label" for="receiveApplications">Activer</label>
+                        </div>
+                        <small class="form-text text-muted">Si désactivé, les candidats ne pourront pas postuler à vos offres</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label d-block">Notifications par email</label>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+                            <label class="form-check-label" for="emailNotifications">Activer</label>
+                        </div>
+                        <small class="form-text text-muted">Recevoir des notifications pour les nouvelles candidatures</small>
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-3">
+                        <label class="form-label">Options de vérification</label>
+                        <div class="d-grid">
+                            <button class="btn btn-outline-success mb-2" disabled>
+                                <i class="fas fa-check-circle me-1"></i> Entreprise vérifiée
+                            </button>
+                            <button class="btn btn-outline-primary">
+                                <i class="fas fa-star me-1"></i> Demander le badge Premium
+                            </button>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-0">
+                        <label class="form-label text-danger">Zone Danger</label>
+                        <div class="d-grid">
+                            <button class="btn btn-outline-danger">
+                                <i class="fas fa-trash-alt me-1"></i> Supprimer le profil
+                            </button>
+                        </div>
+                        <small class="form-text text-muted">Cette action est irréversible et supprimera toutes vos données</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Verification Documents -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Documents de vérification</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small">Pour maintenir votre statut d'entreprise vérifiée, veuillez télécharger les documents suivants :</p>
+
+                    <div class="document-item d-flex align-items-center mb-3">
+                        <div class="document-icon me-3">
+                            <i class="fas fa-file-pdf text-danger fa-2x"></i>
+                        </div>
+                        <div class="document-info flex-grow-1">
+                            <h6 class="mb-0">Registre de commerce</h6>
+                            <small class="text-muted">Téléchargé le 12/03/2025</small>
+                        </div>
+                        <div class="document-actions">
+                            <button class="btn btn-sm btn-light">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="document-item d-flex align-items-center mb-3">
+                        <div class="document-icon me-3">
+                            <i class="fas fa-file-pdf text-danger fa-2x"></i>
+                        </div>
+                        <div class="document-info flex-grow-1">
+                            <h6 class="mb-0">Patente</h6>
+                            <small class="text-muted">Téléchargé le 12/03/2025</small>
+                        </div>
+                        <div class="document-actions">
+                            <button class="btn btn-sm btn-light">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="document-item d-flex align-items-center">
+                        <div class="document-icon me-3">
+                            <i class="fas fa-file-upload text-muted fa-2x"></i>
+                        </div>
+                        <div class="document-info flex-grow-1">
+                            <h6 class="mb-0">Identité du gérant</h6>
+                            <small class="text-danger">Document requis</small>
+                        </div>
+                        <div class="document-actions">
+                            <button class="btn btn-sm btn-primary">
+                                <i class="fas fa-upload"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-outline-primary btn-sm w-100 mt-3">
+                        <i class="fas fa-plus me-1"></i> Ajouter un document
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
