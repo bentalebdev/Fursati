@@ -147,31 +147,35 @@
 <!-- Main content area -->
 <div class="main-content expanded" id="mainContent">
     <div class="container-fluid main-content-container">
-        <!-- Single content container with fragments -->
-        <div th:if="${activeTab == 'dashboard'}" class="content-panel active" id="dashboard-panel">
-            <div th:replace="~{fragments/candidate/dashboard :: dashboard}"></div>
+        <!-- Ajoutez cet attribut à tous vos fragments pour qu'ils ne soient pas chargés en arrière-plan -->
+        <div class="content-panel" th:if="${activeTab == 'dashboard'}"
+             th:classappend="${activeTab == 'dashboard' ? 'active' : ''}"
+             id="dashboard-panel">
+            <h2 class="mb-4">Tableau de bord</h2>
+            <div th:replace="~{fragments/candidate/dashboard}"></div>
         </div>
 
-        <div th:if="${activeTab == 'jobs'}" class="content-panel active" id="jobs-panel">
+        <div class="content-panel" th:if="${activeTab == 'jobs'}"
+             th:classappend="${activeTab == 'jobs' ? 'active' : ''}"
+             id="jobs-panel">
+            <h2 class="mb-4">Offres d'emploi</h2>
             <div th:replace="~{fragments/jobsoffers}"></div>
         </div>
 
-        <div th:if="${activeTab == 'applications'}" class="content-panel active" id="applications-panel">
-            <div th:replace="~{fragments/applications}"></div>
+        <div class="content-panel" th:if="${activeTab == 'jobsdetails'}"
+             th:classappend="${activeTab == 'jobsdetails' ? 'active' : ''}"
+             id="jobsdetails-panel">
+            <div th:replace="~{fragments/jobdetails}"></div>
         </div>
 
-        <div th:if="${activeTab == 'profile'}" class="content-panel active" id="profile-panel">
-            <div th:replace="~{fragments/profile}"></div>
-        </div>
-
-        <div th:if="${activeTab == 'documents'}" class="content-panel active" id="documents-panel">
-            <div th:replace="~{fragments/documents}"></div>
-        </div>
-
-        <div th:if="${activeTab == 'settings'}" class="content-panel active" id="settings-panel">
-            <div th:replace="~{fragments/settings}"></div>
+        <div class="content-panel" th:if="${activeTab == 'applications'}"
+             th:classappend="${activeTab == 'applications' ? 'active' : ''}"
+             id="applications-panel">
+            <h2 class="mb-4">Mes candidatures</h2>
+            <div th:replace="~{fragments/candidate/applications}"></div>
         </div>
     </div>
+
 </div>
 
 <!-- Bootstrap JS -->
