@@ -60,6 +60,9 @@
     <div th:if="${activeTab == 'signup'}">
         <div th:replace="~{fragments/signup}"></div>
     </div>
+    <div th:if="${activeTab == 'login'}">
+        <div th:replace="~{fragments/login :: login}"></div>
+    </div>
 </main>
 <div th:replace="~{fragments/footer :: footer}"></div>
 

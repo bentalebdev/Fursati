@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <div th:fragment="sidebar">
+        <div class="position-sticky pt-3">
+            <div class="text-center mb-4">
+                <img src="/images/logo.png" alt="Logo" class="img-fluid mb-3" style="max-width: 120px;">
+                <h5>Espace Candidat</h5>
+            </div>
+            
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a th:class="${activeTab == 'dashboard'} ? 'nav-link active' : 'nav-link'" href="/candidats/dashboard">
+                        <i class="fas fa-home me-2"></i> Tableau de bord
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a th:class="${activeTab == 'jobs'} ? 'nav-link active' : 'nav-link'" href="/candidats/jobs">
+                        <i class="fas fa-briefcase me-2"></i> Offres d'emploi
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a th:class="${activeTab == 'applications'} ? 'nav-link active' : 'nav-link'" href="/candidats/applications">
+                        <i class="fas fa-paper-plane me-2"></i> Mes candidatures
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a th:class="${activeTab == 'profile'} ? 'nav-link active' : 'nav-link'" href="/candidats/profile">
+                        <i class="fas fa-user me-2"></i> Mon profil
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a th:class="${activeTab == 'documents'} ? 'nav-link active' : 'nav-link'" href="/candidats/documents">
+                        <i class="fas fa-file me-2"></i> Mes documents
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a th:class="${activeTab == 'settings'} ? 'nav-link active' : 'nav-link'" href="/candidats/settings">
+                        <i class="fas fa-cog me-2"></i> Paramètres
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

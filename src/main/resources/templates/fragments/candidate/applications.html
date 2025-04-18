@@ -1,0 +1,40 @@
+<!-- /src/main/resources/templates/fragments/candidate/applications.html -->
+<div th:fragment="applications" xmlns:th="http://www.thymeleaf.org">
+  <div class="card">
+    <div class="card-header">
+      <h5 class="mb-0">Mes candidatures</h5>
+    </div>
+    <div class="card-body">
+      <table class="table">
+        <thead>
+        <tr>
+          <th>Titre du poste</th>
+          <th>Entreprise</th>
+          <th>Statut</th>
+          <th>Date</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td>Développeur Full Stack</td>
+          <td>TechCorp</td>
+          <td><span class="badge bg-warning">En cours d'examen</span></td>
+          <td>01/10/2023</td>
+        </tr>
+        <tr>
+          <td>Analyste de données</td>
+          <td>DataSolutions</td>
+          <td><span class="badge bg-success">Entretien planifié</span></td>
+          <td>25/09/2023</td>
+        </tr>
+        <tr>
+          <td>Développeur Web</td>
+          <td>WebWorks</td>
+          <td><span class="badge bg-danger">Refusé</span></td>
+          <td>15/09/2023</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

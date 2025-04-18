@@ -1,0 +1,475 @@
+
+<div th:fragment="settings">
+    <div class="row">
+        <div class="col-lg-3 mb-4">
+            <div class="list-group settings-tabs">
+                <a href="#account" class="list-group-item list-group-item-action active" data-bs-toggle="list">
+                    <i class="fas fa-user-circle me-2"></i>Compte
+                </a>
+                <a href="#security" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                    <i class="fas fa-shield-alt me-2"></i>Sécurité
+                </a>
+                <a href="#notifications" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                    <i class="fas fa-bell me-2"></i>Notifications
+                </a>
+                <a href="#privacy" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                    <i class="fas fa-lock me-2"></i>Confidentialité
+                </a>
+                <a href="#connected-apps" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                    <i class="fas fa-plug me-2"></i>Applications connectées
+                </a>
+                <a href="#billing" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                    <i class="fas fa-credit-card me-2"></i>Facturation
+                </a>
+                <a href="#delete" class="list-group-item list-group-item-action text-danger" data-bs-toggle="list">
+                    <i class="fas fa-trash-alt me-2"></i>Supprimer le compte
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-9">
+            <div class="tab-content">
+                <!-- Compte -->
+                <div class="tab-pane fade show active" id="account">
+                    <div class="card">
+                        <div class="card-header bg-white">
+                            <h4 class="mb-0">Paramètres du compte</h4>
+                        </div>
+                        <div class="card-body">
+                            <form>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="firstName" class="form-label">Prénom</label>
+                                        <input type="text" class="form-control" id="firstName" value="Ahmed">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="lastName" class="form-label">Nom</label>
+                                        <input type="text" class="form-control" id="lastName" value="Mouhcine">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Adresse email</label>
+                                    <input type="email" class="form-control" id="email" value="ahmed.mouhcine@example.com">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="phone" class="form-label">Téléphone</label>
+                                    <input type="tel" class="form-control" id="phone" value="+212 6XX XXX XXX">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="address" class="form-label">Adresse</label>
+                                    <textarea class="form-control" id="address" rows="3">123 Rue Example, Casablanca, Maroc</textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="language" class="form-label">Langue</label>
+                                    <select class="form-select" id="language">
+                                        <option value="fr" selected>Français</option>
+                                        <option value="en">English</option>
+                                        <option value="ar">العربية</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="timezone" class="form-label">Fuseau horaire</label>
+                                    <select class="form-select" id="timezone">
+                                        <option value="Africa/Casablanca" selected>(GMT+01:00) Casablanca</option>
+                                        <option value="Europe/Paris">(GMT+01:00) Paris</option>
+                                        <option value="Europe/London">(GMT+00:00) London</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sécurité -->
+                <div class="tab-pane fade" id="security">
+                    <div class="card">
+                        <div class="card-header bg-white">
+                            <h4 class="mb-0">Paramètres de sécurité</h4>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="mb-4">Changer le mot de passe</h5>
+                            <form>
+                                <div class="mb-3">
+                                    <label for="currentPassword" class="form-label">Mot de passe actuel</label>
+                                    <input type="password" class="form-control" id="currentPassword">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="newPassword" class="form-label">Nouveau mot de passe</label>
+                                    <input type="password" class="form-control" id="newPassword">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="confirmPassword" class="form-label">Confirmer le nouveau mot de passe</label>
+                                    <input type="password" class="form-control" id="confirmPassword">
+                                </div>
+                                <button type="submit" class="btn btn-primary">Mettre à jour le mot de passe</button>
+                            </form>
+
+                            <hr class="my-4">
+
+                            <h5 class="mb-4">Authentification à deux facteurs</h5>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <p class="mb-0">Statut: <span class="badge bg-danger">Désactivé</span></p>
+                                </div>
+                                <button class="btn btn-outline-primary">Activer</button>
+                            </div>
+                            <p class="text-muted">L'authentification à deux facteurs ajoute une couche de sécurité supplémentaire à votre compte en demandant un code en plus de votre mot de passe.</p>
+
+                            <hr class="my-4">
+
+                            <h5 class="mb-4">Sessions actives</h5>
+                            <div class="list-group mb-3">
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-0">MacBook Pro - Chrome</h6>
+                                            <small class="text-muted">Casablanca, Maroc · Session actuelle</small>
+                                        </div>
+                                        <span class="badge bg-success">Actif</span>
+                                    </div>
+                                </div>
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-0">iPhone 13 - Safari</h6>
+                                            <small class="text-muted">Casablanca, Maroc · Dernière activité: 2 heures</small>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-danger">Déconnecter</button>
+                                    </div>
+                                </div>
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-0">iPad Air - Safari</h6>
+                                            <small class="text-muted">Rabat, Maroc · Dernière activité: 3 jours</small>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-danger">Déconnecter</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline-danger">Déconnecter toutes les autres sessions</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notifications -->
+                <div class="tab-pane fade" id="notifications">
+                    <div class="card">
+                        <div class="card-header bg-white">
+                            <h4 class="mb-0">Paramètres de notifications</h4>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="mb-4">Notifications par email</h5>
+                            <div class="mb-3 form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="emailJobAlerts" checked>
+                                <label class="form-check-label" for="emailJobAlerts">Alertes d'emploi</label>
+                                <p class="text-muted small mb-0">Recevez des alertes pour les nouvelles offres correspondant à votre profil</p>
+                            </div>
+                            <div class="mb-3 form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="emailApplicationUpdates" checked>
+                                <label class="form-check-label" for="emailApplicationUpdates">Mises à jour des candidatures</label>
+                                <p class="text-muted small mb-0">Recevez des notifications lorsque le statut de vos candidatures change</p>
+                            </div>
+                            <div class="mb-3 form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="emailMessages" checked>
+                                <label class="form-check-label" for="emailMessages">Messages</label>
+                                <p class="text-muted small mb-0">Recevez une notification lorsque vous recevez un nouveau message</p>
+                            </div>
+                            <div class="mb-4 form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="emailMarketing">
+                                <label class="form-check-label" for="emailMarketing">Marketing</label>
+                                <p class="text-muted small mb-0">Recevez nos newsletters et offres promotionnelles</p>
+                            </div>
+
+                            <h5 class="mb-4">Notifications sur l'application</h5>
+                            <div class="mb-3 form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="appJobAlerts" checked>
+                                <label class="form-check-label" for="appJobAlerts">Alertes d'emploi</label>
+                            </div>
+                            <div class="mb-3 form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="appApplicationUpdates" checked>
+                                <label class="form-check-label" for="appApplicationUpdates">Mises à jour des candidatures</label>
+                            </div>
+                            <div class="mb-3 form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="appMessages" checked>
+                                <label class="form-check-label" for="appMessages">Messages</label>
+                            </div>
+                            <div class="mb-3 form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="appProfileViews" checked>
+                                <label class="form-check-label" for="appProfileViews">Vues du profil</label>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Enregistrer les préférences</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Confidentialité -->
+                <div class="tab-pane fade" id="privacy">
+                    <div class="card">
+                        <div class="card-header bg-white">
+                            <h4 class="mb-0">Paramètres de confidentialité</h4>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="mb-4">Visibilité du profil</h5>
+                            <div class="mb-3">
+                                <label class="form-label">Qui peut voir mon profil?</label>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="profileVisibility" id="visibilityAll" checked>
+                                    <label class="form-check-label" for="visibilityAll">
+                                        Tous les recruteurs
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="profileVisibility" id="visibilitySelected">
+                                    <label class="form-check-label" for="visibilitySelected">
+                                        Seulement les recruteurs auxquels j'ai postulé
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="profileVisibility" id="visibilityNone">
+                                    <label class="form-check-label" for="visibilityNone">
+                                        Personne (profil privé)
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">Afficher les informations suivantes sur mon profil :</label>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="showEmail" checked>
+                                    <label class="form-check-label" for="showEmail">
+                                        Adresse email
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="showPhone" checked>
+                                    <label class="form-check-label" for="showPhone">
+                                        Numéro de téléphone
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="showEducation" checked>
+                                    <label class="form-check-label" for="showEducation">
+                                        Formation
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="showExperience" checked>
+                                    <label class="form-check-label" for="showExperience">
+                                        Expérience professionnelle
+                                    </label>
+                                </div>
+                            </div>
+
+                            <h5 class="mb-4">Paramètres de recherche</h5>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="allowSearch" checked>
+                                <label class="form-check-label" for="allowSearch">
+                                    Permettre aux recruteurs de me trouver dans les résultats de recherche
+                                </label>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Enregistrer les préférences</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Applications connectées -->
+                <div class="tab-pane fade" id="connected-apps">
+                    <div class="card">
+                        <div class="card-header bg-white">
+                            <h4 class="mb-0">Applications connectées</h4>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted mb-4">Ces applications et services tiers ont accès à votre compte Fursati.</p>
+
+                            <div class="connected-app mb-3 p-3 border rounded">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        <img src="https://via.placeholder.com/40" class="me-3 rounded" alt="LinkedIn Logo">
+                                        <div>
+                                            <h5 class="mb-1">LinkedIn</h5>
+                                            <p class="text-muted mb-0 small">Connecté le 15/02/2023</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-danger">Déconnecter</button>
+                                </div>
+                            </div>
+
+                            <div class="connected-app mb-3 p-3 border rounded">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        <img src="https://via.placeholder.com/40" class="me-3 rounded" alt="Google Logo">
+                                        <div>
+                                            <h5 class="mb-1">Google</h5>
+                                            <p class="text-muted mb-0 small">Connecté le 10/01/2023</p>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-danger">Déconnecter</button>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-outline-primary mt-3">
+                                <i class="fas fa-plus me-1"></i>Connecter une nouvelle application
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Facturation -->
+                <div class="tab-pane fade" id="billing">
+                    <div class="card">
+                        <div class="card-header bg-white">
+                            <h4 class="mb-0">Facturation</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="current-plan mb-4">
+                                <h5 class="mb-3">Plan actuel</h5>
+                                <div class="d-flex justify-content-between align-items-center p-3 bg-light rounded">
+                                    <div>
+                                        <h6 class="mb-1">Plan Gratuit</h6>
+                                        <p class="mb-0 text-muted small">10 candidatures par mois</p>
+                                    </div>
+                                    <a href="#upgrade" class="btn btn-primary">Mettre à niveau</a>
+                                </div>
+                            </div>
+
+                            <h5 class="mb-3">Plans disponibles</h5>
+                            <div class="row mb-4">
+                                <div class="col-md-4 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Plan Gratuit</h5>
+                                            <h6 class="card-subtitle mb-3 text-success">0 MAD/mois</h6>
+                                            <ul class="list-unstyled mb-4">
+                                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>10 candidatures par mois</li>
+                                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Profil de base</li>
+                                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Alertes d'emploi limitées</li>
+                                                <li class="mb-2 text-muted"><i class="fas fa-times text-danger me-2"></i>CV mis en avant</li>
+                                                <li class="mb-2 text-muted"><i class="fas fa-times text-danger me-2"></i>Messagerie premium</li>
+                                            </ul>
+                                            <button class="btn btn-outline-primary w-100" disabled>Plan actuel</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="card h-100 border-primary">
+                                        <div class="card-body">
+                                            <span class="badge bg-primary position-absolute top-0 end-0 mt-2 me-2">Populaire</span>
+                                            <h5 class="card-title">Plan Standard</h5>
+                                            <h6 class="card-subtitle mb-3 text-primary">99 MAD/mois</h6>
+                                            <ul class="list-unstyled mb-4">
+                                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Candidatures illimitées</li>
+                                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Profil premium</li>
+                                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Alertes d'emploi personnalisées</li>
+                                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>CV mis en avant</li>
+                                                <li class="mb-2 text-muted"><i class="fas fa-times text-danger me-2"></i>Messagerie premium</li>
+                                            </ul>
+                                            <button class="btn btn-primary w-100">Choisir</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Plan Premium</h5>
+                                            <h6 class="card-subtitle mb-3 text-primary">199 MAD/mois</h6>
+                                            <ul class="list-unstyled mb-4">
+                                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Candidatures illimitées</li>
+                                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Profil premium</li>
+                                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Alertes d'emploi personnalisées</li>
+                                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>CV mis en avant</li>
+                                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Messagerie premium</li>
+                                            </ul>
+                                            <button class="btn btn-outline-primary w-100">Choisir</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Supprimer le compte -->
+                <div class="tab-pane fade" id="delete">
+                    <div class="card border-danger">
+                        <div class="card-header bg-danger text-white">
+                            <h4 class="mb-0">Supprimer le compte</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-warning">
+                                <h5 class="alert-heading">Attention!</h5>
+                                <p>La suppression de votre compte est définitive et irréversible. Toutes vos données, y compris votre profil, vos candidatures et vos messages seront supprimés de notre système.</p>
+                            </div>
+
+                            <h5 class="mb-3">Pourquoi souhaitez-vous supprimer votre compte?</h5>
+                            <div class="mb-3">
+                                <select class="form-select" id="deleteReason">
+                                    <option value="" selected>Sélectionnez une raison</option>
+                                    <option value="job">J'ai trouvé un emploi</option>
+                                    <option value="unsatisfied">Je ne suis pas satisfait du service</option>
+                                    <option value="unused">Je n'utilise pas assez le service</option>
+                                    <option value="privacy">Préoccupations de confidentialité</option>
+                                    <option value="other">Autre raison</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="deleteComment" class="form-label">Commentaires supplémentaires (facultatif)</label>
+                                <textarea class="form-control" id="deleteComment" rows="3" placeholder="Partagez-nous vos commentaires pour nous aider à améliorer notre service"></textarea>
+                            </div>
+
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="confirmDelete">
+                                <label class="form-check-label" for="confirmDelete">Je comprends que cette action est irréversible</label>
+                            </div>
+
+                            <button type="button" class="btn btn-danger" disabled>Supprimer définitivement mon compte</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Enable the delete button only when the checkbox is checked
+            const confirmDeleteCheckbox = document.getElementById('confirmDelete');
+            const deleteButton = document.querySelector('#delete .btn-danger');
+
+            if (confirmDeleteCheckbox && deleteButton) {
+                confirmDeleteCheckbox.addEventListener('change', function() {
+                    deleteButton.disabled = !this.checked;
+                });
+            }
+
+            // Bootstrap Tab Functionality
+            const tabLinks = document.querySelectorAll('.settings-tabs .list-group-item');
+            const tabContents = document.querySelectorAll('.tab-content .tab-pane');
+
+            tabLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    // Remove active class from all tabs
+                    tabLinks.forEach(item => item.classList.remove('active'));
+                    tabContents.forEach(pane => {
+                        pane.classList.remove('show', 'active');
+                    });
+
+                    // Add active class to current tab
+                    this.classList.add('active');
+
+                    // Get target pane
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.classList.add('show', 'active');
+                    }
+                });
+            });
+        });
+    </script>
+</div>

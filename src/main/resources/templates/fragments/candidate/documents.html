@@ -1,0 +1,219 @@
+
+<div th:fragment="documents">
+    <div class="card mb-4">
+        <div class="card-header bg-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Mes Documents</h4>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadDocumentModal">
+                    <i class="fas fa-upload me-1"></i>Télécharger un document
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- CV -->
+            <div class="document-card mb-3">
+                <div class="d-md-flex justify-content-between align-items-center p-3 border rounded">
+                    <div class="d-flex align-items-center mb-3 mb-md-0">
+                        <div class="document-icon me-3 bg-primary text-white">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-1">CV_Ahmed_Mouhcine.pdf</h5>
+                            <p class="text-muted mb-0">CV principal · Mis à jour le 12/03/2023</p>
+                        </div>
+                    </div>
+                    <div class="document-actions">
+                        <button class="btn btn-sm btn-outline-primary me-2">
+                            <i class="fas fa-download me-1"></i>Télécharger
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger me-2">
+                            <i class="fas fa-trash me-1"></i>Supprimer
+                        </button>
+                        <div class="dropdown d-inline-block">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-cog me-1"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#">Définir comme principal</a></li>
+                                <li><a class="dropdown-item" href="#">Renommer</a></li>
+                                <li><a class="dropdown-item" href="#">Remplacer</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lettre de motivation -->
+            <div class="document-card mb-3">
+                <div class="d-md-flex justify-content-between align-items-center p-3 border rounded">
+                    <div class="d-flex align-items-center mb-3 mb-md-0">
+                        <div class="document-icon me-3 bg-info text-white">
+                            <i class="fas fa-file-word"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-1">Lettre_Motivation_Générale.docx</h5>
+                            <p class="text-muted mb-0">Lettre de motivation · Mis à jour le 05/02/2023</p>
+                        </div>
+                    </div>
+                    <div class="document-actions">
+                        <button class="btn btn-sm btn-outline-primary me-2">
+                            <i class="fas fa-download me-1"></i>Télécharger
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger me-2">
+                            <i class="fas fa-trash me-1"></i>Supprimer
+                        </button>
+                        <div class="dropdown d-inline-block">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-cog me-1"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#">Définir comme principal</a></li>
+                                <li><a class="dropdown-item" href="#">Renommer</a></li>
+                                <li><a class="dropdown-item" href="#">Remplacer</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diplôme -->
+            <div class="document-card mb-3">
+                <div class="d-md-flex justify-content-between align-items-center p-3 border rounded">
+                    <div class="d-flex align-items-center mb-3 mb-md-0">
+                        <div class="document-icon me-3 bg-success text-white">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-1">Diplome_Master_Informatique.pdf</h5>
+                            <p class="text-muted mb-0">Diplôme · Mis à jour le 20/12/2022</p>
+                        </div>
+                    </div>
+                    <div class="document-actions">
+                        <button class="btn btn-sm btn-outline-primary me-2">
+                            <i class="fas fa-download me-1"></i>Télécharger
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger me-2">
+                            <i class="fas fa-trash me-1"></i>Supprimer
+                        </button>
+                        <div class="dropdown d-inline-block">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-cog me-1"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#">Définir comme principal</a></li>
+                                <li><a class="dropdown-item" href="#">Renommer</a></li>
+                                <li><a class="dropdown-item" href="#">Remplacer</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Certificat -->
+            <div class="document-card">
+                <div class="d-md-flex justify-content-between align-items-center p-3 border rounded">
+                    <div class="d-flex align-items-center mb-3 mb-md-0">
+                        <div class="document-icon me-3 bg-warning text-white">
+                            <i class="fas fa-certificate"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-1">Certificat_Java_Developer.pdf</h5>
+                            <p class="text-muted mb-0">Certificat · Mis à jour le 15/01/2023</p>
+                        </div>
+                    </div>
+                    <div class="document-actions">
+                        <button class="btn btn-sm btn-outline-primary me-2">
+                            <i class="fas fa-download me-1"></i>Télécharger
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger me-2">
+                            <i class="fas fa-trash me-1"></i>Supprimer
+                        </button>
+                        <div class="dropdown d-inline-block">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-cog me-1"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#">Définir comme principal</a></li>
+                                <li><a class="dropdown-item" href="#">Renommer</a></li>
+                                <li><a class="dropdown-item" href="#">Remplacer</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour télécharger un document -->
+    <div class="modal fade" id="uploadDocumentModal" tabindex="-1" aria-labelledby="uploadDocumentModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="uploadDocumentModalLabel">Télécharger un document</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="documentType" class="form-label">Type de document</label>
+                            <select class="form-select" id="documentType">
+                                <option selected>CV</option>
+                                <option>Lettre de motivation</option>
+                                <option>Diplôme</option>
+                                <option>Certificat</option>
+                                <option>Autre</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="documentTitle" class="form-label">Titre du document</label>
+                            <input type="text" class="form-control" id="documentTitle">
+                        </div>
+                        <div class="mb-3">
+                            <label for="documentFile" class="form-label">Fichier</label>
+                            <input type="file" class="form-control" id="documentFile">
+                            <div class="form-text">Formats acceptés: PDF, DOC, DOCX, JPG, PNG (Max: 5MB)</div>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="defaultDocument">
+                            <label class="form-check-label" for="defaultDocument">
+                                Définir comme document par défaut pour ce type
+                            </label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary">Télécharger</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .document-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .document-card {
+            transition: all 0.3s ease;
+        }
+
+        .document-card:hover {
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+
+        @media (max-width: 767.98px) {
+            .document-actions {
+                display: flex;
+                justify-content: space-between;
+                width: 100%;
+            }
+        }
+    </style>
+</div>
