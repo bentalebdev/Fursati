@@ -1,0 +1,419 @@
+<!-- Applications Fragment -->
+<div th:fragment="applications">
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-card-body">
+                    <div class="stats-card-icon bg-primary">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="stats-card-content">
+                        <h5 class="stats-card-title">18</h5>
+                        <p class="stats-card-text">Total des candidatures</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-card-body">
+                    <div class="stats-card-icon bg-success">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stats-card-content">
+                        <h5 class="stats-card-title">7</h5>
+                        <p class="stats-card-text">Nouvelles candidatures</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-card-body">
+                    <div class="stats-card-icon bg-warning">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stats-card-content">
+                        <h5 class="stats-card-title">8</h5>
+                        <p class="stats-card-text">En cours d'évaluation</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-card-body">
+                    <div class="stats-card-icon bg-danger">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <div class="stats-card-content">
+                        <h5 class="stats-card-title">3</h5>
+                        <p class="stats-card-text">Refusées</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-8 mb-3 mb-md-0">
+                    <div class="d-flex flex-wrap gap-2">
+                        <select class="form-select form-select-sm">
+                            <option selected>Toutes les offres</option>
+                            <option>Développeur Full-Stack</option>
+                            <option>Designer UX/UI</option>
+                            <option>Chef de Projet Digital</option>
+                            <option>Ingénieur DevOps</option>
+                            <option>Responsable Marketing</option>
+                        </select>
+                        <select class="form-select form-select-sm">
+                            <option selected>Tous les statuts</option>
+                            <option>Nouveau</option>
+                            <option>En cours d'évaluation</option>
+                            <option>Entretien planifié</option>
+                            <option>Accepté</option>
+                            <option>Refusé</option>
+                        </select>
+                        <select class="form-select form-select-sm">
+                            <option selected>Toutes les dates</option>
+                            <option>Aujourd'hui</option>
+                            <option>Cette semaine</option>
+                            <option>Ce mois</option>
+                            <option>Les 3 derniers mois</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <input type="text" class="form-control form-control-sm" placeholder="Rechercher un candidat...">
+                        <button class="btn btn-sm btn-primary" type="button">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Applications Table -->
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                    <tr>
+                        <th scope="col" style="width: 40px;">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="selectAll">
+                            </div>
+                        </th>
+                        <th scope="col">Candidat</th>
+                        <th scope="col">Poste</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Correspondance</th>
+                        <th scope="col">Statut</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <!-- Row 1 -->
+                    <tr>
+                        <td>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox">
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar me-2">
+                                    <span>AM</span>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Ahmed Moussaoui</h6>
+                                    <small class="text-muted">ahmed.m@example.com</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>Développeur Full-Stack</td>
+                        <td>15 avril 2025</td>
+                        <td>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar bg-success" style="width: 85%"></div>
+                            </div>
+                            <small class="text-muted">85%</small>
+                        </td>
+                        <td><span class="badge bg-success">Nouveau</span></td>
+                        <td>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    Actions
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i>Voir détails</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-envelope me-2"></i>Contacter</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-calendar me-2"></i>Planifier entretien</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-success" href="#"><i class="fas fa-check me-2"></i>Accepter</a></li>
+                                    <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-times me-2"></i>Refuser</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Row 2 -->
+                    <tr>
+                        <td>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox">
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar me-2">
+                                    <span>SB</span>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Sara Benali</h6>
+                                    <small class="text-muted">sara.b@example.com</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>Designer UX/UI</td>
+                        <td>14 avril 2025</td>
+                        <td>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar bg-success" style="width: 92%"></div>
+                            </div>
+                            <small class="text-muted">92%</small>
+                        </td>
+                        <td><span class="badge bg-warning">En cours d'évaluation</span></td>
+                        <td>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    Actions
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i>Voir détails</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-envelope me-2"></i>Contacter</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-calendar me-2"></i>Planifier entretien</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-success" href="#"><i class="fas fa-check me-2"></i>Accepter</a></li>
+                                    <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-times me-2"></i>Refuser</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Row 3 -->
+                    <tr>
+                        <td>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox">
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar me-2">
+                                    <span>YE</span>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Youssef El Amrani</h6>
+                                    <small class="text-muted">youssef.e@example.com</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>Ingénieur DevOps</td>
+                        <td>12 avril 2025</td>
+                        <td>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar bg-warning" style="width: 68%"></div>
+                            </div>
+                            <small class="text-muted">68%</small>
+                        </td>
+                        <td><span class="badge bg-info">Entretien planifié</span></td>
+                        <td>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    Actions
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i>Voir détails</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-envelope me-2"></i>Contacter</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-calendar me-2"></i>Modifier entretien</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-success" href="#"><i class="fas fa-check me-2"></i>Accepter</a></li>
+                                    <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-times me-2"></i>Refuser</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Row 4 -->
+                    <tr>
+                        <td>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox">
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar me-2">
+                                    <span>LO</span>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Laila Ouazzani</h6>
+                                    <small class="text-muted">laila.o@example.com</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>Chef de Projet Digital</td>
+                        <td>10 avril 2025</td>
+                        <td>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar bg-danger" style="width: 45%"></div>
+                            </div>
+                            <small class="text-muted">45%</small>
+                        </td>
+                        <td><span class="badge bg-danger">Refusé</span></td>
+                        <td>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    Actions
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i>Voir détails</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-envelope me-2"></i>Contacter</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-history me-2"></i>Réexaminer</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash me-2"></i>Supprimer</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Row 5 -->
+                    <tr>
+                        <td>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox">
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar me-2">
+                                    <span>MT</span>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">Mohammed Tahiri</h6>
+                                    <small class="text-muted">mohammed.t@example.com</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>Responsable Marketing</td>
+                        <td>8 avril 2025</td>
+                        <td>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar bg-success" style="width: 78%"></div>
+                            </div>
+                            <small class="text-muted">78%</small>
+                        </td>
+                        <td><span class="badge bg-primary">Accepté</span></td>
+                        <td>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    Actions
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i>Voir détails</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-envelope me-2"></i>Contacter</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-file-contract me-2"></i>Générer contrat</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-times me-2"></i>Annuler acceptation</a></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <button class="btn btn-sm btn-outline-primary me-2"><i class="fas fa-envelope me-1"></i> Contacter</button>
+                    <button class="btn btn-sm btn-outline-success me-2"><i class="fas fa-check me-1"></i> Accepter</button>
+                    <button class="btn btn-sm btn-outline-danger"><i class="fas fa-times me-1"></i> Refuser</button>
+                </div>
+                <nav>
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1" aria-disabled="true"><i class="fas fa-chevron-left"></i></a>
+                        </li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="#"><i class="fas fa-chevron-right"></i></a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Action Modal -->
+    <div class="modal fade" id="bulkActionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Action groupée</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Vous êtes sur le point d'appliquer cette action à 3 candidatures.</p>
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label">Action</label>
+                            <select class="form-select">
+                                <option selected>Changer le statut</option>
+                                <option>Accepter les candidatures</option>
+                                <option>Refuser les candidatures</option>
+                                <option>Planifier des entretiens</option>
+                                <option>Envoyer un message</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nouveau statut</label>
+                            <select class="form-select">
+                                <option>Nouveau</option>
+                                <option selected>En cours d'évaluation</option>
+                                <option>Entretien planifié</option>
+                                <option>Accepté</option>
+                                <option>Refusé</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Notification par e-mail</label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="notifyCandidate" checked>
+                                <label class="form-check-label" for="notifyCandidate">Notifier les candidats</label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Message (optionnel)</label>
+                            <textarea class="form-control" rows="3" placeholder="Ajouter un message personnalisé..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary">Appliquer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

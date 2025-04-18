@@ -1,0 +1,466 @@
+<!-- Recruiter Dashboard Fragment -->
+<div th:fragment="dashboard">
+    <!-- Dashboard header with welcome message and date -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h3>Bienvenue, Sarah</span>!</h3>
+            <p class="text-muted">Voici un résumé de votre activité de recrutement.</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <div class="current-date">
+                <i class="fas fa-calendar-alt me-2"></i>
+                <span >18 avril 2025</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats cards -->
+    <div class="row mb-4">
+        <!-- Active Jobs -->
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stats-card">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="text-muted mb-1">Offres actives</h6>
+                        <h3 class="mb-0">5</h3>
+                    </div>
+                    <div class="stats-card-icon">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                </div>
+                <div class="progress mt-3" style="height: 5px;">
+                    <div class="progress-bar bg-primary" role="progressbar" style="width: 80%;" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <p class="text-muted mt-2 mb-0 small">
+                    <i class="fas fa-arrow-up text-success me-1"></i>
+                    <span>20% de plus que le mois dernier</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Candidates -->
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stats-card">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="text-muted mb-1">Candidats</h6>
+                        <h3 class="mb-0">24</h3>
+                    </div>
+                    <div class="stats-card-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+                <div class="progress mt-3" style="height: 5px;">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: 65%;" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <p class="text-muted mt-2 mb-0 small">
+                    <i class="fas fa-arrow-up text-success me-1"></i>
+                    <span>15% de plus que le mois dernier</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Applications -->
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stats-card">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="text-muted mb-1">Candidatures</h6>
+                        <h3 class="mb-0">18</h3>
+                    </div>
+                    <div class="stats-card-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                </div>
+                <div class="progress mt-3" style="height: 5px;">
+                    <div class="progress-bar bg-info" role="progressbar" style="width: 50%;" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <p class="text-muted mt-2 mb-0 small">
+                    <i class="fas fa-arrow-up text-success me-1"></i>
+                    <span>10% de plus cette semaine</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="stats-card">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="text-muted mb-1">Messages</h6>
+                        <h3 class="mb-0">7</h3>
+                    </div>
+                    <div class="stats-card-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                </div>
+                <div class="progress mt-3" style="height: 5px;">
+                    <div class="progress-bar bg-warning" role="progressbar" style="width: 30%;" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <p class="text-muted mt-2 mb-0 small">
+                    <i class="fas fa-arrow-down text-danger me-1"></i>
+                    <span>5% de moins que hier</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Actions rapides</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6 mb-3 mb-md-0">
+                            <a th:href="" class="btn btn-primary w-100 py-3">
+                                <i class="fas fa-plus-circle me-2"></i>Publier une offre
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3 mb-md-0">
+                            <a th:href="" class="btn btn-outline-primary w-100 py-3">
+                                <i class="fas fa-search me-2"></i>Rechercher des candidats
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3 mb-sm-0">
+                            <a th:href="" class="btn btn-outline-primary w-100 py-3">
+                                <i class="fas fa-list-ul me-2"></i>Voir les candidatures
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <a href="#" class="btn btn-outline-primary w-100 py-3">
+                                <i class="fas fa-envelope me-2"></i>Messages
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content area -->
+    <div class="row">
+        <!-- Recent applications column -->
+        <div class="col-lg-8 mb-4 mb-lg-0">
+            <!-- Recent applications -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Candidatures récentes</h5>
+                    <a th:href="" class="btn btn-sm btn-outline-primary">Voir tout</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover m-0">
+                            <thead>
+                            <tr>
+                                <th>Candidat</th>
+                                <th>Poste</th>
+                                <th>Date</th>
+                                <th>Statut</th>
+                                <th>Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar me-2 bg-primary">AM</div>
+                                        <div>Ahmed Mansouri</div>
+                                    </div>
+                                </td>
+                                <td>Développeur Frontend</td>
+                                <td>17 Avr 2025</td>
+                                <td><span class="badge bg-warning">En attente</span></td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i>Voir</a></li>
+                                            <li><a class="dropdown-item" href="#"><i class="fas fa-check me-2"></i>Approuver</a></li>
+                                            <li><a class="dropdown-item" href="#"><i class="fas fa-times me-2"></i>Rejeter</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar me-2 bg-info">LB</div>
+                                        <div>Leila Benali</div>
+                                    </div>
+                                </td>
+                                <td>Chef de Projet</td>
+                                <td>16 Avr 2025</td>
+                                <td><span class="badge bg-success">Accepté</span></td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i>Voir</a></li>
+                                            <li><a class="dropdown-item" href="#"><i class="fas fa-envelope me-2"></i>Message</a></li>
+                                            <li><a class="dropdown-item" href="#"><i class="fas fa-calendar me-2"></i>Plannifier</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar me-2 bg-success">OC</div>
+                                        <div>Omar Chennafi</div>
+                                    </div>
+                                </td>
+                                <td>UX Designer</td>
+                                <td>15 Avr 2025</td>
+                                <td><span class="badge bg-danger">Rejeté</span></td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i>Voir</a></li>
+                                            <li><a class="dropdown-item" href="#"><i class="fas fa-redo me-2"></i>Reconsidérer</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar me-2 bg-warning">KH</div>
+                                        <div>Karim Hassani</div>
+                                    </div>
+                                </td>
+                                <td>Développeur Backend</td>
+                                <td>14 Avr 2025</td>
+                                <td><span class="badge bg-info">Entretien</span></td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i>Voir</a></li>
+                                            <li><a class="dropdown-item" href="#"><i class="fas fa-envelope me-2"></i>Message</a></li>
+                                            <li><a class="dropdown-item" href="#"><i class="fas fa-calendar me-2"></i>Plannifier</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar me-2 bg-secondary">SL</div>
+                                        <div>Sara Lamrani</div>
+                                    </div>
+                                </td>
+                                <td>Analyste Marketing</td>
+                                <td>13 Avr 2025</td>
+                                <td><span class="badge bg-warning">En attente</span></td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i>Voir</a></li>
+                                            <li><a class="dropdown-item" href="#"><i class="fas fa-check me-2"></i>Approuver</a></li>
+                                            <li><a class="dropdown-item" href="#"><i class="fas fa-times me-2"></i>Rejeter</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active jobs -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Offres actives</h5>
+                    <a th:href="" class="btn btn-sm btn-outline-primary">Voir tout</a>
+                </div>
+                <div class="card-body">
+                    <div class="job-listing active mb-3">
+                        <div class="d-flex justify-content-between">
+                            <h5 class="mb-1">Développeur Frontend</h5>
+                            <span class="badge bg-success">Active</span>
+                        </div>
+                        <p class="text-muted mb-2">Casablanca • Temps Plein</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="badge bg-light text-dark me-2">JavaScript</span>
+                                <span class="badge bg-light text-dark me-2">React</span>
+                                <span class="badge bg-light text-dark">Vue.js</span>
+                            </div>
+                            <div>
+                                <small class="text-muted">8 candidatures</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="job-listing active mb-3">
+                        <div class="d-flex justify-content-between">
+                            <h5 class="mb-1">Chef de Projet</h5>
+                            <span class="badge bg-success">Active</span>
+                        </div>
+                        <p class="text-muted mb-2">Rabat • Temps Plein</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="badge bg-light text-dark me-2">Agile</span>
+                                <span class="badge bg-light text-dark me-2">Scrum</span>
+                                <span class="badge bg-light text-dark">JIRA</span>
+                            </div>
+                            <div>
+                                <small class="text-muted">5 candidatures</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="job-listing active">
+                        <div class="d-flex justify-content-between">
+                            <h5 class="mb-1">UX Designer</h5>
+                            <span class="badge bg-success">Active</span>
+                        </div>
+                        <p class="text-muted mb-2">Marrakech • Temps Plein</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="badge bg-light text-dark me-2">Figma</span>
+                                <span class="badge bg-light text-dark me-2">Adobe XD</span>
+                                <span class="badge bg-light text-dark">Sketch</span>
+                            </div>
+                            <div>
+                                <small class="text-muted">3 candidatures</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Side column -->
+        <div class="col-lg-4">
+            <!-- Calendar -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Calendrier des entretiens</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-primary" role="alert">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <i class="far fa-calendar-alt fa-2x"></i>
+                            </div>
+                            <div>
+                                <strong>Aujourd'hui, 14:30</strong>
+                                <p class="mb-0">Entretien avec Leila Benali pour le poste de Chef de Projet</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-secondary" role="alert">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <i class="far fa-calendar-alt fa-2x"></i>
+                            </div>
+                            <div>
+                                <strong>Demain, 10:00</strong>
+                                <p class="mb-0">Entretien avec Karim Hassani pour le poste de Développeur Backend</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-secondary" role="alert">
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <i class="far fa-calendar-alt fa-2x"></i>
+                            </div>
+                            <div>
+                                <strong>22 Avr, 11:30</strong>
+                                <p class="mb-0">Réunion de suivi avec l'équipe de recrutement</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <a href="#" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-plus me-1"></i> Ajouter un événement
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top candidates -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Candidats recommandés</h5>
+                    <a th:href="" class="btn btn-sm btn-outline-primary">Voir tout</a>
+                </div>
+                <div class="card-body">
+                    <div class="candidate-card">
+                        <div class="candidate-avatar">YB</div>
+                        <div class="w-100">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="mb-0">Youssef Benjelloun</h6>
+                                <span class="badge bg-primary">95% match</span>
+                            </div>
+                            <p class="text-muted mb-1">Full Stack Developer</p>
+                            <div>
+                                <span class="badge bg-light text-dark me-1">JavaScript</span>
+                                <span class="badge bg-light text-dark me-1">React</span>
+                                <span class="badge bg-light text-dark">Node.js</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="candidate-card">
+                        <div class="candidate-avatar">NE</div>
+                        <div class="w-100">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="mb-0">Nadia El Moutaouakil</h6>
+                                <span class="badge bg-primary">90% match</span>
+                            </div>
+                            <p class="text-muted mb-1">UX/UI Designer</p>
+                            <div>
+                                <span class="badge bg-light text-dark me-1">Figma</span>
+                                <span class="badge bg-light text-dark me-1">UX Research</span>
+                                <span class="badge bg-light text-dark">UI Design</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="candidate-card">
+                        <div class="candidate-avatar">MB</div>
+                        <div class="w-100">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="mb-0">Mohammed Berrada</h6>
+                                <span class="badge bg-primary">85% match</span>
+                            </div>
+                            <p class="text-muted mb-1">Project Manager</p>
+                            <div>
+                                <span class="badge bg-light text-dark me-1">Agile</span>
+                                <span class="badge bg-light text-dark me-1">Scrum</span>
+                                <span class="badge bg-light text-dark">PMI</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <a th:href="" class="btn btn-primary btn-sm">
+                            <i class="fas fa-search me-1"></i> Rechercher des candidats
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
