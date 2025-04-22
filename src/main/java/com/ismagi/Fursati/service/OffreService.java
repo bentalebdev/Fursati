@@ -40,7 +40,7 @@ public class OffreService {
             return offreRepository.save(offre);
         } catch (Exception e) {
             logger.severe("Error saving offer: " + e.getMessage());
-            throw e; // Relancer l'exception après journalisation
+            throw e;
         }
     }
 

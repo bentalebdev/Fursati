@@ -1,11 +1,297 @@
-
 <div th:fragment="profile">
+  <!-- Modals pour les formulaires popup -->
+  <!-- Modal Informations Personnelles -->
+  <div class="modal fade" id="personalInfoModal" tabindex="-1" aria-labelledby="personalInfoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="personalInfoModalLabel">Modifier les informations personnelles</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        </div>
+        <div class="modal-body">
+          <form id="personalInfoForm">
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="firstName" class="form-label">Prénom</label>
+                <input type="text" class="form-control" id="firstName" value="Ahmed">
+              </div>
+              <div class="col-md-6">
+                <label for="lastName" class="form-label">Nom</label>
+                <input type="text" class="form-control" id="lastName" value="Mouhcine">
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" value="ahmed.mouhcine@example.com">
+              </div>
+              <div class="col-md-6">
+                <label for="phone" class="form-label">Téléphone</label>
+                <input type="tel" class="form-control" id="phone" value="+212 6XX XXX XXX">
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="birthdate" class="form-label">Date de naissance</label>
+                <input type="date" class="form-control" id="birthdate" value="1990-05-15">
+              </div>
+              <div class="col-md-6">
+                <label for="address" class="form-label">Adresse</label>
+                <input type="text" class="form-control" id="address" value="Casablanca, Maroc">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="profilePicture" class="form-label">Photo de profil</label>
+              <input class="form-control" type="file" id="profilePicture">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-primary">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Résumé Professionnel -->
+  <div class="modal fade" id="resumeModal" tabindex="-1" aria-labelledby="resumeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="resumeModalLabel">Modifier le résumé professionnel</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        </div>
+        <div class="modal-body">
+          <form id="resumeForm">
+            <div class="mb-3">
+              <label for="resumeText" class="form-label">Résumé</label>
+              <textarea class="form-control" id="resumeText" rows="5">Développeur Full Stack avec 5 ans d'expérience dans le développement d'applications web et mobiles. Expertise en Java, Spring Boot, et technologies frontend comme React et Angular. Passionné par la création de solutions innovantes et l'amélioration des processus de développement.</textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-primary">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Ajout/Modification Expérience -->
+  <div class="modal fade" id="experienceModal" tabindex="-1" aria-labelledby="experienceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="experienceModalLabel">Ajouter/Modifier une expérience</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        </div>
+        <div class="modal-body">
+          <form id="experienceForm">
+            <input type="hidden" id="experienceId">
+            <div class="mb-3">
+              <label for="jobTitle" class="form-label">Titre du poste</label>
+              <input type="text" class="form-control" id="jobTitle">
+            </div>
+            <div class="mb-3">
+              <label for="company" class="form-label">Entreprise</label>
+              <input type="text" class="form-control" id="company">
+            </div>
+            <div class="mb-3">
+              <label for="location" class="form-label">Lieu</label>
+              <input type="text" class="form-control" id="location">
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="startDate" class="form-label">Date de début</label>
+                <input type="month" class="form-control" id="startDate">
+              </div>
+              <div class="col-md-6">
+                <label for="endDate" class="form-label">Date de fin</label>
+                <input type="month" class="form-control" id="endDate">
+                <div class="form-check mt-2">
+                  <input class="form-check-input" type="checkbox" id="currentJob">
+                  <label class="form-check-label" for="currentJob">
+                    Poste actuel
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="description" class="form-label">Description</label>
+              <textarea class="form-control" id="description" rows="4"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-primary">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Ajout/Modification Formation -->
+  <div class="modal fade" id="educationModal" tabindex="-1" aria-labelledby="educationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="educationModalLabel">Ajouter/Modifier une formation</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        </div>
+        <div class="modal-body">
+          <form id="educationForm">
+            <input type="hidden" id="educationId">
+            <div class="mb-3">
+              <label for="degree" class="form-label">Diplôme</label>
+              <input type="text" class="form-control" id="degree">
+            </div>
+            <div class="mb-3">
+              <label for="school" class="form-label">Établissement</label>
+              <input type="text" class="form-control" id="school">
+            </div>
+            <div class="mb-3">
+              <label for="schoolLocation" class="form-label">Localisation</label>
+              <input type="text" class="form-control" id="schoolLocation">
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="startYear" class="form-label">Année de début</label>
+                <input type="number" class="form-control" id="startYear">
+              </div>
+              <div class="col-md-6">
+                <label for="endYear" class="form-label">Année de fin</label>
+                <input type="number" class="form-control" id="endYear">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="fieldOfStudy" class="form-label">Spécialisation</label>
+              <input type="text" class="form-control" id="fieldOfStudy">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-primary">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Compétences -->
+  <div class="modal fade" id="skillsModal" tabindex="-1" aria-labelledby="skillsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="skillsModalLabel">Modifier les compétences</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        </div>
+        <div class="modal-body">
+          <form id="skillsForm">
+            <div class="mb-4">
+              <label class="form-label">Compétences techniques</label>
+              <div class="mb-2">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                  <input type="text" class="form-control" placeholder="Nouvelle compétence">
+                  <button type="button" class="btn btn-sm btn-primary"><i class="fas fa-plus"></i></button>
+                </div>
+                <div class="d-flex flex-wrap gap-2 border p-2 rounded" style="min-height: 100px;">
+                  <div class="badge bg-primary d-flex align-items-center p-2">
+                    Java
+                    <button type="button" class="btn-close btn-close-white ms-2" style="font-size: 0.5rem;"></button>
+                  </div>
+                  <div class="badge bg-primary d-flex align-items-center p-2">
+                    Spring Boot
+                    <button type="button" class="btn-close btn-close-white ms-2" style="font-size: 0.5rem;"></button>
+                  </div>
+                  <div class="badge bg-primary d-flex align-items-center p-2">
+                    JavaScript
+                    <button type="button" class="btn-close btn-close-white ms-2" style="font-size: 0.5rem;"></button>
+                  </div>
+                  <!-- Autres badges ici -->
+                </div>
+              </div>
+            </div>
+            <div class="mb-4">
+              <label class="form-label">Langues</label>
+              <div id="languagesList">
+                <div class="language-item border rounded p-3 mb-2">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                      <input type="text" class="form-control" value="Arabe">
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                      <select class="form-select">
+                        <option value="native">Natif</option>
+                        <option value="fluent">Courant</option>
+                        <option value="professional">Professionnel</option>
+                        <option value="intermediate">Intermédiaire</option>
+                        <option value="beginner">Débutant</option>
+                      </select>
+                      <button type="button" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                    </div>
+                  </div>
+                  <input type="range" class="form-range" min="0" max="100" step="5" value="100">
+                </div>
+
+                <div class="language-item border rounded p-3 mb-2">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                      <input type="text" class="form-control" value="Français">
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                      <select class="form-select">
+                        <option value="native">Natif</option>
+                        <option value="fluent" selected>Courant</option>
+                        <option value="professional">Professionnel</option>
+                        <option value="intermediate">Intermédiaire</option>
+                        <option value="beginner">Débutant</option>
+                      </select>
+                      <button type="button" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                    </div>
+                  </div>
+                  <input type="range" class="form-range" min="0" max="100" step="5" value="90">
+                </div>
+
+                <div class="language-item border rounded p-3 mb-2">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                      <input type="text" class="form-control" value="Anglais">
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                      <select class="form-select">
+                        <option value="native">Natif</option>
+                        <option value="fluent">Courant</option>
+                        <option value="professional" selected>Professionnel</option>
+                        <option value="intermediate">Intermédiaire</option>
+                        <option value="beginner">Débutant</option>
+                      </select>
+                      <button type="button" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                    </div>
+                  </div>
+                  <input type="range" class="form-range" min="0" max="100" step="5" value="75">
+                </div>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline-primary mt-2">
+                <i class="fas fa-plus me-1"></i>Ajouter une langue
+              </button>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-primary">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Profil du candidat -->
   <div class="card mb-4">
     <div class="card-header bg-white">
       <div class="d-flex justify-content-between align-items-center">
         <h4 class="mb-0">Informations personnelles</h4>
-        <button class="btn btn-sm btn-outline-primary"><i class="fas fa-edit me-1"></i>Modifier</button>
+        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#personalInfoModal"><i class="fas fa-edit me-1"></i>Modifier</button>
       </div>
     </div>
     <div class="card-body">
@@ -14,7 +300,7 @@
           <div class="avatar-container mb-3">
             <div class="avatar-placeholder">AM</div>
           </div>
-          <button class="btn btn-sm btn-outline-primary">Changer la photo</button>
+          <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#personalInfoModal">Changer la photo</button>
         </div>
         <div class="col-md-8">
           <div class="row mb-3">
@@ -57,7 +343,7 @@
     <div class="card-header bg-white">
       <div class="d-flex justify-content-between align-items-center">
         <h4 class="mb-0">Résumé professionnel</h4>
-        <button class="btn btn-sm btn-outline-primary"><i class="fas fa-edit me-1"></i>Modifier</button>
+        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#resumeModal"><i class="fas fa-edit me-1"></i>Modifier</button>
       </div>
     </div>
     <div class="card-body">
@@ -70,7 +356,7 @@
     <div class="card-header bg-white">
       <div class="d-flex justify-content-between align-items-center">
         <h4 class="mb-0">Expérience professionnelle</h4>
-        <button class="btn btn-sm btn-outline-primary"><i class="fas fa-plus me-1"></i>Ajouter</button>
+        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#experienceModal"><i class="fas fa-plus me-1"></i>Ajouter</button>
       </div>
     </div>
     <div class="card-body">
@@ -81,8 +367,8 @@
             <div class="d-flex justify-content-between mb-2">
               <h5>Développeur Full Stack</h5>
               <div class="d-flex">
-                <button class="btn btn-sm btn-link text-primary"><i class="fas fa-edit"></i></button>
-                <button class="btn btn-sm btn-link text-danger"><i class="fas fa-trash"></i></button>
+                <button class="btn btn-sm btn-link text-primary" data-bs-toggle="modal" data-bs-target="#experienceModal" onclick="editExperience(1)"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-sm btn-link text-danger" onclick="confirmDeleteExperience(1)"><i class="fas fa-trash"></i></button>
               </div>
             </div>
             <p class="text-muted mb-2">TechSolutions SARL · Casablanca, Maroc</p>
@@ -97,8 +383,8 @@
             <div class="d-flex justify-content-between mb-2">
               <h5>Développeur Backend</h5>
               <div class="d-flex">
-                <button class="btn btn-sm btn-link text-primary"><i class="fas fa-edit"></i></button>
-                <button class="btn btn-sm btn-link text-danger"><i class="fas fa-trash"></i></button>
+                <button class="btn btn-sm btn-link text-primary" data-bs-toggle="modal" data-bs-target="#experienceModal" onclick="editExperience(2)"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-sm btn-link text-danger" onclick="confirmDeleteExperience(2)"><i class="fas fa-trash"></i></button>
               </div>
             </div>
             <p class="text-muted mb-2">DigitalWorks · Rabat, Maroc</p>
@@ -115,7 +401,7 @@
     <div class="card-header bg-white">
       <div class="d-flex justify-content-between align-items-center">
         <h4 class="mb-0">Formation</h4>
-        <button class="btn btn-sm btn-outline-primary"><i class="fas fa-plus me-1"></i>Ajouter</button>
+        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#educationModal"><i class="fas fa-plus me-1"></i>Ajouter</button>
       </div>
     </div>
     <div class="card-body">
@@ -126,8 +412,8 @@
             <div class="d-flex justify-content-between mb-2">
               <h5>Master en Informatique</h5>
               <div class="d-flex">
-                <button class="btn btn-sm btn-link text-primary"><i class="fas fa-edit"></i></button>
-                <button class="btn btn-sm btn-link text-danger"><i class="fas fa-trash"></i></button>
+                <button class="btn btn-sm btn-link text-primary" data-bs-toggle="modal" data-bs-target="#educationModal" onclick="editEducation(1)"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-sm btn-link text-danger" onclick="confirmDeleteEducation(1)"><i class="fas fa-trash"></i></button>
               </div>
             </div>
             <p class="text-muted mb-2">ENSIAS · Rabat, Maroc</p>
@@ -142,8 +428,8 @@
             <div class="d-flex justify-content-between mb-2">
               <h5>Licence en Informatique</h5>
               <div class="d-flex">
-                <button class="btn btn-sm btn-link text-primary"><i class="fas fa-edit"></i></button>
-                <button class="btn btn-sm btn-link text-danger"><i class="fas fa-trash"></i></button>
+                <button class="btn btn-sm btn-link text-primary" data-bs-toggle="modal" data-bs-target="#educationModal" onclick="editEducation(2)"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-sm btn-link text-danger" onclick="confirmDeleteEducation(2)"><i class="fas fa-trash"></i></button>
               </div>
             </div>
             <p class="text-muted mb-2">Université Hassan II · Casablanca, Maroc</p>
@@ -160,7 +446,7 @@
     <div class="card-header bg-white">
       <div class="d-flex justify-content-between align-items-center">
         <h4 class="mb-0">Compétences</h4>
-        <button class="btn btn-sm btn-outline-primary"><i class="fas fa-edit me-1"></i>Modifier</button>
+        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#skillsModal"><i class="fas fa-edit me-1"></i>Modifier</button>
       </div>
     </div>
     <div class="card-body">
@@ -214,4 +500,230 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal de confirmation de suppression -->
+  <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Confirmer la suppression</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        </div>
+        <div class="modal-body">
+          <p>Êtes-vous sûr de vouloir supprimer cet élément ? Cette action est irréversible.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Supprimer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript pour gérer les interactions -->
+  <script>
+    // Fonctions pour gérer l'édition des expériences
+    function editExperience(id) {
+      // Récupérer les données de l'expérience et les insérer dans le formulaire
+      // Ici, on simulerait la récupération des données pour l'ID spécifié
+      if (id === 1) {
+        document.getElementById('experienceId').value = '1';
+        document.getElementById('jobTitle').value = 'Développeur Full Stack';
+        document.getElementById('company').value = 'TechSolutions SARL';
+        document.getElementById('location').value = 'Casablanca, Maroc';
+        document.getElementById('startDate').value = '2021-01';
+        document.getElementById('endDate').value = '';
+        document.getElementById('currentJob').checked = true;
+        document.getElementById('description').value = 'Développement et maintenance d\'applications web utilisant Java/Spring Boot côté backend et React côté frontend. Mise en place de CI/CD avec Jenkins et déploiement sur AWS.';
+      } else if (id === 2) {
+        document.getElementById('experienceId').value = '2';
+        document.getElementById('jobTitle').value = 'Développeur Backend';
+        document.getElementById('company').value = 'DigitalWorks';
+        document.getElementById('location').value = 'Rabat, Maroc';
+        document.getElementById('startDate').value = '2018-03';
+        document.getElementById('endDate').value = '2020-12';
+        document.getElementById('currentJob').checked = false;
+        document.getElementById('description').value = 'Conception et développement de services RESTful avec Java et Spring Boot. Gestion de bases de données MySQL et MongoDB. Participation aux revues de code et à l\'amélioration continue de la qualité du code.';
+      }
+
+      // Mettre à jour le titre de la modal
+      document.getElementById('experienceModalLabel').textContent = 'Modifier une expérience';
+    }
+
+    // Réinitialiser le formulaire d'expérience pour un ajout
+    document.querySelectorAll('button[data-bs-target="#experienceModal"]').forEach(btn => {
+      if (!btn.hasAttribute('onclick')) {
+        btn.addEventListener('click', function() {
+          document.getElementById('experienceForm').reset();
+          document.getElementById('experienceId').value = '';
+          document.getElementById('experienceModalLabel').textContent = 'Ajouter une expérience';
+        });
+      }
+    });
+
+    // Fonctions pour gérer l'édition des formations
+    function editEducation(id) {
+      // Récupérer les données de la formation et les insérer dans le formulaire
+      if (id === 1) {
+        document.getElementById('educationId').value = '1';
+        document.getElementById('degree').value = 'Master en Informatique';
+        document.getElementById('school').value = 'ENSIAS';
+        document.getElementById('schoolLocation').value = 'Rabat, Maroc';
+        document.getElementById('startYear').value = '2016';
+        document.getElementById('endYear').value = '2018';
+        document.getElementById('fieldOfStudy').value = 'Génie Logiciel et Systèmes d\'Information';
+      } else if (id === 2) {
+        document.getElementById('educationId').value = '2';
+        document.getElementById('degree').value = 'Licence en Informatique';
+        document.getElementById('school').value = 'Université Hassan II';
+        document.getElementById('schoolLocation').value = 'Casablanca, Maroc';
+        document.getElementById('startYear').value = '2013';
+        document.getElementById('endYear').value = '2016';
+        document.getElementById('fieldOfStudy').value = 'Formation générale en informatique';
+      }
+
+      // Mettre à jour le titre de la modal
+      document.getElementById('educationModalLabel').textContent = 'Modifier une formation';
+    }
+
+    // Réinitialiser le formulaire de formation pour un ajout
+    document.querySelectorAll('button[data-bs-target="#educationModal"]').forEach(btn => {
+      if (!btn.hasAttribute('onclick')) {
+        btn.addEventListener('click', function() {
+          document.getElementById('educationForm').reset();
+          document.getElementById('educationId').value = '';
+          document.getElementById('educationModalLabel').textContent = 'Ajouter une formation';
+        });
+      }
+    });
+
+    // Gestion des compétences techniques (ajout/suppression)
+    document.addEventListener('DOMContentLoaded', function() {
+      // Ajouter une nouvelle compétence technique
+      const skillInput = document.querySelector('#skillsForm input[placeholder="Nouvelle compétence"]');
+      const addSkillBtn = skillInput.nextElementSibling;
+      const skillsContainer = document.querySelector('#skillsForm .d-flex.flex-wrap.gap-2.border');
+
+      addSkillBtn.addEventListener('click', function() {
+        const skillName = skillInput.value.trim();
+        if (skillName) {
+          const skillBadge = document.createElement('div');
+          skillBadge.className = 'badge bg-primary d-flex align-items-center p-2';
+          skillBadge.innerHTML = `${skillName}
+            <button type="button" class="btn-close btn-close-white ms-2" style="font-size: 0.5rem;"></button>`;
+
+          skillsContainer.appendChild(skillBadge);
+          skillInput.value = '';
+
+          // Ajouter l'événement de suppression pour le nouveau badge
+          const closeBtn = skillBadge.querySelector('.btn-close');
+          closeBtn.addEventListener('click', function() {
+            skillBadge.remove();
+          });
+        }
+      });
+
+      // Suppression des compétences existantes
+      document.querySelectorAll('#skillsForm .badge .btn-close').forEach(btn => {
+        btn.addEventListener('click', function() {
+          this.closest('.badge').remove();
+        });
+      });
+
+      // Gestion des langues
+      const addLanguageBtn = document.querySelector('#skillsForm button:last-child');
+      const languagesList = document.getElementById('languagesList');
+
+      addLanguageBtn.addEventListener('click', function() {
+        const newLanguageItem = document.createElement('div');
+        newLanguageItem.className = 'language-item border rounded p-3 mb-2';
+        newLanguageItem.innerHTML = `
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+              <input type="text" class="form-control" placeholder="Langue">
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <select class="form-select">
+                <option value="native">Natif</option>
+                <option value="fluent">Courant</option>
+                <option value="professional">Professionnel</option>
+                <option value="intermediate">Intermédiaire</option>
+                <option value="beginner">Débutant</option>
+              </select>
+              <button type="button" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+            </div>
+          </div>
+          <input type="range" class="form-range" min="0" max="100" step="5" value="50">
+        `;
+
+        languagesList.appendChild(newLanguageItem);
+
+        // Ajouter l'événement de suppression
+        const deleteBtn = newLanguageItem.querySelector('.btn-danger');
+        deleteBtn.addEventListener('click', function() {
+          newLanguageItem.remove();
+        });
+      });
+
+      // Suppression des langues existantes
+      document.querySelectorAll('#languagesList .language-item .btn-danger').forEach(btn => {
+        btn.addEventListener('click', function() {
+          this.closest('.language-item').remove();
+        });
+      });
+    });
+
+    // Gestion des confirmations de suppression
+    let deleteTargetType = null;
+    let deleteTargetId = null;
+
+    function confirmDeleteExperience(id) {
+      deleteTargetType = 'experience';
+      deleteTargetId = id;
+      const modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+      modal.show();
+    }
+
+    function confirmDeleteEducation(id) {
+      deleteTargetType = 'education';
+      deleteTargetId = id;
+      const modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+      modal.show();
+    }
+
+    document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+      if (deleteTargetType === 'experience') {
+        // Logique pour supprimer une expérience
+        console.log(`Suppression de l'expérience avec ID: ${deleteTargetId}`);
+        // Dans une implémentation réelle, vous supprimeriez l'élément du DOM ou enverriez une requête AJAX
+      } else if (deleteTargetType === 'education') {
+        // Logique pour supprimer une formation
+        console.log(`Suppression de la formation avec ID: ${deleteTargetId}`);
+        // Dans une implémentation réelle, vous supprimeriez l'élément du DOM ou enverriez une requête AJAX
+      }
+
+      // Fermer la modal
+      const modal = bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal'));
+      modal.hide();
+    });
+
+    // Contrôle du champ de date de fin d'emploi basé sur la case "Poste actuel"
+    document.getElementById('currentJob').addEventListener('change', function() {
+      const endDateField = document.getElementById('endDate');
+      if (this.checked) {
+        endDateField.value = '';
+        endDateField.disabled = true;
+      } else {
+        endDateField.disabled = false;
+      }
+    });
+
+    // Initialisation des tooltips Bootstrap
+    document.addEventListener('DOMContentLoaded', function() {
+      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+      });
+    });
+  </script>
 </div>

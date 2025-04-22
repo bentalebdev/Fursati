@@ -1,9 +1,9 @@
-<!-- Post Job Fragment - Static Version -->
+<!-- Post Job Fragment - Adapted for Offre Entity -->
 <div th:fragment="post-job">
   <!-- Form container -->
   <div class="card">
     <div class="card-body">
-      <form class="job-form needs-validation" novalidate>
+      <form class="job-form needs-validation" th:action="@{/offres/create}" th:object="${offre}" method="post" novalidate>
         <!-- Progress steps -->
         <div class="post-job-progress mb-4">
           <div class="row">
@@ -22,7 +22,7 @@
             <div class="col-md-3">
               <div class="progress-step" id="step3-indicator">
                 <div class="progress-step-number">3</div>
-                <div class="progress-step-label">Compétences requises</div>
+                <div class="progress-step-label">Qualifications requises</div>
               </div>
             </div>
             <div class="col-md-3">
@@ -44,14 +44,14 @@
 
           <div class="row mb-3">
             <div class="col-md-6">
-              <label for="jobTitle" class="form-label">Titre du poste *</label>
-              <input type="text" class="form-control" id="jobTitle" name="title" required>
+              <label for="title" class="form-label">Titre du poste *</label>
+              <input type="text" class="form-control" id="title" th:field="*{title}" required>
               <div class="invalid-feedback">Le titre du poste est requis.</div>
             </div>
             <div class="col-md-6">
-              <label for="department" class="form-label">Département</label>
-              <select class="form-select" id="department" name="department">
-                <option value="">Sélectionner un département</option>
+              <label for="industry" class="form-label">Secteur d'activité</label>
+              <select class="form-select" id="industry" th:field="*{industry}">
+                <option value="">Sélectionner un secteur</option>
                 <option value="IT">Informatique</option>
                 <option value="FINANCE">Finance</option>
                 <option value="MARKETING">Marketing</option>
@@ -66,8 +66,8 @@
 
           <div class="row mb-3">
             <div class="col-md-6">
-              <label for="jobType" class="form-label">Type de contrat *</label>
-              <select class="form-select" id="jobType" name="jobType" required>
+              <label for="contractType" class="form-label">Type de contrat *</label>
+              <select class="form-select" id="contractType" th:field="*{contractType}" required>
                 <option value="">Sélectionner un type</option>
                 <option value="FULL_TIME">Temps plein</option>
                 <option value="PART_TIME">Temps partiel</option>
@@ -79,8 +79,8 @@
               <div class="invalid-feedback">Le type de contrat est requis.</div>
             </div>
             <div class="col-md-6">
-              <label for="workArrangement" class="form-label">Mode de travail *</label>
-              <select class="form-select" id="workArrangement" name="workArrangement" required>
+              <label for="workMode" class="form-label">Mode de travail *</label>
+              <select class="form-select" id="workMode" th:field="*{workMode}" required>
                 <option value="">Sélectionner un mode</option>
                 <option value="ONSITE">Sur site</option>
                 <option value="REMOTE">Télétravail</option>
@@ -93,12 +93,12 @@
           <div class="row mb-3">
             <div class="col-md-6">
               <label for="location" class="form-label">Lieu *</label>
-              <input type="text" class="form-control" id="location" name="location" required>
+              <input type="text" class="form-control" id="location" th:field="*{location}" required>
               <div class="invalid-feedback">Le lieu est requis.</div>
             </div>
             <div class="col-md-6">
               <label for="experienceLevel" class="form-label">Niveau d'expérience *</label>
-              <select class="form-select" id="experienceLevel" name="experienceLevel" required>
+              <select class="form-select" id="experienceLevel" th:field="*{experienceLevel}" required>
                 <option value="">Sélectionner un niveau</option>
                 <option value="ENTRY">Débutant (0-2 ans)</option>
                 <option value="JUNIOR">Junior (2-3 ans)</option>
@@ -113,19 +113,47 @@
           <div class="row mb-3">
             <div class="col-md-6">
               <label for="minSalary" class="form-label">Salaire minimum (MAD/an)</label>
-              <input type="number" class="form-control" id="minSalary" name="minSalary">
+              <input type="number" class="form-control" id="minSalary" th:field="*{minSalary}">
             </div>
             <div class="col-md-6">
               <label for="maxSalary" class="form-label">Salaire maximum (MAD/an)</label>
-              <input type="number" class="form-control" id="maxSalary" name="maxSalary">
+              <input type="number" class="form-control" id="maxSalary" th:field="*{maxSalary}">
             </div>
           </div>
 
-          <div class="form-check mb-3">
-            <input class="form-check-input" type="checkbox" id="showSalaryRange" name="showSalaryRange">
-            <label class="form-check-label" for="showSalaryRange">
-              Afficher la fourchette de salaire aux candidats
-            </label>
+          <!-- Company Information -->
+          <h5 class="mt-4 mb-3">Informations sur l'entreprise</h5>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <!-- Hidden field for companyName during preview -->
+              <input type="hidden" id="companyName" value="" />
+              <label for="companyWebsite" class="form-label">Site web de l'entreprise</label>
+              <input type="url" class="form-control" id="companyWebsite" th:field="*{companyWebsite}">
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="companySize" class="form-label">Taille de l'entreprise</label>
+              <select class="form-select" id="companySize" th:field="*{companySize}">
+                <option value="">Sélectionner</option>
+                <option value="1-10">1-10 employés</option>
+                <option value="11-50">11-50 employés</option>
+                <option value="51-200">51-200 employés</option>
+                <option value="201-500">201-500 employés</option>
+                <option value="501-1000">501-1000 employés</option>
+                <option value="1001+">1001+ employés</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label for="companyHeadquarters" class="form-label">Siège social</label>
+              <input type="text" class="form-control" id="companyHeadquarters" th:field="*{companyHeadquarters}">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="companyDescription" class="form-label">Description de l'entreprise</label>
+            <textarea class="form-control" id="companyDescription" th:field="*{companyDescription}" rows="3"></textarea>
           </div>
 
           <div class="d-flex justify-content-end mt-4">
@@ -138,41 +166,30 @@
         <!-- Step 2: Détails du poste -->
         <div class="form-step" id="step2">
           <h4 class="form-section-title">Détails du poste</h4>
-          <p class="text-muted mb-4">Décrivez le poste, les responsabilités et les qualifications requises.</p>
+          <p class="text-muted mb-4">Décrivez le poste et les responsabilités requises.</p>
 
           <div class="mb-3">
-            <label for="shortDescription" class="form-label">Description courte (max. 150 caractères) *</label>
-            <input type="text" class="form-control" id="shortDescription" name="shortDescription" maxlength="150" required>
-            <div class="invalid-feedback">Une description courte est requise.</div>
-            <div class="form-text text-end">
-              <span id="shortDescCounter">0</span>/150 caractères
-            </div>
-          </div>
-
-          <div class="mb-3">
-            <label for="description" class="form-label">Description complète *</label>
-            <textarea class="form-control rich-editor" id="description" name="description" rows="6" required></textarea>
+            <label for="description" class="form-label">Description du poste *</label>
+            <textarea class="form-control rich-editor" id="description" th:field="*{description}" rows="6" required></textarea>
             <div class="invalid-feedback">Une description complète est requise.</div>
           </div>
 
-          <div class="mb-3">
-            <label for="responsibilities" class="form-label">Responsabilités *</label>
-            <textarea class="form-control rich-editor" id="responsibilities" name="responsibilities" rows="6" required></textarea>
-            <div class="invalid-feedback">Les responsabilités sont requises.</div>
-            <div class="form-text">Utilisez une liste à puces pour une meilleure lisibilité.</div>
-          </div>
-
-          <div class="mb-3">
-            <label for="requirements" class="form-label">Qualifications requises *</label>
-            <textarea class="form-control rich-editor" id="requirements" name="requirements" rows="6" required></textarea>
-            <div class="invalid-feedback">Les qualifications requises sont nécessaires.</div>
-            <div class="form-text">Indiquez l'éducation, l'expérience et les certifications attendues.</div>
-          </div>
-
-          <div class="mb-3">
-            <label for="benefits" class="form-label">Avantages</label>
-            <textarea class="form-control rich-editor" id="benefits" name="benefits" rows="4"></textarea>
-            <div class="form-text">Mettez en avant les avantages de travailler pour votre entreprise.</div>
+          <div class="mb-4">
+            <label class="form-label">Responsabilités *</label>
+            <div class="responsibility-container" id="responsibilitiesContainer">
+              <div class="input-group mb-2">
+                <input type="text" class="form-control responsibility-input" placeholder="Ajouter une responsabilité">
+                <button class="btn btn-outline-secondary add-responsibility" type="button">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+              <div class="responsibility-list">
+                <!-- Les responsabilités seront ajoutées ici dynamiquement -->
+              </div>
+              <!-- Champ caché pour stocker les responsabilités -->
+              <input type="hidden" id="responsibilitiesHidden" th:field="*{responsibilities}">
+            </div>
+            <div class="invalid-feedback">Au moins une responsabilité est requise.</div>
           </div>
 
           <div class="d-flex justify-content-between mt-4">
@@ -185,13 +202,31 @@
           </div>
         </div>
 
-        <!-- Step 3: Compétences requises -->
+        <!-- Step 3: Qualifications requises -->
         <div class="form-step" id="step3">
-          <h4 class="form-section-title">Compétences requises</h4>
-          <p class="text-muted mb-4">Précisez les compétences techniques et non techniques requises pour le poste.</p>
+          <h4 class="form-section-title">Qualifications requises</h4>
+          <p class="text-muted mb-4">Précisez les qualifications requises pour le poste.</p>
 
           <div class="mb-4">
-            <label class="form-label">Compétences techniques *</label>
+            <label class="form-label">Qualifications *</label>
+            <div class="qualification-container" id="qualificationsContainer">
+              <div class="input-group mb-2">
+                <input type="text" class="form-control qualification-input" placeholder="Ajouter une qualification">
+                <button class="btn btn-outline-secondary add-qualification" type="button">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+              <div class="qualification-list">
+                <!-- Les qualifications seront ajoutées ici dynamiquement -->
+              </div>
+              <!-- Champ caché pour stocker les qualifications -->
+              <input type="hidden" id="qualificationsHidden" th:field="*{qualifications}">
+            </div>
+            <div class="invalid-feedback">Au moins une qualification est requise.</div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label">Compétences techniques</label>
             <div class="skills-container mb-2" id="technicalSkills">
               <div class="input-group mb-2">
                 <input type="text" class="form-control skill-input" placeholder="Ajouter une compétence">
@@ -200,44 +235,10 @@
                 </button>
               </div>
               <div class="selected-skills">
-                <!-- Exemples de compétences sélectionnées -->
-                <div class="skill-badge">
-                  JavaScript <button class="remove-badge"><i class="fas fa-times"></i></button>
-                </div>
-                <div class="skill-badge">
-                  React <button class="remove-badge"><i class="fas fa-times"></i></button>
-                </div>
-                <div class="skill-badge">
-                  Node.js <button class="remove-badge"><i class="fas fa-times"></i></button>
-                </div>
+                <!-- Les compétences seront ajoutées ici dynamiquement -->
               </div>
-              <input type="hidden" name="technicalSkills" value="JavaScript,React,Node.js">
+              <input type="hidden" name="technicalSkills">
             </div>
-            <div id="technicalSkillsRequired" class="invalid-feedback">Au moins une compétence technique est requise.</div>
-            <div class="form-text">Ajoutez des langages de programmation, technologies, logiciels, etc.</div>
-          </div>
-
-          <div class="mb-4">
-            <label class="form-label">Compétences non techniques</label>
-            <div class="skills-container mb-2" id="softSkills">
-              <div class="input-group mb-2">
-                <input type="text" class="form-control skill-input" placeholder="Ajouter une compétence">
-                <button class="btn btn-outline-secondary add-skill" type="button">
-                  <i class="fas fa-plus"></i>
-                </button>
-              </div>
-              <div class="selected-skills">
-                <!-- Exemples de compétences sélectionnées -->
-                <div class="skill-badge">
-                  Communication <button class="remove-badge"><i class="fas fa-times"></i></button>
-                </div>
-                <div class="skill-badge">
-                  Travail d'équipe <button class="remove-badge"><i class="fas fa-times"></i></button>
-                </div>
-              </div>
-              <input type="hidden" name="softSkills" value="Communication,Travail d'équipe">
-            </div>
-            <div class="form-text">Ajoutez des compétences comme la communication, le travail d'équipe, etc.</div>
           </div>
 
           <div class="mb-4">
@@ -257,37 +258,10 @@
                 </button>
               </div>
               <div class="selected-languages">
-                <!-- Exemples de langues sélectionnées -->
-                <div class="language-badge">
-                  <span class="language-name">Français</span>
-                  <span class="language-level">Natif</span>
-                  <button class="remove-badge"><i class="fas fa-times"></i></button>
-                </div>
-                <div class="language-badge">
-                  <span class="language-name">Anglais</span>
-                  <span class="language-level">Courant</span>
-                  <button class="remove-badge"><i class="fas fa-times"></i></button>
-                </div>
+                <!-- Les langues seront ajoutées ici dynamiquement -->
               </div>
-              <input type="hidden" name="languages" value="Français:NATIVE,Anglais:FLUENT">
+              <input type="hidden" name="languages">
             </div>
-          </div>
-
-          <div class="mb-3">
-            <label for="educationLevel" class="form-label">Niveau d'éducation minimum</label>
-            <select class="form-select" id="educationLevel" name="educationLevel">
-              <option value="">Aucun</option>
-              <option value="HIGH_SCHOOL">Baccalauréat</option>
-              <option value="ASSOCIATE">Bac+2</option>
-              <option value="BACHELOR" selected>Licence (Bac+3)</option>
-              <option value="MASTER">Master (Bac+5)</option>
-              <option value="DOCTORATE">Doctorat</option>
-            </select>
-          </div>
-
-          <div class="mb-3">
-            <label for="certifications" class="form-label">Certifications souhaitées</label>
-            <input type="text" class="form-control" id="certifications" name="certifications" placeholder="Ex: PMP, ITIL, CFA, etc." value="Agile, Scrum">
           </div>
 
           <div class="d-flex justify-content-between mt-4">
@@ -307,85 +281,12 @@
 
           <div class="row mb-4">
             <div class="col-md-6">
-              <label for="applicationDeadline" class="form-label">Date limite de candidature</label>
-              <input type="date" class="form-control" id="applicationDeadline" name="applicationDeadline" value="2025-05-18">
+              <label for="postedAt" class="form-label">Date de publication</label>
+              <input type="datetime-local" class="form-control" id="postedAt" th:field="*{postedAt}">
             </div>
             <div class="col-md-6">
-              <label for="publicationDuration" class="form-label">Durée de publication</label>
-              <select class="form-select" id="publicationDuration" name="publicationDuration">
-                <option value="15">15 jours</option>
-                <option value="30" selected>30 jours</option>
-                <option value="60">60 jours</option>
-                <option value="90">90 jours</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="row mb-4">
-            <div class="col-md-6">
-              <label for="maxApplications" class="form-label">Nombre maximum de candidatures</label>
-              <input type="number" class="form-control" id="maxApplications" name="maxApplications" value="50">
-              <div class="form-text">Laissez vide pour un nombre illimité</div>
-            </div>
-            <div class="col-md-6">
-              <label for="visibility" class="form-label">Visibilité</label>
-              <select class="form-select" id="visibility" name="visibility">
-                <option value="PUBLIC" selected>Publique</option>
-                <option value="PRIVATE">Privée (sur invitation uniquement)</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="mb-4">
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" id="screeningQuestions" name="enableScreeningQuestions">
-              <label class="form-check-label" for="screeningQuestions">
-                Activer les questions de présélection
-              </label>
-            </div>
-            <div class="form-text">Les questions de présélection peuvent vous aider à identifier les candidats les plus qualifiés.</div>
-
-            <div id="screeningQuestionsForm" class="mt-3 d-none">
-              <div class="card">
-                <div class="card-body bg-light">
-                  <h6>Questions de présélection</h6>
-                  <div id="questionsContainer">
-                    <div class="question-item mb-3">
-                      <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Entrez une question" value="Combien d'années d'expérience avez-vous en développement JavaScript?">
-                        <button class="btn btn-outline-danger remove-question" type="button">
-                          <i class="fas fa-trash"></i>
-                        </button>
-                      </div>
-                    </div>
-                    <div class="question-item mb-3">
-                      <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Entrez une question" value="Avez-vous déjà travaillé dans un environnement Agile?">
-                        <button class="btn btn-outline-danger remove-question" type="button">
-                          <i class="fas fa-trash"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="addQuestion">
-                    <i class="fas fa-plus"></i> Ajouter une question
-                  </button>
-                  <input type="hidden" name="screeningQuestions" value="Combien d'années d'expérience avez-vous en développement JavaScript?,Avez-vous déjà travaillé dans un environnement Agile?">
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="mb-4">
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" id="publishNow" checked>
-              <label class="form-check-label" for="publishNow">
-                Publier maintenant
-              </label>
-            </div>
-            <div class="scheduled-date d-none mt-3">
-              <label for="publicationDate" class="form-label">Date de publication</label>
-              <input type="datetime-local" class="form-control" id="publicationDate" name="publicationDate">
+              <label for="expiresAt" class="form-label">Date d'expiration</label>
+              <input type="datetime-local" class="form-control" id="expiresAt" th:field="*{expiresAt}">
             </div>
           </div>
 
@@ -395,38 +296,29 @@
             </div>
             <div class="card-body">
               <div class="job-preview">
-                <h4 id="preview-title">Développeur Frontend</h4>
+                <h4 id="preview-title">Titre du poste</h4>
                 <p class="text-muted mb-2">
-                  <span id="preview-location">Casablanca</span> •
-                  <span id="preview-jobType">Temps plein</span> •
-                  <span id="preview-department">Informatique</span>
+                  <span id="preview-companyName">Nom de l'entreprise</span> •
+                  <span id="preview-location">Lieu</span> •
+                  <span id="preview-contractType">Type de contrat</span>
                 </p>
                 <div class="mb-3">
                   <span class="badge bg-primary me-1">Nouveau</span>
-                  <span id="preview-experienceLevel" class="badge bg-secondary me-1">Intermédiaire (3-5 ans)</span>
-                  <span id="preview-workArrangement" class="badge bg-info text-dark">Hybride</span>
+                  <span id="preview-experienceLevel" class="badge bg-secondary me-1">Niveau d'expérience</span>
+                  <span id="preview-workMode" class="badge bg-info text-dark">Mode de travail</span>
                 </div>
-                <p id="preview-shortDescription" class="mb-3">Nous recherchons un développeur frontend talentueux pour rejoindre notre équipe et contribuer au développement de nos applications web innovantes.</p>
+                <p id="preview-description" class="mb-3">Description du poste...</p>
                 <div class="mb-3">
-                  <h6>Compétences requises:</h6>
-                  <div id="preview-skills" class="d-flex flex-wrap gap-1 mb-2">
-                    <span class="badge bg-light text-dark">JavaScript</span>
-                    <span class="badge bg-light text-dark">React</span>
-                    <span class="badge bg-light text-dark">Node.js</span>
-                    <span class="badge bg-light text-dark">CSS</span>
-                    <span class="badge bg-light text-dark">HTML5</span>
+                  <h6>Qualifications requises:</h6>
+                  <div id="preview-qualifications" class="d-flex flex-wrap gap-1 mb-2">
+                    <!-- Les qualifications seront affichées ici -->
                   </div>
                 </div>
                 <div class="text-muted small">
-                  <i class="far fa-calendar-alt me-1"></i> Date de publication: <span id="preview-publicationDate">Aujourd'hui</span>
+                  <i class="far fa-calendar-alt me-1"></i> Date d'expiration: <span id="preview-expiresAt">Date</span>
                 </div>
               </div>
             </div>
-          </div>
-
-          <div class="alert alert-info" role="alert">
-            <i class="fas fa-info-circle me-2"></i>
-            <strong>Note:</strong> Votre plan actuel vous permet de publier <strong>10</strong> offres d'emploi par mois. Il vous reste <strong>7</strong> offres à publier ce mois-ci.
           </div>
 
           <div class="d-flex justify-content-between mt-4">
@@ -531,6 +423,30 @@
       cursor: pointer;
     }
 
+    /* Styles pour les responsabilités et qualifications */
+    .responsibility-list, .qualification-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .responsibility-item, .qualification-item {
+      background-color: #f8f9fa;
+      border-radius: 5px;
+      padding: 8px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .remove-item {
+      background: none;
+      border: none;
+      color: #dc3545;
+      cursor: pointer;
+    }
+
     /* Styles pour les badges de langues */
     .selected-languages {
       display: flex;
@@ -567,18 +483,502 @@
       padding-left: 15px;
     }
 
-    /* Style des questions de présélection */
-    .question-item {
-      background-color: white;
-      border-radius: 5px;
-      padding: 10px;
-    }
-
     /* Style pour les badges dans l'aperçu */
-    #preview-skills .badge {
+    #preview-qualifications .badge {
       padding: 5px 10px;
       margin-right: 5px;
       margin-bottom: 5px;
     }
   </style>
+
+  <!-- JavaScript pour la gestion des étapes et des champs dynamiques -->
+  <script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+      // Gestion des étapes du formulaire
+      const nextButtons = document.querySelectorAll('.next-step');
+      const prevButtons = document.querySelectorAll('.prev-step');
+      const progressBar = document.getElementById('progress-bar');
+
+      nextButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const currentStep = document.querySelector('.form-step.active');
+          const targetStep = this.getAttribute('data-target');
+
+          // Vérification des champs obligatoires de l'étape actuelle
+          const requiredFields = currentStep.querySelectorAll('[required]');
+          let isValid = true;
+
+          requiredFields.forEach(field => {
+            if (!field.value) {
+              field.classList.add('is-invalid');
+              isValid = false;
+            } else {
+              field.classList.remove('is-invalid');
+            }
+          });
+
+          if (isValid) {
+            // Passage à l'étape suivante
+            currentStep.classList.remove('active');
+            document.getElementById(targetStep).classList.add('active');
+
+            // Mise à jour des indicateurs d'étape
+            const stepNumber = targetStep.replace('step', '');
+            document.querySelectorAll('.progress-step').forEach(step => {
+              step.classList.remove('active');
+            });
+            document.getElementById(targetStep + '-indicator').classList.add('active');
+
+            // Mise à jour de la barre de progression
+            progressBar.style.width = (stepNumber * 25) + '%';
+            progressBar.setAttribute('aria-valuenow', stepNumber * 25);
+
+            // Mise à jour de l'aperçu en étape 4
+            if (targetStep === 'step4') {
+              updatePreview();
+            }
+          }
+        });
+      });
+
+      prevButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const currentStep = document.querySelector('.form-step.active');
+          const targetStep = this.getAttribute('data-target');
+
+          currentStep.classList.remove('active');
+          document.getElementById(targetStep).classList.add('active');
+
+          const stepNumber = targetStep.replace('step', '');
+          document.querySelectorAll('.progress-step').forEach(step => {
+            step.classList.remove('active');
+          });
+          document.getElementById(targetStep + '-indicator').classList.add('active');
+
+          progressBar.style.width = (stepNumber * 25) + '%';
+          progressBar.setAttribute('aria-valuenow', stepNumber * 25);
+        });
+      });
+
+      // Gestion des responsabilités
+      const addResponsibilityBtn = document.querySelector('.add-responsibility');
+      const responsibilityInput = document.querySelector('.responsibility-input');
+      const responsibilityList = document.querySelector('.responsibility-list');
+      const responsibilitiesHidden = document.getElementById('responsibilitiesHidden');
+      let responsibilities = [];
+
+      addResponsibilityBtn.addEventListener('click', function() {
+        const value = responsibilityInput.value.trim();
+        if (value) {
+          addResponsibility(value);
+          responsibilityInput.value = '';
+        }
+      });
+
+      responsibilityInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const value = this.value.trim();
+          if (value) {
+            addResponsibility(value);
+            this.value = '';
+          }
+        }
+      });
+
+      function addResponsibility(value) {
+        responsibilities.push(value);
+        updateResponsibilitiesList();
+        updateResponsibilitiesHidden();
+      }
+
+      function removeResponsibility(index) {
+        responsibilities.splice(index, 1);
+        updateResponsibilitiesList();
+        updateResponsibilitiesHidden();
+      }
+
+      function updateResponsibilitiesList() {
+        responsibilityList.innerHTML = '';
+        responsibilities.forEach((item, index) => {
+          const itemElement = document.createElement('div');
+          itemElement.className = 'responsibility-item';
+          itemElement.innerHTML = `
+            <span>${item}</span>
+            <button type="button" class="remove-item" data-index="${index}">
+              <i class="fas fa-times"></i>
+            </button>
+          `;
+          responsibilityList.appendChild(itemElement);
+        });
+
+        document.querySelectorAll('.responsibility-item .remove-item').forEach(button => {
+          button.addEventListener('click', function() {
+            const index = parseInt(this.getAttribute('data-index'));
+            removeResponsibility(index);
+          });
+        });
+      }
+
+      function updateResponsibilitiesHidden() {
+        // Store as direct list for Spring to bind to List<String>
+        responsibilitiesHidden.value = responsibilities.join(',');
+      }
+
+      // Gestion des qualifications
+      const addQualificationBtn = document.querySelector('.add-qualification');
+      const qualificationInput = document.querySelector('.qualification-input');
+      const qualificationList = document.querySelector('.qualification-list');
+      const qualificationsHidden = document.getElementById('qualificationsHidden');
+      let qualifications = [];
+
+      addQualificationBtn.addEventListener('click', function() {
+        const value = qualificationInput.value.trim();
+        if (value) {
+          addQualification(value);
+          qualificationInput.value = '';
+        }
+      });
+
+      qualificationInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const value = this.value.trim();
+          if (value) {
+            addQualification(value);
+            this.value = '';
+          }
+        }
+      });
+
+      function addQualification(value) {
+        qualifications.push(value);
+        updateQualificationsList();
+        updateQualificationsHidden();
+      }
+
+      function removeQualification(index) {
+        qualifications.splice(index, 1);
+        updateQualificationsList();
+        updateQualificationsHidden();
+      }
+
+      function updateQualificationsList() {
+        qualificationList.innerHTML = '';
+        qualifications.forEach((item, index) => {
+          const itemElement = document.createElement('div');
+          itemElement.className = 'qualification-item';
+          itemElement.innerHTML = `
+            <span>${item}</span>
+            <button type="button" class="remove-item" data-index="${index}">
+              <i class="fas fa-times"></i>
+            </button>
+          `;
+          qualificationList.appendChild(itemElement);
+        });
+
+        document.querySelectorAll('.qualification-item .remove-item').forEach(button => {
+          button.addEventListener('click', function() {
+            const index = parseInt(this.getAttribute('data-index'));
+            removeQualification(index);
+          });
+        });
+      }
+
+      function updateQualificationsHidden() {
+        // Store as direct list for Spring to bind to List<String>
+        qualificationsHidden.value = qualifications.join(',');
+      }
+
+      // Mise à jour de l'aperçu
+      function updatePreview() {
+        document.getElementById('preview-title').textContent = document.getElementById('title').value || 'Titre du poste';
+
+        // Use the Recruteur company name if available, otherwise use a placeholder
+        document.getElementById('preview-companyName').textContent = document.querySelector('#companyName').value || 'Nom de l\'entreprise';
+
+        document.getElementById('preview-location').textContent = document.getElementById('location').value || 'Lieu';
+
+        const contractTypeSelect = document.getElementById('contractType');
+        document.getElementById('preview-contractType').textContent =
+                contractTypeSelect.options[contractTypeSelect.selectedIndex].text || 'Type de contrat';
+
+        const experienceLevelSelect = document.getElementById('experienceLevel');
+        document.getElementById('preview-experienceLevel').textContent =
+                experienceLevelSelect.options[experienceLevelSelect.selectedIndex].text || 'Niveau d\'expérience';
+
+        const workModeSelect = document.getElementById('workMode');
+        document.getElementById('preview-workMode').textContent =
+                workModeSelect.options[workModeSelect.selectedIndex].text || 'Mode de travail';
+
+        document.getElementById('preview-description').textContent =
+                document.getElementById('description').value || 'Description du poste...';
+
+        // Afficher les qualifications dans l'aperçu
+        const previewQualifications = document.getElementById('preview-qualifications');
+        previewQualifications.innerHTML = '';
+        qualifications.forEach(qual => {
+          const qualBadge = document.createElement('span');
+          qualBadge.className = 'badge bg-light text-dark';
+          qualBadge.textContent = qual;
+          previewQualifications.appendChild(qualBadge);
+        });
+
+        // Date d'expiration
+        const expiresAtInput = document.getElementById('expiresAt');
+        if (expiresAtInput.value) {
+          const expiryDate = new Date(expiresAtInput.value);
+          document.getElementById('preview-expiresAt').textContent =
+                  expiryDate.toLocaleDateString();
+        } else {
+          document.getElementById('preview-expiresAt').textContent = 'Non définie';
+        }
+      }
+
+      // Gestion des compétences techniques
+      const addSkillBtn = document.querySelector('#technicalSkills .add-skill');
+      const skillInput = document.querySelector('#technicalSkills .skill-input');
+      const selectedSkills = document.querySelector('#technicalSkills .selected-skills');
+      const technicalSkillsInput = document.querySelector('input[name="technicalSkills"]');
+      let skills = [];
+
+      addSkillBtn.addEventListener('click', function() {
+        const value = skillInput.value.trim();
+        if (value) {
+          addSkill(value);
+          skillInput.value = '';
+        }
+      });
+
+      skillInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const value = this.value.trim();
+          if (value) {
+            addSkill(value);
+            this.value = '';
+          }
+        }
+      });
+
+      function addSkill(value) {
+        if (!skills.includes(value)) {
+          skills.push(value);
+          updateSkillsList();
+        }
+      }
+
+      function removeSkill(skill) {
+        const index = skills.indexOf(skill);
+        if (index !== -1) {
+          skills.splice(index, 1);
+          updateSkillsList();
+        }
+      }
+
+      function updateSkillsList() {
+        selectedSkills.innerHTML = '';
+        skills.forEach(skill => {
+          const badge = document.createElement('div');
+          badge.className = 'skill-badge';
+          badge.innerHTML = `
+            ${skill} <button type="button" class="remove-badge"><i class="fas fa-times"></i></button>
+          `;
+          selectedSkills.appendChild(badge);
+
+          badge.querySelector('.remove-badge').addEventListener('click', function() {
+            removeSkill(skill);
+          });
+        });
+
+        technicalSkillsInput.value = skills.join(',');
+      }
+
+      // Gestion des langues
+      const addLanguageBtn = document.querySelector('.add-language');
+      const languageInput = document.querySelector('#languages .skill-input');
+      const languageLevelSelect = document.querySelector('.language-level');
+      const selectedLanguages = document.querySelector('.selected-languages');
+      const languagesInput = document.querySelector('input[name="languages"]');
+      let languages = [];
+
+      addLanguageBtn.addEventListener('click', function() {
+        const language = languageInput.value.trim();
+        const level = languageLevelSelect.value;
+        if (language) {
+          addLanguage(language, level);
+          languageInput.value = '';
+        }
+      });
+
+      function addLanguage(language, level) {
+        // Vérifier si la langue existe déjà
+        const index = languages.findIndex(l => l.name === language);
+        if (index !== -1) {
+          languages[index].level = level;
+        } else {
+          languages.push({ name: language, level: level });
+        }
+        updateLanguagesList();
+      }
+
+      function removeLanguage(language) {
+        const index = languages.findIndex(l => l.name === language);
+        if (index !== -1) {
+          languages.splice(index, 1);
+          updateLanguagesList();
+        }
+      }
+
+      function updateLanguagesList() {
+        selectedLanguages.innerHTML = '';
+        languages.forEach(lang => {
+          const levelText = languageLevelSelect.options[
+                  Array.from(languageLevelSelect.options).findIndex(opt => opt.value === lang.level)
+                  ].text;
+
+          const badge = document.createElement('div');
+          badge.className = 'language-badge';
+          badge.innerHTML = `
+            <span class="language-name">${lang.name}</span>
+            <span class="language-level">${levelText}</span>
+            <button type="button" class="remove-badge"><i class="fas fa-times"></i></button>
+          `;
+          selectedLanguages.appendChild(badge);
+
+          badge.querySelector('.remove-badge').addEventListener('click', function() {
+            removeLanguage(lang.name);
+          });
+        });
+
+        // Format: "French:NATIVE,English:FLUENT"
+        languagesInput.value = languages.map(l => `${l.name}:${l.level}`).join(',');
+      }
+
+      // Gestion du formulaire
+      const form = document.querySelector('.job-form');
+      const saveAsDraftBtn = document.getElementById('saveAsDraft');
+
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Vérification des champs obligatoires
+        const requiredFields = form.querySelectorAll('[required]');
+        let isValid = true;
+
+        requiredFields.forEach(field => {
+          if (!field.value) {
+            field.classList.add('is-invalid');
+            isValid = false;
+          } else {
+            field.classList.remove('is-invalid');
+          }
+        });
+
+        // Vérifier les responsabilités et qualifications
+        if (responsibilities.length === 0) {
+          document.getElementById('responsibilitiesContainer').classList.add('is-invalid');
+          isValid = false;
+        } else {
+          document.getElementById('responsibilitiesContainer').classList.remove('is-invalid');
+        }
+
+        if (qualifications.length === 0) {
+          document.getElementById('qualificationsContainer').classList.add('is-invalid');
+          isValid = false;
+        } else {
+          document.getElementById('qualificationsContainer').classList.remove('is-invalid');
+        }
+
+        if (isValid) {
+          // Si la date de publication n'est pas définie, la définir à maintenant
+          if (!document.getElementById('postedAt').value) {
+            const now = new Date();
+            document.getElementById('postedAt').value = now.toISOString().slice(0, 16);
+          }
+
+          // Si la date d'expiration n'est pas définie, la définir à 30 jours plus tard
+          if (!document.getElementById('expiresAt').value) {
+            const expiry = new Date();
+            expiry.setDate(expiry.getDate() + 30);
+            document.getElementById('expiresAt').value = expiry.toISOString().slice(0, 16);
+          }
+
+          // Soumettre le formulaire
+          this.submit();
+        } else {
+          // Afficher un message d'erreur
+          alert('Veuillez remplir tous les champs obligatoires.');
+
+          // Revenir à la première étape avec erreur
+          document.querySelectorAll('.form-step').forEach(step => {
+            step.classList.remove('active');
+          });
+
+          // Trouver l'étape avec la première erreur
+          for (let i = 1; i <= 4; i++) {
+            const step = document.getElementById('step' + i);
+            if (step.querySelector('.is-invalid')) {
+              step.classList.add('active');
+              document.querySelectorAll('.progress-step').forEach(s => {
+                s.classList.remove('active');
+              });
+              document.getElementById('step' + i + '-indicator').classList.add('active');
+              progressBar.style.width = (i * 25) + '%';
+              progressBar.setAttribute('aria-valuenow', i * 25);
+              break;
+            }
+          }
+        }
+      });
+
+      saveAsDraftBtn.addEventListener('click', function() {
+        // Ajouter un champ caché pour indiquer qu'il s'agit d'un brouillon
+        const draftInput = document.createElement('input');
+        draftInput.type = 'hidden';
+        draftInput.name = 'isDraft';
+        draftInput.value = 'true';
+        form.appendChild(draftInput);
+
+        // Supprimer temporairement les attributs required
+        form.querySelectorAll('[required]').forEach(field => {
+          field.removeAttribute('required');
+        });
+
+        // Soumettre le formulaire
+        form.submit();
+      });
+
+      // Initialiser depuis les valeurs existantes dans le model (pour l'édition)
+      // Pour responsabilités
+      if (responsibilitiesHidden.value && responsibilitiesHidden.value.trim() !== '') {
+        try {
+          // Handle both JSON array and comma-separated lists
+          if (responsibilitiesHidden.value.startsWith('[')) {
+            responsibilities = JSON.parse(responsibilitiesHidden.value);
+          } else {
+            responsibilities = responsibilitiesHidden.value.split(',').map(item => item.trim()).filter(item => item !== '');
+          }
+          updateResponsibilitiesList();
+        } catch (e) {
+          console.error('Erreur lors du chargement des responsabilités:', e);
+        }
+      }
+
+      // Pour qualifications
+      if (qualificationsHidden.value && qualificationsHidden.value.trim() !== '') {
+        try {
+          // Handle both JSON array and comma-separated lists
+          if (qualificationsHidden.value.startsWith('[')) {
+            qualifications = JSON.parse(qualificationsHidden.value);
+          } else {
+            qualifications = qualificationsHidden.value.split(',').map(item => item.trim()).filter(item => item !== '');
+          }
+          updateQualificationsList();
+        } catch (e) {
+          console.error('Erreur lors du chargement des qualifications:', e);
+        }
+      }
+    });
+  </script>
 </div>

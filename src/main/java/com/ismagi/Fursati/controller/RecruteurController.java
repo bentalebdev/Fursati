@@ -18,59 +18,50 @@ public class RecruteurController {
 
     @Autowired
     private RecruteurService recruteurService;
+
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
         logger.info("Loading dashboard page...");
         model.addAttribute("activeTab", "dashboard");
-
-
-
-
         return "recruterboard";
     }
+
     @GetMapping("/post-job")
     public String postjob(Model model) {
         logger.info("Loading post-job page...");
         model.addAttribute("activeTab", "post-job");
 
-
+        // Add an empty Offre object to the model - THIS FIXES THE ERROR
+        model.addAttribute("offre", new Offre());
 
         return "recruterboard";
     }
+
     @GetMapping("/my-jobs")
     public String myjobs(Model model) {
         logger.info("Loading post-job page...");
         model.addAttribute("activeTab", "my-jobs");
-
-
-
         return "recruterboard";
     }
+
     @GetMapping("/candidates")
     public String candidates(Model model) {
         logger.info("Loading candidates page...");
         model.addAttribute("activeTab", "candidates");
-
-
-
         return "recruterboard";
     }
+
     @GetMapping("/applications")
     public String applications(Model model) {
         logger.info("Loading applications page...");
         model.addAttribute("activeTab", "applications");
-
-
-
         return "recruterboard";
     }
+
     @GetMapping("/company")
     public String company(Model model) {
         logger.info("Loading company page...");
         model.addAttribute("activeTab", "company");
-
-
-
         return "recruterboard";
     }
 
