@@ -1,35 +1,114 @@
 package com.ismagi.Fursati.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ismagi.Fursati.entity.Offre;
+import com.ismagi.Fursati.entity.Recruteur;
 import com.ismagi.Fursati.service.OffreService;
+import com.ismagi.Fursati.service.RecruteurService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.Principal;
+import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 
-@RestController
+@Controller
 @RequestMapping("/offres")
 public class OffreController {
+
     @Autowired
     private OffreService offreService;
+    @Autowired
+    private RecruteurService recruteurService;
 
-    @GetMapping
-    public List<Offre> getAllOffres() {
-        return offreService.getAllOffres();
-    }
 
-    @GetMapping("/{id}")
-    public Offre getOffreById(@PathVariable Long id) {
-        return offreService.getOffreById(id);
-    }
 
-    @PostMapping
-    public Offre createOffre(@RequestBody Offre offre) {
-        return offreService.saveOffre(offre);
-    }
+    @PostMapping("/create")
+    public String createOffre(@ModelAttribute Offre offre,
+                              @RequestParam(required = false) String responsibilitiesStr,
+                              @RequestParam(required = false) String qualificationsStr,
+                              RedirectAttributes redirectAttributes) {
 
-    @DeleteMapping("/{id}")
-    public void deleteOffre(@PathVariable Long id) {
-        offreService.deleteOffre(id);
+        System.out.println("DEBUG: Starting createOffre method");
+        System.out.println("DEBUG: Received job title: " + offre.getTitle());
+        System.out.println("DEBUG: Responsibilities string: " + responsibilitiesStr);
+        System.out.println("DEBUG: Qualifications string: " + qualificationsStr);
+
+        try {
+            // Get recruiter
+            System.out.println("DEBUG: Getting recruiter with ID 1");
+            Recruteur recruteur = recruteurService.getRecruteurById(Long.valueOf(1));
+            if (recruteur == null) {
+                System.out.println("DEBUG: CRITICAL ERROR - Recruiter with ID 1 not found!");
+                throw new RuntimeException("Recruiter with ID 1 not found");
+            }
+            System.out.println("DEBUG: Retrieved recruiter: " + recruteur.getIdRecruteur());
+            offre.setRecruteur(recruteur);
+
+            // Process responsibilities - REPLACING Arrays.asList with ArrayList
+            if (responsibilitiesStr != null && !responsibilitiesStr.isEmpty()) {
+                System.out.println("DEBUG: Processing responsibilities");
+                // Create a modifiable ArrayList instead of fixed-size List
+                List<String> responsibilities = new java.util.ArrayList<>();
+                String[] respArray = responsibilitiesStr.split(",");
+                System.out.println("DEBUG: Split responsibilities into " + respArray.length + " items");
+                for (String resp : respArray) {
+                    if (!resp.trim().isEmpty()) {
+                        responsibilities.add(resp.trim());
+                    }
+                }
+                System.out.println("DEBUG: Final responsibilities count: " + responsibilities.size());
+                offre.setResponsibilities(responsibilities);
+            }
+
+            // Process qualifications - REPLACING Arrays.asList with ArrayList
+            if (qualificationsStr != null && !qualificationsStr.isEmpty()) {
+                System.out.println("DEBUG: Processing qualifications");
+                // Create a modifiable ArrayList instead of fixed-size List
+                List<String> qualifications = new java.util.ArrayList<>();
+                String[] qualArray = qualificationsStr.split(",");
+                System.out.println("DEBUG: Split qualifications into " + qualArray.length + " items");
+                for (String qual : qualArray) {
+                    if (!qual.trim().isEmpty()) {
+                        qualifications.add(qual.trim());
+                    }
+                }
+                System.out.println("DEBUG: Final qualifications count: " + qualifications.size());
+                offre.setQualifications(qualifications);
+            }
+
+            // Set default dates
+            System.out.println("DEBUG: Setting dates");
+            if (offre.getPostedAt() == null) {
+                offre.setPostedAt(LocalDateTime.now());
+            }
+            if (offre.getExpiresAt() == null) {
+                offre.setExpiresAt(LocalDateTime.now().plusDays(30));
+            }
+
+            // Save the offer
+            System.out.println("DEBUG: About to save offer to database");
+            Offre savedOffre = offreService.saveOffre(offre);
+            System.out.println("DEBUG: Successfully saved offer with ID: " + savedOffre.getId());
+
+            // Add success message
+            redirectAttributes.addFlashAttribute("successMessage", "L'offre a été publiée avec succès.");
+            return "redirect:/offres";
+
+        } catch (Exception e) {
+            System.err.println("DEBUG: EXCEPTION TYPE: " + e.getClass().getName());
+            System.err.println("DEBUG: EXCEPTION MESSAGE: " + e.getMessage());
+            System.err.println("DEBUG: EXCEPTION STACKTRACE:");
+            e.printStackTrace();
+
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Une erreur s'est produite lors de l'enregistrement de l'offre: " + e.getMessage());
+            return "redirect:/recruteurs/post-job";
+        }
     }
 }
