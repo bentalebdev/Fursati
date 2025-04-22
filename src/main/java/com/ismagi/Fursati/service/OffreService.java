@@ -120,4 +120,14 @@ public class OffreService {
             return false;
         }
     }
+
+    public List<Offre> findOffresByRecruteurIdRecruteur(Long idRecruteur) {
+        try {
+            return offreRepository.findOffresByRecruteurIdRecruteur(idRecruteur);
+        } catch (Exception e) {
+            logger.severe("Error retrieving offers for recruiter with ID " + idRecruteur + ": " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+    
 }

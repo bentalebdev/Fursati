@@ -35,6 +35,12 @@ public class Offre {
     private String companyHeadquarters;
     private String companyDescription;
 
+    @Column(name = "status")
+    private String status = "DRAFT"; // Default status
+
+    @Column(name = "views")
+    private Long views = 0L; // Default views count
+
     // Ajout de la relation avec Recruteur
     @ManyToOne
     @JoinColumn(name = "recruteur_id")
@@ -203,6 +209,22 @@ public class Offre {
 
     public void setCompanyDescription(String companyDescription) {
         this.companyDescription = companyDescription;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Long getViews() {
+        return views;
+    }
+
+    public void setViews(Long views) {
+        this.views = views;
     }
 
     public List<String> getResponsibilities() {
