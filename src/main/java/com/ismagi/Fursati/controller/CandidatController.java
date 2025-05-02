@@ -1,7 +1,9 @@
 package com.ismagi.Fursati.controller;
 
+import com.ismagi.Fursati.dto.*;
 import com.ismagi.Fursati.entity.Candidat;
 import com.ismagi.Fursati.entity.Offre;
+import com.ismagi.Fursati.service.CandidatProfileService;
 import com.ismagi.Fursati.service.CandidatService;
 import com.ismagi.Fursati.service.OffreService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,9 @@ public class CandidatController {
 
     @Autowired
     private CandidatService candidatService;
+    @Autowired
+    private CandidatProfileService candidatProfileService;
+
 
     @Autowired
     private OffreService offreService;
@@ -138,18 +143,65 @@ public class CandidatController {
         return "candidateboard";
     }
 
+    // === PROFILE ===
+
     @GetMapping("/profile")
     public String profile(Model model) {
         logger.info("Loading profile page...");
 
         model.addAttribute("activeTab", "profile");
 
+        Candidat c = candidatProfileService.getCandidatById(1L);
+
         // Provide a default Offre object to avoid null pointer exceptions in the view
         if (!model.containsAttribute("offre")) {
             model.addAttribute("offre", new Offre());
         }
+        model.addAttribute("candidat", c);
 
         return "candidateboard";
+    }
+
+    @PostMapping("/profile/basic-info")
+    public String updateBasicInfo(@ModelAttribute BasicInfoDTO basicInfoDTO) {
+        candidatProfileService.updateBasicInfo(1L, basicInfoDTO);
+        return "redirect:/candidats/profile";
+    }
+
+    @PostMapping("/profile/summary")
+    public String updateSummary(@ModelAttribute SummaryDTO summaryDTO) {
+        candidatProfileService.updateSummary(1L, summaryDTO);
+        return "redirect:/candidats/profile";
+    }
+
+    @PostMapping("/profile/experience")
+    public String updateExperience(@ModelAttribute ExperienceListDTO experienceListDTO) {
+        candidatProfileService.updateExperiences(1L, experienceListDTO);
+        return "redirect:/candidats/profile";
+    }
+
+    @PostMapping("/profile/experience/delete")
+    public String deleteExperience(@RequestParam Long experienceId) {
+        candidatProfileService.deleteExperience(experienceId);
+        return "redirect:/candidats/profile";
+    }
+
+    @PostMapping("/profile/education")
+    public String updateEducation(@ModelAttribute EducationListDTO educationListDTO) {
+        candidatProfileService.updateEducations(1L, educationListDTO);
+        return "redirect:/candidats/profile";
+    }
+
+    @PostMapping("/profile/education/delete")
+    public String deleteEducation(@RequestParam Long educationId) {
+        candidatProfileService.deleteEducation(educationId);
+        return "redirect:/candidats/profile";
+    }
+
+    @PostMapping("/profile/skills-languages")
+    public String updateSkillsAndLanguages(@ModelAttribute SkillsLanguagesDTO dto) {
+        candidatProfileService.updateSkillsAndLanguages(1L, dto);
+        return "redirect:/candidats/profile";
     }
 
     @GetMapping("/documents")

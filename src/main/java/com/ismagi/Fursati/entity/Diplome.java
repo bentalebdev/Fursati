@@ -13,6 +13,5 @@ public class Diplome {
 
     private String diplome;
 
-    @ManyToMany(mappedBy = "diplomes")
-    private List<Candidat> candidats; // A diploma can belong to multiple candidates
+
 }

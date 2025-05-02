@@ -1,7 +1,14 @@
 package com.ismagi.Fursati.entity;
 
+import com.ismagi.Fursati.entity.Education;
+import com.ismagi.Fursati.entity.Experience;
+import com.ismagi.Fursati.entity.Language;
+import com.ismagi.Fursati.entity.Skill;
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -9,27 +16,27 @@ import java.util.List;
 public class Candidat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long candidatId;
+    private Long id;
 
-    private String nom;
-    private String prenom;
-    private String telephone;
-    private int age;
+    private String firstName;
+    private String lastName;
     private String email;
-    private String login;
-    private String password;
+    private String phone;
+    @Column(name = "birthdate")
+    private LocalDate birthdate;
+    private String address;
+    private String profilePicture;
+    private String summary;
 
-    @Lob
-    private byte[] cv;
+    @OneToMany(mappedBy = "candidat", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Experience> experiences = new ArrayList<>();
 
-    @OneToMany(mappedBy = "candidat", cascade = CascadeType.ALL)
-    private List<Demande> demandes; // One candidate can make multiple job applications
+    @OneToMany(mappedBy = "candidat", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Education> educations = new ArrayList<>();
 
-    @ManyToMany
-    @JoinTable(
-            name = "candidat_diplome",
-            joinColumns = @JoinColumn(name = "candidat_id"),
-            inverseJoinColumns = @JoinColumn(name = "diplome_id")
-    )
-    private List<Diplome> diplomes; // Candidate can have multiple diplomas
+    @OneToMany(mappedBy = "candidat", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Skill> skills = new ArrayList<>();
+
+    @OneToMany(mappedBy = "candidat", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Language> languages = new ArrayList<>();
 }
