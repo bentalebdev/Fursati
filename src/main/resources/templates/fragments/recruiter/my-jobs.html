@@ -1,393 +1,372 @@
-<!-- My Jobs Fragment -->
-<div th:fragment="my-jobs">
-  <!-- Header avec barre de recherche et filtres -->
-  <div class="card mb-4">
-    <div class="card-body">
-      <div class="row g-3">
-        <div class="col-md-4">
-          <div class="input-group">
-            <input type="text" class="form-control" placeholder="Rechercher une offre...">
-            <button class="btn btn-outline-secondary" type="button">
-              <i class="fas fa-search"></i>
-            </button>
+<!-- Fragment "Mes offres d'emploi" -->
+<div th:fragment="my-jobs" class="my-jobs-container">
+  <!-- En-tête avec filtres et recherche -->
+  <div class="search-filters-container mb-4">
+    <div class="card shadow-sm border-0">
+      <div class="card-body py-3">
+        <form th:action="@{/recruteurs/my-jobs}" method="get" class="job-filter-form">
+          <div class="row g-3 align-items-center">
+            <!-- Barre de recherche -->
+            <div class="col-md-5">
+              <div class="input-group">
+                <span class="input-group-text bg-white border-end-0">
+                  <i class="fas fa-search text-muted"></i>
+                </span>
+                <input type="text" class="form-control border-start-0" name="keyword" th:value="${currentKeyword}"
+                       placeholder="Rechercher par titre, compétence ou lieu...">
+                <button class="btn btn-primary" type="submit">
+                  <i class="fas fa-search d-md-none"></i>
+                  <span class="d-none d-md-inline">Rechercher</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Filtres et tri -->
+            <div class="col-md-7">
+              <div class="d-flex flex-wrap gap-2 justify-content-md-end">
+                <!-- Filtre de statut -->
+                <div class="filter-dropdown">
+                  <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="statusDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-filter me-1"></i>
+                    <span th:text="${currentStatus != null && !#strings.isEmpty(currentStatus) ? currentStatus : 'Statut'}">Statut</span>
+                  </button>
+                  <ul class="dropdown-menu shadow-sm" aria-labelledby="statusDropdown">
+                    <li><a class="dropdown-item" href="#" onclick="setStatusFilter('')">Toutes</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="setStatusFilter('ACTIVE')">Actives</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="setStatusFilter('DRAFT')">Brouillons</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="setStatusFilter('EXPIRED')">Expirées</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="setStatusFilter('CLOSED')">Fermées</a></li>
+                  </ul>
+                </div>
+
+                <!-- Tri -->
+                <div class="filter-dropdown">
+                  <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-sort me-1"></i>
+                    <span th:text="${currentSort == 'postedAt' ? 'Date' :
+                                   currentSort == 'views' ? 'Vues' :
+                                   currentSort == 'title' ? 'Titre' : 'Trier par'}">Trier par</span>
+                  </button>
+                  <ul class="dropdown-menu shadow-sm" aria-labelledby="sortDropdown">
+                    <li><a class="dropdown-item" href="#" onclick="setSortBy('postedAt')">Date</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="setSortBy('views')">Vues</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="setSortBy('title')">Titre</a></li>
+                  </ul>
+                </div>
+
+                <!-- Direction de tri -->
+                <div class="filter-dropdown">
+                  <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="directionDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i th:class="${currentDirection == 'asc' ? 'fas fa-sort-amount-up-alt' : 'fas fa-sort-amount-down'} + ' me-1'"></i>
+                    <span class="d-none d-md-inline" th:text="${currentDirection == 'asc' ? 'Ascendant' : 'Descendant'}">Ordre</span>
+                  </button>
+                  <ul class="dropdown-menu shadow-sm" aria-labelledby="directionDropdown">
+                    <li><a class="dropdown-item" href="#" onclick="setDirection('desc')">Descendant</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="setDirection('asc')">Ascendant</a></li>
+                  </ul>
+                </div>
+
+                <!-- Filtres avancés -->
+                <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#advancedFiltersModal">
+                  <i class="fas fa-sliders-h me-1"></i>
+                  <span class="d-none d-md-inline">Filtres</span>
+                </button>
+              </div>
+            </div>
           </div>
+
+          <!-- Champs cachés pour l'état des filtres -->
+          <input type="hidden" name="status" id="statusInput" th:value="${currentStatus}">
+          <input type="hidden" name="sortBy" id="sortByInput" th:value="${currentSort ?: 'postedAt'}">
+          <input type="hidden" name="direction" id="directionInput" th:value="${currentDirection ?: 'desc'}">
+          <input type="hidden" name="page" id="pageInput" th:value="${currentPage ?: 0}">
+          <input type="hidden" name="size" id="sizeInput" th:value="${pageSize ?: 10}">
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cartes de statistiques -->
+  <div class="stats-container">
+    <div class="row g-3 mb-4">
+      <!-- Offres actives -->
+      <div class="col-md-3 col-6">
+        <div class="stat-card active-card">
+          <div class="d-flex align-items-center">
+            <div class="stat-icon bg-primary bg-opacity-10">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-value" th:text="${activeCount}">0</h3>
+              <p class="stat-label">Offres actives</p>
+            </div>
+          </div>
+          <a th:href="@{/recruteurs/my-jobs(status='ACTIVE')}" class="stretched-link"></a>
         </div>
-        <div class="col-md-8">
-          <div class="d-flex gap-2 justify-content-md-end">
-            <select class="form-select" style="max-width: 150px;">
-              <option value="">Statut</option>
-              <option value="ACTIVE">Actives</option>
-              <option value="DRAFT">Brouillons</option>
-              <option value="EXPIRED">Expirées</option>
-              <option value="CLOSED">Fermées</option>
-            </select>
-            <select class="form-select" style="max-width: 150px;">
-              <option value="">Date</option>
-              <option value="NEWEST">Plus récentes</option>
-              <option value="OLDEST">Plus anciennes</option>
-            </select>
-            <select class="form-select" style="max-width: 150px;">
-              <option value="">Applications</option>
-              <option value="MOST">Plus de candidatures</option>
-              <option value="LEAST">Moins de candidatures</option>
-            </select>
-            <button class="btn btn-outline-secondary">
-              <i class="fas fa-sliders-h"></i>
-            </button>
+      </div>
+
+      <!-- Brouillons -->
+      <div class="col-md-3 col-6">
+        <div class="stat-card draft-card">
+          <div class="d-flex align-items-center">
+            <div class="stat-icon bg-secondary bg-opacity-10">
+              <i class="fas fa-pencil-alt"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-value" th:text="${draftCount}">0</h3>
+              <p class="stat-label">Brouillons</p>
+            </div>
+          </div>
+          <a th:href="@{/recruteurs/my-jobs(status='DRAFT')}" class="stretched-link"></a>
+        </div>
+      </div>
+
+      <!-- Expirées -->
+      <div class="col-md-3 col-6">
+        <div class="stat-card expired-card">
+          <div class="d-flex align-items-center">
+            <div class="stat-icon" style="background-color: rgba(220, 53, 69, 0.1); color: #dc3545;">
+              <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-value" th:text="${expiredCount}">0</h3>
+              <p class="stat-label">Expirées</p>
+            </div>
+          </div>
+          <a th:href="@{/recruteurs/my-jobs(status='EXPIRED')}" class="stretched-link"></a>
+        </div>
+      </div>
+
+      <!-- Fermées -->
+      <div class="col-md-3 col-6">
+        <div class="stat-card closed-card">
+          <div class="d-flex align-items-center">
+            <div class="stat-icon" style="background-color: rgba(108, 117, 125, 0.1); color: #6c757d;">
+              <i class="fas fa-lock"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-value" th:text="${closedCount}">0</h3>
+              <p class="stat-label">Fermées</p>
+            </div>
+          </div>
+          <a th:href="@{/recruteurs/my-jobs(status='CLOSED')}" class="stretched-link"></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bouton d'ajout -->
+  <div class="d-flex justify-content-end mb-4">
+    <a th:href="@{/recruteurs/post-job}" class="btn btn-primary shadow-sm">
+      <i class="fas fa-plus-circle me-2"></i>Publier une nouvelle offre
+    </a>
+  </div>
+
+  <!-- Liste des offres d'emploi -->
+  <div class="job-listings-container" th:if="${!#lists.isEmpty(offres)}">
+    <div class="mb-4" th:each="offre : ${offres}">
+      <div class="job-card shadow-sm rounded" th:classappend="${offre.status == 'ACTIVE' ? 'active-job' : (offre.status == 'EXPIRED' ? 'expired-job' : (offre.status == 'DRAFT' ? 'draft-job' : 'closed-job'))}">
+        <div class="row g-0">
+          <!-- Informations sur l'offre -->
+          <div class="col-lg-8">
+            <div class="job-info p-3">
+              <div class="d-flex flex-wrap align-items-start">
+                <!-- Badge de statut -->
+                <div class="me-3 mb-2">
+                  <span class="status-badge" th:classappend="${offre.status == 'ACTIVE' ? 'status-active' :
+                                       offre.status == 'DRAFT' ? 'status-draft' :
+                                       offre.status == 'EXPIRED' ? 'status-expired' : 'status-closed'}"
+                        th:text="${offre.status}">ACTIVE</span>
+                </div>
+
+                <div class="job-details">
+                  <!-- Titre de l'offre -->
+                  <h5 class="job-title" th:text="${offre.title}">Développeur Full Stack</h5>
+
+                  <!-- Détails principaux -->
+                  <div class="job-meta">
+                    <span th:if="${offre.location != null && !#strings.isEmpty(offre.location)}" class="job-location">
+                      <i class="fas fa-map-marker-alt"></i>
+                      <span th:text="${offre.location}">Casablanca</span>
+                    </span>
+                    <span th:if="${offre.companyName != null && !#strings.isEmpty(offre.companyName)}" class="job-company">
+                      <i class="fas fa-building"></i>
+                      <span th:text="${offre.companyName}">Tech Solutions</span>
+                    </span>
+                    <span th:if="${offre.contractType != null && !#strings.isEmpty(offre.contractType)}" class="job-contract">
+                      <i class="fas fa-briefcase"></i>
+                      <span th:text="${offre.contractType}">CDI</span>
+                    </span>
+                    <span th:if="${offre.workMode != null && !#strings.isEmpty(offre.workMode)}" class="job-mode">
+                      <i class="fas fa-laptop-house"></i>
+                      <span th:text="${offre.workMode}">Hybride</span>
+                    </span>
+                  </div>
+
+                  <!-- Tags et informations supplémentaires -->
+                  <div class="job-tags mt-2">
+                    <span class="job-tag" th:if="${offre.industry != null && !#strings.isEmpty(offre.industry)}"
+                          th:text="${offre.industry}">Informatique</span>
+                    <span class="job-tag" th:if="${offre.experienceLevel != null && !#strings.isEmpty(offre.experienceLevel)}"
+                          th:text="${offre.experienceLevel}">3-5 ans</span>
+                    <span class="job-tag salary-tag" th:if="${offre.minSalary != null || offre.maxSalary != null}">
+                      <i class="fas fa-money-bill-wave text-success"></i>
+                      <span th:text="${offre.minSalary != null ? offre.minSalary + ' DH' : ''} + ${offre.maxSalary != null ? (' - ' + offre.maxSalary + ' DH') : ''}">10000 DH - 15000 DH</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Statistiques et actions -->
+          <div class="col-lg-4 border-start-lg">
+            <div class="job-actions p-3 h-100">
+              <div class="d-flex flex-column justify-content-between h-100">
+                <!-- Statistiques -->
+                <div class="job-stats">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span class="stats-item">
+                      <i class="fas fa-eye"></i>
+                      <span class="fw-bold" th:text="${offre.views ?: 0}">145</span> vues
+                    </span>
+                    <span class="stats-item">
+                      <i class="fas fa-users"></i>
+                      <span class="fw-bold">0</span> candidats
+                    </span>
+                  </div>
+
+                  <!-- Dates -->
+                  <div class="job-dates mt-2">
+                    <div class="date-item" th:if="${offre.postedAt != null}">
+                      <i class="far fa-calendar-alt"></i> Publié le <span th:text="${#temporals.format(offre.postedAt, 'd MMMM yyyy')}">12 Avril 2023</span>
+                    </div>
+                    <div class="date-item" th:if="${offre.expiresAt != null}">
+                      <i class="far fa-clock"></i> Expire le <span th:text="${#temporals.format(offre.expiresAt, 'd MMMM yyyy')}">12 Mai 2023</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="action-menu mt-3 text-end">
+                  <button class="btn btn-outline-primary btn-sm custom-dropdown-btn" th:onclick="'toggleCustomDropdown(\'' + ${offre.id} + '\')'">
+                    <i class="fas fa-cog me-1"></i>Actions
+                  </button>
+                </div>
+
+                <!-- Options de menu personnalisées -->
+                <div th:id="'customDropdown-' + ${offre.id}" class="custom-dropdown-menu">
+                  <li><a href="javascript:void(0)" th:onclick="'window.open(\'' + @{/offres/{id}(id=${offre.id})} + '\', \'_blank\')'"><i class="fas fa-eye text-primary"></i> Voir l'offre</a></li>
+                  <li><a href="javascript:void(0)" th:onclick="'window.location.href = \'' + @{/recruteurs/edit-job/{id}(id=${offre.id})} + '\'';"><i class="fas fa-edit text-info"></i> Modifier</a></li>
+                  <li><a href="javascript:void(0)" th:onclick="'window.location.href = \'' + @{/recruteurs/applications(offreId=${offre.id})} + '\'';"><i class="fas fa-users text-success"></i> Voir les candidatures</a></li>
+                  <li><a href="javascript:void(0)" th:onclick="'shareJob(\'' + ${offre.id} + '\')'"><i class="fas fa-share-alt text-warning"></i> Partager</a></li>
+                  <li><hr></li>
+
+                  <!-- Actions conditionnelles selon le statut -->
+                  <li th:if="${offre.status == 'ACTIVE'}">
+                    <a href="javascript:void(0)" th:onclick="'updateJobStatus(\'' + ${offre.id} + '\', \'CLOSED\')'">
+                      <i class="fas fa-pause-circle text-dark"></i> Suspendre
+                    </a>
+                  </li>
+                  <li th:if="${offre.status == 'DRAFT'}">
+                    <a href="javascript:void(0)" th:onclick="'updateJobStatus(\'' + ${offre.id} + '\', \'ACTIVE\')'">
+                      <i class="fas fa-paper-plane text-success"></i> Publier
+                    </a>
+                  </li>
+                  <li th:if="${offre.status == 'EXPIRED' || offre.status == 'CLOSED'}">
+                    <a href="javascript:void(0)" th:onclick="'renewJob(\'' + ${offre.id} + '\')'">
+                      <i class="fas fa-redo text-primary"></i> Republier
+                    </a>
+                  </li>
+                  <li>
+                    <a href="javascript:void(0)" th:onclick="'duplicateJob(\'' + ${offre.id} + '\')'">
+                      <i class="fas fa-clone text-info"></i> Dupliquer
+                    </a>
+                  </li>
+                  <li><hr></li>
+                  <li>
+                    <a href="javascript:void(0)" class="text-danger" th:onclick="'confirmDeleteJob(\'' + ${offre.id} + '\')'">
+                      <i class="fas fa-trash"></i> Supprimer
+                    </a>
+                  </li>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Stats et bouton d'ajout -->
-  <div class="row mb-4 align-items-center">
-    <div class="col-md-6">
-      <div class="job-stats d-flex">
-        <div class="job-stat-item me-4">
-          <span class="job-stat-number">5</span>
-          <span class="job-stat-label">Actives</span>
+  <!-- État vide - Aucune offre trouvée -->
+  <div class="empty-state-container" th:if="${#lists.isEmpty(offres)}">
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-5 text-center">
+        <div class="py-5">
+          <div class="empty-icon mb-3">
+            <i class="fas fa-briefcase fa-4x text-muted opacity-50"></i>
+          </div>
+          <h4 class="empty-title">Aucune offre d'emploi trouvée</h4>
+          <p class="text-muted mb-4" th:if="${currentKeyword != null || currentStatus != null}">
+            Aucun résultat ne correspond à vos critères de recherche. Veuillez essayer avec d'autres filtres.
+          </p>
+          <p class="text-muted mb-4" th:if="${currentKeyword == null && currentStatus == null}">
+            Vous n'avez pas encore publié d'offres d'emploi. Commencez par en créer une nouvelle.
+          </p>
+          <div class="d-flex justify-content-center gap-3">
+            <a th:href="@{/recruteurs/my-jobs}" class="btn btn-outline-secondary" th:if="${currentKeyword != null || currentStatus != null}">
+              <i class="fas fa-times-circle me-2"></i>Effacer les filtres
+            </a>
+            <a th:href="@{/recruteurs/post-job}" class="btn btn-primary">
+              <i class="fas fa-plus-circle me-2"></i>Publier une offre
+            </a>
+          </div>
         </div>
-        <div class="job-stat-item me-4">
-          <span class="job-stat-number">2</span>
-          <span class="job-stat-label">Brouillons</span>
-        </div>
-        <div class="job-stat-item me-4">
-          <span class="job-stat-number">3</span>
-          <span class="job-stat-label">Expirées</span>
-        </div>
-        <div class="job-stat-item">
-          <span class="job-stat-number">1</span>
-          <span class="job-stat-label">Fermées</span>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-6 text-md-end mt-3 mt-md-0">
-      <a th:href="@{/recruteurs/post-job}" class="btn btn-primary">
-        <i class="fas fa-plus-circle me-2"></i>Publier une nouvelle offre
-      </a>
-    </div>
-  </div>
-
-  <!-- Tableau des offres d'emploi -->
-  <div class="card">
-    <div class="card-body p-0">
-      <div class="table-responsive">
-        <table class="table job-listing-table m-0">
-          <thead>
-          <tr>
-            <th>Titre</th>
-            <th>Statut</th>
-            <th>Candidatures</th>
-            <th>Date de publication</th>
-            <th>Vues</th>
-            <th>Actions</th>
-          </tr>
-          </thead>
-          <tbody>
-          <!-- Job 1 - Active -->
-          <tr>
-            <td>
-              <div class="job-title-cell">
-                <h6 class="mb-1">Développeur Frontend</h6>
-                <div class="job-meta text-muted small">
-                  <span><i class="fas fa-map-marker-alt me-1"></i>Casablanca</span>
-                  <span class="mx-2">|</span>
-                  <span><i class="fas fa-briefcase me-1"></i>Temps plein</span>
-                </div>
-              </div>
-            </td>
-            <td>
-              <span class="badge bg-success">Active</span>
-            </td>
-            <td>
-              <strong>8</strong>
-              <div class="progress" style="height: 4px; width: 80px;">
-                <div class="progress-bar bg-primary" role="progressbar" style="width: 80%"></div>
-              </div>
-              <span class="text-muted small">8/10 consultées</span>
-            </td>
-            <td>
-              <div>12 avril 2025</div>
-              <span class="text-muted small">Expire le 12 mai 2025</span>
-            </td>
-            <td>
-              <div class="d-flex align-items-center">
-                <strong>124</strong>
-                <span class="ms-2 text-success small"><i class="fas fa-arrow-up"></i> 12%</span>
-              </div>
-            </td>
-            <td>
-              <div class="dropdown">
-                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                  Actions
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                  <li><a class="dropdown-item" th:href="@{/recruteurs/job-details}"><i class="fas fa-eye me-2"></i>Voir les détails</a></li>
-                  <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i>Modifier</a></li>
-                  <li><a class="dropdown-item" href="#"><i class="fas fa-copy me-2"></i>Dupliquer</a></li>
-                  <li><a class="dropdown-item" href="#"><i class="fas fa-pause-circle me-2"></i>Suspendre</a></li>
-                  <li><hr class="dropdown-divider"></li>
-                  <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash-alt me-2"></i>Supprimer</a></li>
-                </ul>
-              </div>
-            </td>
-          </tr>
-
-          <!-- Job 2 - Active -->
-          <tr>
-            <td>
-              <div class="job-title-cell">
-                <h6 class="mb-1">Chef de Projet</h6>
-                <div class="job-meta text-muted small">
-                  <span><i class="fas fa-map-marker-alt me-1"></i>Rabat</span>
-                  <span class="mx-2">|</span>
-                  <span><i class="fas fa-briefcase me-1"></i>Temps plein</span>
-                </div>
-              </div>
-            </td>
-            <td>
-              <span class="badge bg-success">Active</span>
-            </td>
-            <td>
-              <strong>5</strong>
-              <div class="progress" style="height: 4px; width: 80px;">
-                <div class="progress-bar bg-primary" role="progressbar" style="width: 50%"></div>
-              </div>
-              <span class="text-muted small">5/10 consultées</span>
-            </td>
-            <td>
-              <div>10 avril 2025</div>
-              <span class="text-muted small">Expire le 10 mai 2025</span>
-            </td>
-            <td>
-              <div class="d-flex align-items-center">
-                <strong>98</strong>
-                <span class="ms-2 text-success small"><i class="fas fa-arrow-up"></i> 8%</span>
-              </div>
-            </td>
-            <td>
-              <div class="dropdown">
-                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                  Actions
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                  <li><a class="dropdown-item" th:href="@{/recruteurs/job-details}"><i class="fas fa-eye me-2"></i>Voir les détails</a></li>
-                  <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i>Modifier</a></li>
-                  <li><a class="dropdown-item" href="#"><i class="fas fa-copy me-2"></i>Dupliquer</a></li>
-                  <li><a class="dropdown-item" href="#"><i class="fas fa-pause-circle me-2"></i>Suspendre</a></li>
-                  <li><hr class="dropdown-divider"></li>
-                  <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash-alt me-2"></i>Supprimer</a></li>
-                </ul>
-              </div>
-            </td>
-          </tr>
-
-          <!-- Job 3 - Active -->
-          <tr>
-            <td>
-              <div class="job-title-cell">
-                <h6 class="mb-1">UX Designer</h6>
-                <div class="job-meta text-muted small">
-                  <span><i class="fas fa-map-marker-alt me-1"></i>Marrakech</span>
-                  <span class="mx-2">|</span>
-                  <span><i class="fas fa-briefcase me-1"></i>Temps plein</span>
-                </div>
-              </div>
-            </td>
-            <td>
-              <span class="badge bg-success">Active</span>
-            </td>
-            <td>
-              <strong>3</strong>
-              <div class="progress" style="height: 4px; width: 80px;">
-                <div class="progress-bar bg-primary" role="progressbar" style="width: 30%"></div>
-              </div>
-              <span class="text-muted small">3/10 consultées</span>
-            </td>
-            <td>
-              <div>8 avril 2025</div>
-              <span class="text-muted small">Expire le 8 mai 2025</span>
-            </td>
-            <td>
-              <div class="d-flex align-items-center">
-                <strong>76</strong>
-                <span class="ms-2 text-success small"><i class="fas fa-arrow-up"></i> 5%</span>
-              </div>
-            </td>
-            <td>
-              <div class="dropdown">
-                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                  Actions
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                  <li><a class="dropdown-item" th:href="@{/recruteurs/job-details}"><i class="fas fa-eye me-2"></i>Voir les détails</a></li>
-                  <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i>Modifier</a></li>
-                  <li><a class="dropdown-item" href="#"><i class="fas fa-copy me-2"></i>Dupliquer</a></li>
-                  <li><a class="dropdown-item" href="#"><i class="fas fa-pause-circle me-2"></i>Suspendre</a></li>
-                  <li><hr class="dropdown-divider"></li>
-                  <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash-alt me-2"></i>Supprimer</a></li>
-                </ul>
-              </div>
-            </td>
-          </tr>
-
-          <!-- Job 4 - Draft -->
-          <tr class="table-light">
-            <td>
-              <div class="job-title-cell">
-                <h6 class="mb-1">Développeur Backend</h6>
-                <div class="job-meta text-muted small">
-                  <span><i class="fas fa-map-marker-alt me-1"></i>Tanger</span>
-                  <span class="mx-2">|</span>
-                  <span><i class="fas fa-briefcase me-1"></i>Temps plein</span>
-                </div>
-              </div>
-            </td>
-            <td>
-              <span class="badge bg-secondary">Brouillon</span>
-            </td>
-            <td>
-              <strong>-</strong>
-            </td>
-            <td>
-              <div>Non publié</div>
-              <span class="text-muted small">Modifié le 15 avril 2025</span>
-            </td>
-            <td>
-              <strong>-</strong>
-            </td>
-            <td>
-              <div class="dropdown">
-                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                  Actions
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                  <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i>Modifier</a></li>
-                  <li><a class="dropdown-item text-success" href="#"><i class="fas fa-paper-plane me-2"></i>Publier</a></li>
-                  <li><a class="dropdown-item" href="#"><i class="fas fa-copy me-2"></i>Dupliquer</a></li>
-                  <li><hr class="dropdown-divider"></li>
-                  <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash-alt me-2"></i>Supprimer</a></li>
-                </ul>
-              </div>
-            </td>
-          </tr>
-
-          <!-- Job 5 - Expired -->
-          <tr class="table-light">
-            <td>
-              <div class="job-title-cell">
-                <h6 class="mb-1">Analyste Marketing</h6>
-                <div class="job-meta text-muted small">
-                  <span><i class="fas fa-map-marker-alt me-1"></i>Casablanca</span>
-                  <span class="mx-2">|</span>
-                  <span><i class="fas fa-briefcase me-1"></i>Temps plein</span>
-                </div>
-              </div>
-            </td>
-            <td>
-              <span class="badge bg-danger">Expirée</span>
-            </td>
-            <td>
-              <strong>12</strong>
-              <div class="progress" style="height: 4px; width: 80px;">
-                <div class="progress-bar bg-success" role="progressbar" style="width: 100%"></div>
-              </div>
-              <span class="text-muted small">12/10 consultées</span>
-            </td>
-            <td>
-              <div>1 mars 2025</div>
-              <span class="text-muted small">Expirée le 1 avril 2025</span>
-            </td>
-            <td>
-              <div class="d-flex align-items-center">
-                <strong>195</strong>
-              </div>
-            </td>
-            <td>
-              <div class="dropdown">
-                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                  Actions
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                  <li><a class="dropdown-item" th:href="@{/recruteurs/job-details}"><i class="fas fa-eye me-2"></i>Voir les détails</a></li>
-                  <li><a class="dropdown-item" href="#"><i class="fas fa-redo me-2"></i>Republier</a></li>
-                  <li><a class="dropdown-item" href="#"><i class="fas fa-copy me-2"></i>Dupliquer</a></li>
-                  <li><hr class="dropdown-divider"></li>
-                  <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-archive me-2"></i>Archiver</a></li>
-                </ul>
-              </div>
-            </td>
-          </tr>
-
-          <!-- Job 6 - Closed -->
-          <tr class="table-light">
-            <td>
-              <div class="job-title-cell">
-                <h6 class="mb-1">Responsable Comptabilité</h6>
-                <div class="job-meta text-muted small">
-                  <span><i class="fas fa-map-marker-alt me-1"></i>Casablanca</span>
-                  <span class="mx-2">|</span>
-                  <span><i class="fas fa-briefcase me-1"></i>Temps plein</span>
-                </div>
-              </div>
-            </td>
-            <td>
-              <span class="badge bg-dark">Fermée</span>
-            </td>
-            <td>
-              <strong>15</strong>
-              <div class="progress" style="height: 4px; width: 80px;">
-                <div class="progress-bar bg-success" role="progressbar" style="width: 100%"></div>
-              </div>
-              <span class="text-muted small">15/10 consultées</span>
-            </td>
-            <td>
-              <div>15 février 2025</div>
-              <span class="text-muted small">Fermée le 10 mars 2025</span>
-            </td>
-            <td>
-              <div class="d-flex align-items-center">
-                <strong>230</strong>
-              </div>
-            </td>
-            <td>
-              <div class="dropdown">
-                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                  Actions
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                  <li><a class="dropdown-item" th:href="@{/recruteurs/job-details}"><i class="fas fa-eye me-2"></i>Voir les détails</a></li>
-                  <li><a class="dropdown-item" href="#"><i class="fas fa-redo me-2"></i>Republier</a></li>
-                  <li><a class="dropdown-item" href="#"><i class="fas fa-copy me-2"></i>Dupliquer</a></li>
-                  <li><hr class="dropdown-divider"></li>
-                  <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-archive me-2"></i>Archiver</a></li>
-                </ul>
-              </div>
-            </td>
-          </tr>
-          </tbody>
-        </table>
       </div>
     </div>
   </div>
 
   <!-- Pagination -->
-  <div class="d-flex justify-content-between align-items-center mt-4">
+  <div class="pagination-container d-flex justify-content-between align-items-center mt-4" th:if="${!#lists.isEmpty(offres) && totalPages > 1}">
     <div class="text-muted small">
-      Affichage de 1-6 sur 11 offres
+      Affichage de <span th:text="${startIndex + 1}">1</span>-<span th:text="${endIndex}">6</span> sur <span th:text="${totalOffres}">11</span> offres
     </div>
     <nav aria-label="Page navigation">
-      <ul class="pagination mb-0">
-        <li class="page-item disabled">
-          <a class="page-link" href="#" aria-label="Previous">
+      <ul class="pagination pagination-sm mb-0">
+        <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+          <a class="page-link" href="javascript:void(0)" th:onclick="'goToPage(' + (${currentPage} - 1) + ')'" aria-label="Previous">
             <span aria-hidden="true">&laquo;</span>
           </a>
         </li>
-        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-        <li class="page-item"><a class="page-link" href="#">2</a></li>
-        <li class="page-item">
-          <a class="page-link" href="#" aria-label="Next">
+        <!-- Affichage intelligent des numéros de page -->
+        <th:block th:with="maxPages=${totalPages > 5 ? 5 : totalPages},
+                          start=${currentPage - 2 < 0 ? 0 : (currentPage + 2 >= totalPages ? (totalPages - maxPages < 0 ? 0 : totalPages - maxPages) : currentPage - 2)},
+                          end=${start + maxPages > totalPages ? totalPages : start + maxPages}">
+
+          <!-- Première page si nécessaire -->
+          <li class="page-item" th:if="${start > 0}">
+            <a class="page-link" href="javascript:void(0)" th:onclick="'goToPage(0)'">1</a>
+          </li>
+          <li class="page-item disabled" th:if="${start > 1}">
+            <a class="page-link" href="javascript:void(0)">...</a>
+          </li>
+
+          <!-- Pages principales -->
+          <li class="page-item" th:each="i : ${#numbers.sequence(start, end - 1)}"
+              th:classappend="${i == currentPage ? 'active' : ''}">
+            <a class="page-link" href="javascript:void(0)" th:onclick="'goToPage(' + ${i} + ')'" th:text="${i + 1}">1</a>
+          </li>
+
+          <!-- Dernière page si nécessaire -->
+          <li class="page-item disabled" th:if="${end < totalPages - 1}">
+            <a class="page-link" href="javascript:void(0)">...</a>
+          </li>
+          <li class="page-item" th:if="${end < totalPages}">
+            <a class="page-link" href="javascript:void(0)" th:onclick="'goToPage(' + (${totalPages} - 1) + ')'" th:text="${totalPages}">Last</a>
+          </li>
+        </th:block>
+
+        <li class="page-item" th:classappend="${currentPage >= totalPages - 1 ? 'disabled' : ''}">
+          <a class="page-link" href="javascript:void(0)" th:onclick="'goToPage(' + (${currentPage} + 1) + ')'" aria-label="Next">
             <span aria-hidden="true">&raquo;</span>
           </a>
         </li>
@@ -395,47 +374,676 @@
     </nav>
   </div>
 
+  <!-- Modal pour filtres avancés -->
+  <div class="modal fade" id="advancedFiltersModal" tabindex="-1" aria-labelledby="advancedFiltersModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-light">
+          <h5 class="modal-title" id="advancedFiltersModalLabel">
+            <i class="fas fa-filter me-2"></i>Filtres avancés
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form th:action="@{/recruteurs/my-jobs}" method="get">
+          <!-- Conserver les filtres existants -->
+          <input type="hidden" name="page" value="0">
+          <input type="hidden" name="sortBy" th:value="${currentSort ?: 'postedAt'}">
+          <input type="hidden" name="direction" th:value="${currentDirection ?: 'desc'}">
+
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Type de contrat</label>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="contractType" value="CDI" id="contractTypeCDI">
+                  <label class="form-check-label" for="contractTypeCDI">CDI</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="contractType" value="CDD" id="contractTypeCDD">
+                  <label class="form-check-label" for="contractTypeCDD">CDD</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="contractType" value="Stage" id="contractTypeStage">
+                  <label class="form-check-label" for="contractTypeStage">Stage</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="contractType" value="Freelance" id="contractTypeFreelance">
+                  <label class="form-check-label" for="contractTypeFreelance">Freelance</label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Mode de travail</label>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="workMode" value="Sur site" id="workModeSurSite">
+                  <label class="form-check-label" for="workModeSurSite">Sur site</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="workMode" value="Hybride" id="workModeHybride">
+                  <label class="form-check-label" for="workModeHybride">Hybride</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="workMode" value="Télétravail" id="workModeTeletravail">
+                  <label class="form-check-label" for="workModeTeletravail">Télétravail</label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Niveau d'expérience</label>
+                <select class="form-select" name="experienceLevel">
+                  <option value="">Tous les niveaux</option>
+                  <option value="Débutant">Débutant (0-2 ans)</option>
+                  <option value="Intermédiaire">Intermédiaire (3-5 ans)</option>
+                  <option value="Confirmé">Confirmé (6-9 ans)</option>
+                  <option value="Expert">Expert (10+ ans)</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Date de publication</label>
+                <div class="row g-2">
+                  <div class="col-6">
+                    <label class="form-label small">De</label>
+                    <input type="date" class="form-control" name="dateFrom">
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label small">À</label>
+                    <input type="date" class="form-control" name="dateTo">
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Secteur d'activité</label>
+                <select class="form-select" name="industry">
+                  <option value="">Tous les secteurs</option>
+                  <option value="Informatique">Informatique</option>
+                  <option value="Finance">Finance</option>
+                  <option value="Santé">Santé</option>
+                  <option value="Education">Education</option>
+                  <option value="Marketing">Marketing</option>
+                  <option value="Commerce">Commerce</option>
+                  <option value="Industrie">Industrie</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Localisation</label>
+                <input type="text" class="form-control" name="location" placeholder="Ville ou région">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer bg-light">
+            <button type="button" class="btn btn-outline-secondary" onclick="clearAdvancedFilters()">
+              <i class="fas fa-eraser me-2"></i>Réinitialiser
+            </button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-check me-2"></i>Appliquer les filtres
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de confirmation de suppression -->
+  <div class="modal fade" id="deleteJobModal" tabindex="-1" aria-labelledby="deleteJobModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title" id="deleteJobModalLabel">
+            <i class="fas fa-exclamation-triangle me-2"></i>Confirmer la suppression
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p class="fw-bold mb-3">Êtes-vous sûr de vouloir supprimer cette offre d'emploi ?</p>
+          <p class="text-danger mb-0">Cette action est irréversible et supprimera également toutes les candidatures liées à cette offre.</p>
+        </div>
+        <div class="modal-footer">
+          <input type="hidden" id="deleteJobId" value="">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-danger" onclick="deleteJob()">
+            <i class="fas fa-trash me-2"></i>Supprimer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Style personnalisé pour le fragment -->
   <style>
-    /* Styles spécifiques pour la page mes offres */
-    .job-stat-item {
+    /* Style général */
+    .my-jobs-container {
+      font-family: var(--bs-font-sans-serif);
+    }
+
+    /* Cartes de statistiques */
+    .stat-card {
+      display: block;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      box-shadow: 0 .125rem .25rem rgba(0,0,0,.075);
+      transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+      position: relative;
+      overflow: hidden;
+      height: 100%;
+      border-left: 4px solid;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15);
+    }
+
+    .active-card { border-left-color: var(--bs-primary); }
+    .draft-card { border-left-color: var(--bs-secondary); }
+    .expired-card { border-left-color: #dc3545; }
+    .closed-card { border-left-color: #6c757d; }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      margin-right: 1rem;
+    }
+
+    .stat-content {
+      flex: 1;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0;
+      line-height: 1.2;
+    }
+
+    .stat-label {
+      font-size: 0.875rem;
+      color: var(--bs-secondary);
+      margin-bottom: 0;
+    }
+
+    /* Cartes d'offres d'emploi */
+    .job-card {
+      transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+      border: 1px solid rgba(0,0,0,.125);
+      overflow: visible;
+    }
+
+    .job-card:hover {
+      box-shadow: 0 0.5rem 1rem rgba(0,0,0,.1) !important;
+      transform: translateY(-2px);
+    }
+
+    /* Active job styling */
+    .active-job {
+      border-left: 4px solid #28a745;
+    }
+
+    /* Expired job styling */
+    .expired-job {
+      border-left: 4px solid #dc3545;
+    }
+
+    /* Draft job styling */
+    .draft-job {
+      border-left: 4px solid #6c757d;
+    }
+
+    /* Closed job styling */
+    .closed-job {
+      border-left: 4px solid #343a40;
+    }
+
+    /* Status badges */
+    .status-badge {
+      display: inline-block;
+      padding: 0.35em 0.65em;
+      font-size: 0.75em;
+      font-weight: 700;
+      line-height: 1;
+      color: #fff;
+      text-align: center;
+      white-space: nowrap;
+      vertical-align: baseline;
+      border-radius: 50rem;
+    }
+
+    .status-active {
+      background-color: #28a745;
+    }
+
+    .status-draft {
+      background-color: #6c757d;
+    }
+
+    .status-expired {
+      background-color: #dc3545;
+    }
+
+    .status-closed {
+      background-color: #343a40;
+    }
+
+    /* Job info styling */
+    .job-title {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #212529;
+    }
+
+    .job-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+      color: #6c757d;
+    }
+
+    .job-meta i {
+      margin-right: 0.25rem;
+      width: 1rem;
       text-align: center;
     }
 
-    .job-stat-number {
-      display: block;
-      font-size: 1.5rem;
+    .job-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .job-tag {
+      display: inline-block;
+      padding: 0.25em 0.6em;
+      font-size: 0.75em;
+      font-weight: 500;
+      color: #212529;
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 0.25rem;
+    }
+
+    .salary-tag {
+      color: #198754;
+      background-color: rgba(25, 135, 84, 0.1);
+      border-color: rgba(25, 135, 84, 0.2);
+    }
+
+    /* Job actions styling */
+    .job-actions {
+      background-color: #f8f9fa;
+    }
+
+    .job-stats {
+      font-size: 0.875rem;
+      color: #6c757d;
+    }
+
+    .stats-item i {
+      margin-right: 0.25rem;
+      color: #6c757d;
+    }
+
+    .job-dates {
+      font-size: 0.75rem;
+      color: #6c757d;
+    }
+
+    .date-item {
+      margin-bottom: 0.25rem;
+    }
+
+    .date-item i {
+      margin-right: 0.25rem;
+    }
+
+    /* Empty state styling */
+    .empty-icon {
+      margin-bottom: 1.5rem;
+    }
+
+    .empty-title {
       font-weight: 600;
-      color: var(--text-dark);
+      margin-bottom: 1rem;
     }
 
-    .job-stat-label {
+    /* Styles for the custom dropdown */
+    .custom-dropdown-menu {
+      display: none;
+      position: absolute;
+      background-color: white;
+      min-width: 220px;
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
+      border-radius: 0.25rem;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      z-index: 9999;
+      list-style: none;
+      padding: 0.5rem 0;
+      margin: 0;
+      overflow: auto;
+      max-height: 80vh;
+    }
+
+    .custom-dropdown-menu.show {
       display: block;
-      font-size: 0.85rem;
-      color: var(--text-gray);
     }
 
-    .job-listing-table th {
-      font-weight: 600;
-      color: var(--text-dark);
-      padding: 1rem;
+    .custom-dropdown-menu li {
+      padding: 0;
     }
 
-    .job-listing-table td {
-      padding: 1rem;
-      vertical-align: middle;
+    .custom-dropdown-menu a {
+      display: block;
+      padding: 0.5rem 1rem;
+      color: #212529;
+      text-decoration: none;
     }
 
-    .job-listing-table tr {
-      border-left: 3px solid transparent;
+    .custom-dropdown-menu a:hover {
+      background-color: #f8f9fa;
     }
 
-    .job-listing-table tr:hover {
-      background-color: rgba(0, 0, 0, 0.02);
-      border-left: 3px solid var(--primary-color);
+    .custom-dropdown-menu hr {
+      margin: 0.5rem 0;
+      border-top: 1px solid #dee2e6;
     }
 
-    .job-meta span {
-      font-size: 0.8rem;
+    .custom-dropdown-menu .text-danger {
+      color: #dc3545 !important;
+    }
+
+    .custom-dropdown-menu i {
+      width: 1rem;
+      text-align: center;
+      margin-right: 0.5rem;
+    }
+
+    /* Responsive borders */
+    @media (min-width: 992px) {
+      .border-start-lg {
+        border-left: 1px solid #dee2e6 !important;
+      }
+    }
+
+    @media (max-width: 991.98px) {
+      .job-actions {
+        border-top: 1px solid #dee2e6;
+      }
     }
   </style>
+
+  <script th:inline="javascript">
+    // Functions for filtering and pagination
+    function setStatusFilter(status) {
+      document.getElementById('statusInput').value = status;
+      document.getElementById('pageInput').value = 0; // Reset to first page
+      document.querySelector('.job-filter-form').submit();
+    }
+
+    function setSortBy(sortBy) {
+      document.getElementById('sortByInput').value = sortBy;
+      document.getElementById('pageInput').value = 0; // Reset to first page
+      document.querySelector('.job-filter-form').submit();
+    }
+
+    function setDirection(direction) {
+      document.getElementById('directionInput').value = direction;
+      document.querySelector('.job-filter-form').submit();
+    }
+
+    function goToPage(page) {
+      document.getElementById('pageInput').value = page;
+      document.querySelector('.job-filter-form').submit();
+    }
+
+    function clearAdvancedFilters() {
+      // Clear all inputs in the advanced filters modal
+      const modal = document.getElementById('advancedFiltersModal');
+      const inputs = modal.querySelectorAll('input:not([type="hidden"])');
+      const selects = modal.querySelectorAll('select');
+
+      inputs.forEach(input => {
+        if (input.type === 'checkbox') {
+          input.checked = false;
+        } else {
+          input.value = '';
+        }
+      });
+
+      selects.forEach(select => {
+        select.value = '';
+      });
+    }
+
+    // Custom dropdown menu functionality
+    function toggleCustomDropdown(jobId) {
+      const event = window.event; // Capture the event
+      if (!event) return;
+
+      // Get the clicked button
+      const button = event.target.closest('.custom-dropdown-btn');
+      if (!button) return;
+
+      // Get the dropdown
+      const dropdown = document.getElementById('customDropdown-' + jobId);
+      if (!dropdown) return;
+
+      // First, close all open dropdowns
+      const allDropdowns = document.querySelectorAll('.custom-dropdown-menu');
+      allDropdowns.forEach(menu => {
+        if (menu.id !== 'customDropdown-' + jobId) {
+          menu.classList.remove('show');
+        }
+      });
+
+      // Toggle the current dropdown
+      dropdown.classList.toggle('show');
+
+      if (dropdown.classList.contains('show')) {
+        // Position the dropdown properly
+        positionDropdown(dropdown, button);
+      }
+    }
+
+    function positionDropdown(dropdown, button) {
+      // Make sure the dropdown is in the body
+      if (dropdown.parentNode !== document.body) {
+        document.body.appendChild(dropdown);
+      }
+
+      // Get button position
+      const buttonRect = button.getBoundingClientRect();
+
+      // Calculate positioning
+      const dropdownWidth = 220; // Set a fixed width
+
+      // Position right-aligned to the button
+      dropdown.style.position = 'absolute';
+      dropdown.style.width = dropdownWidth + 'px';
+      dropdown.style.top = (buttonRect.bottom + window.scrollY) + 'px';
+      dropdown.style.left = (buttonRect.right - dropdownWidth + window.scrollX) + 'px';
+
+      // Check if the dropdown is out of view
+      const dropdownRect = dropdown.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+
+      // If dropdown extends past right edge of viewport
+      if (dropdownRect.right > viewportWidth) {
+        dropdown.style.left = (viewportWidth - dropdownWidth - 10 + window.scrollX) + 'px';
+      }
+    }
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(event) {
+      // Check if the click target is not a dropdown trigger or inside a dropdown
+      if (!event.target.closest('.custom-dropdown-btn') && !event.target.closest('.custom-dropdown-menu')) {
+        const dropdowns = document.querySelectorAll('.custom-dropdown-menu');
+        dropdowns.forEach(dropdown => {
+          dropdown.classList.remove('show');
+        });
+      }
+    });
+
+    // Initialize dropdowns on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      // Prepare all dropdowns
+      const dropdowns = document.querySelectorAll('.custom-dropdown-menu');
+      dropdowns.forEach(dropdown => {
+        // Hide the dropdown initially
+        dropdown.classList.remove('show');
+
+        // Move to body for absolute positioning
+        if (dropdown.parentNode !== document.body) {
+          document.body.appendChild(dropdown);
+        }
+      });
+    });
+
+    // Job actions
+    function updateJobStatus(jobId, newStatus) {
+      // Close any open dropdowns first
+      document.querySelectorAll('.custom-dropdown-menu').forEach(el => {
+        el.classList.remove('show');
+      });
+
+      if (!jobId) return;
+
+      fetch(`/api/offres/${jobId}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus })
+      })
+              .then(response => {
+                if (response.ok) {
+                  window.location.reload();
+                } else {
+                  alert('Une erreur s\'est produite lors de la mise à jour du statut.');
+                }
+              })
+              .catch(error => {
+                console.error('Error:', error);
+                alert('Une erreur s\'est produite. Veuillez réessayer.');
+              });
+    }
+
+    function renewJob(jobId) {
+      // Close any open dropdowns first
+      document.querySelectorAll('.custom-dropdown-menu').forEach(el => {
+        el.classList.remove('show');
+      });
+
+      if (!jobId) return;
+
+      fetch(`/api/offres/${jobId}/renew`, {
+        method: 'POST'
+      })
+              .then(response => {
+                if (response.ok) {
+                  window.location.reload();
+                } else {
+                  alert('Une erreur s\'est produite lors du renouvellement de l\'offre.');
+                }
+              })
+              .catch(error => {
+                console.error('Error:', error);
+                alert('Une erreur s\'est produite. Veuillez réessayer.');
+              });
+    }
+
+    function duplicateJob(jobId) {
+      // Close any open dropdowns first
+      document.querySelectorAll('.custom-dropdown-menu').forEach(el => {
+        el.classList.remove('show');
+      });
+
+      if (!jobId) return;
+      window.location.href = `/recruteurs/duplicate-job/${jobId}`;
+    }
+
+    function shareJob(jobId) {
+      // Close any open dropdowns first
+      document.querySelectorAll('.custom-dropdown-menu').forEach(el => {
+        el.classList.remove('show');
+      });
+
+      if (!jobId) return;
+
+      // Get the job URL
+      const jobUrl = window.location.origin + `/offres/${jobId}`;
+
+      // Try to use the Clipboard API first (more modern)
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(jobUrl)
+                .then(() => {
+                  alert('URL de l\'offre copiée dans le presse-papier: ' + jobUrl);
+                })
+                .catch(err => {
+                  // Fallback to the old method if Clipboard API fails
+                  fallbackCopyTextToClipboard(jobUrl);
+                });
+      } else {
+        // Fallback for older browsers
+        fallbackCopyTextToClipboard(jobUrl);
+      }
+    }
+
+    function fallbackCopyTextToClipboard(text) {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+
+      // Make the textarea out of viewport
+      textArea.style.position = "fixed";
+      textArea.style.left = "-999999px";
+      textArea.style.top = "-999999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      try {
+        document.execCommand('copy');
+        alert('URL de l\'offre copiée dans le presse-papier: ' + text);
+      } catch (err) {
+        console.error('Fallback: Erreur lors de la copie', err);
+        alert('Impossible de copier l\'URL: ' + text);
+      }
+
+      document.body.removeChild(textArea);
+    }
+
+    function confirmDeleteJob(jobId) {
+      // Close any open dropdowns first
+      document.querySelectorAll('.custom-dropdown-menu').forEach(el => {
+        el.classList.remove('show');
+      });
+
+      if (!jobId) return;
+      document.getElementById('deleteJobId').value = jobId;
+      new bootstrap.Modal(document.getElementById('deleteJobModal')).show();
+    }
+
+    function deleteJob() {
+      const jobId = document.getElementById('deleteJobId').value;
+      if (!jobId) return;
+
+      fetch(`/api/offres/${jobId}`, {
+        method: 'DELETE'
+      })
+              .then(response => {
+                if (response.ok) {
+                  window.location.reload();
+                } else {
+                  alert('Une erreur s\'est produite lors de la suppression de l\'offre.');
+                }
+              })
+              .catch(error => {
+                console.error('Error:', error);
+                alert('Une erreur s\'est produite. Veuillez réessayer.');
+              });
+    }
+  </script>
 </div>

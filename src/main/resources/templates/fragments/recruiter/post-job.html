@@ -1,5 +1,8 @@
 <!-- Post Job Fragment - Adapted for Offre Entity -->
 <div th:fragment="post-job">
+  <!-- Add toastr CSS after existing styles -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
   <!-- Form container -->
   <div class="card">
     <div class="card-body">
@@ -492,7 +495,30 @@
   </style>
 
   <!-- JavaScript pour la gestion des étapes et des champs dynamiques -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
   <script th:inline="javascript">
+    // Configure toastr
+    toastr.options = {
+      "closeButton": true,
+      "progressBar": true,
+      "positionClass": "toast-top-right",
+      "timeOut": "5000"
+    };
+
+    // Check for success message from server
+    document.addEventListener('DOMContentLoaded', function() {
+      const successMessage = /*[[${successMessage}]]*/ null;
+      const errorMessage = /*[[${errorMessage}]]*/ null;
+      
+      if (successMessage) {
+        toastr.success(successMessage, 'Succès!');
+      }
+      if (errorMessage) {
+        toastr.error(errorMessage, 'Erreur!');
+      }
+    });
+
     document.addEventListener('DOMContentLoaded', function() {
       // Gestion des étapes du formulaire
       const nextButtons = document.querySelectorAll('.next-step');
@@ -903,6 +929,9 @@
             expiry.setDate(expiry.getDate() + 30);
             document.getElementById('expiresAt').value = expiry.toISOString().slice(0, 16);
           }
+
+          // Show loading toast
+          const loadingToast = toastr.info('Enregistrement de l\'offre en cours...', 'Patientez');
 
           // Soumettre le formulaire
           this.submit();

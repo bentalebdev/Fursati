@@ -26,8 +26,6 @@ public class OffreController {
     @Autowired
     private RecruteurService recruteurService;
 
-
-
     @PostMapping("/create")
     public String createOffre(@ModelAttribute Offre offre,
                               @RequestParam(required = false) String responsibilitiesStr,
@@ -98,7 +96,7 @@ public class OffreController {
 
             // Add success message
             redirectAttributes.addFlashAttribute("successMessage", "L'offre a été publiée avec succès.");
-            return "redirect:/offres";
+            return "redirect:/recruteurs/post-job"; // Redirect back to the post-job page
 
         } catch (Exception e) {
             System.err.println("DEBUG: EXCEPTION TYPE: " + e.getClass().getName());
@@ -111,4 +109,13 @@ public class OffreController {
             return "redirect:/recruteurs/post-job";
         }
     }
+
+    @GetMapping("/recruiter/{id}")
+    public String getRecruiterOffres(@PathVariable Long id, Model model) {
+        List<Offre> offres = offreService.findOffresByRecruteurIdRecruteur(id);
+        model.addAttribute("offres", offres);
+        return "fragments/recruiter/my-jobs :: my-jobs";
+    }
+
+    
 }
