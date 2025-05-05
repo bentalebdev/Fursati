@@ -1,11 +1,12 @@
 package com.ismagi.Fursati.dto;
 
 import lombok.Data;
+import java.util.List;
 
 @Data
 public class LanguageDTO {
     private Long id;
     private String name;
-    private String proficiency;
-    private Integer proficiencyLevel;
+    private String level;
 }
+

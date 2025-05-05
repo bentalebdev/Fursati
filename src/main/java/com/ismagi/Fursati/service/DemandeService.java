@@ -27,4 +27,27 @@ public class DemandeService {
     public void deleteDemande(Long id) {
         demandeRepository.deleteById(id);
     }
+    public List<Demande> getDemandesByCandidatId(Long candidatId) {
+        return demandeRepository.findByCandidatId(candidatId);
+    }
+
+    public List<Demande> getDemandesByCandidatIdSortedByDate(Long candidatId) {
+        return demandeRepository.findByCandidatIdOrderByDateDemandeDesc(candidatId);
+    }
+
+    public List<Demande> getDemandesByOffreId(Long offreId) {
+        return demandeRepository.findByOffreId(offreId);
+    }
+
+    public Demande getDemandeByOffreAndCandidat(Long offreId, Long candidatId) {
+        return demandeRepository.findByCandidatIdAndOffreId(candidatId, offreId);
+    }
+
+    public List<Demande> getDemandesByCandidatAndEtat(Long candidatId, String etat) {
+        return demandeRepository.findByCandidatIdAndEtat(candidatId, etat);
+    }
+
+    public boolean hasAlreadyApplied(Long candidatId, Long offreId) {
+        return demandeRepository.findByCandidatIdAndOffreId(candidatId, offreId) != null;
+    }
 }

@@ -11,8 +11,7 @@ public class Language {
     private Long id;
 
     private String name;
-    private String proficiency;
-    private Integer proficiencyLevel; // 0-100
+    private String level; // "Débutant", "Intermédiaire", "Avancé", "Courant", "Maternelle"
 
     @ManyToOne
     @JoinColumn(name = "candidat_id")

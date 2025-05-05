@@ -2,9 +2,11 @@ package com.ismagi.Fursati.controller;
 
 import com.ismagi.Fursati.dto.*;
 import com.ismagi.Fursati.entity.Candidat;
+import com.ismagi.Fursati.entity.Demande;
 import com.ismagi.Fursati.entity.Offre;
 import com.ismagi.Fursati.service.CandidatProfileService;
 import com.ismagi.Fursati.service.CandidatService;
+import com.ismagi.Fursati.service.DemandeService;
 import com.ismagi.Fursati.service.OffreService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -24,10 +26,10 @@ public class CandidatController {
     private CandidatService candidatService;
     @Autowired
     private CandidatProfileService candidatProfileService;
-
-
     @Autowired
     private OffreService offreService;
+    @Autowired
+    private DemandeService demandeService;
 
     // API endpoints
     @GetMapping("/api")
@@ -115,8 +117,23 @@ public class CandidatController {
                 similarOffers = new ArrayList<>();
             }
 
+            // Vérifier si le candidat a déjà postulé à cette offre
+            boolean hasApplied = false;
+            Long candidatId = 1L; // À remplacer par le candidat connecté
+            List<Demande> demandes = demandeService.getAllDemandes();
+            if (demandes != null && !demandes.isEmpty() && offre != null) {
+                hasApplied = demandes.stream()
+                        .anyMatch(d -> d.getCandidat() != null &&
+                                d.getCandidat().getId() != null &&
+                                d.getCandidat().getId().equals(candidatId) &&
+                                d.getOffre() != null &&
+                                d.getOffre().getId() != null &&
+                                d.getOffre().getId().equals(offre.getId()));
+            }
+
             model.addAttribute("offre", offre);
             model.addAttribute("similarOffers", similarOffers);
+            model.addAttribute("hasApplied", hasApplied);
             model.addAttribute("activeTab", "jobsdetails");
             return "candidateboard";
         } catch (Exception e) {
@@ -133,6 +150,21 @@ public class CandidatController {
     public String applications(Model model) {
         logger.info("Loading applications page...");
 
+        // Récupérer les demandes du candidat connecté
+        Long candidatId = 1L; // À remplacer par le candidat connecté
+        List<Demande> demandes = demandeService.getAllDemandes();
+
+        // Filtrer pour ne montrer que les demandes du candidat connecté
+        List<Demande> candidatDemandes = new ArrayList<>();
+        if (demandes != null) {
+            candidatDemandes = demandes.stream()
+                    .filter(d -> d.getCandidat() != null &&
+                            d.getCandidat().getId() != null &&
+                            d.getCandidat().getId().equals(candidatId))
+                    .toList();
+        }
+
+        model.addAttribute("demandes", candidatDemandes);
         model.addAttribute("activeTab", "applications");
 
         // Provide a default Offre object to avoid null pointer exceptions in the view
@@ -197,10 +229,27 @@ public class CandidatController {
         candidatProfileService.deleteEducation(educationId);
         return "redirect:/candidats/profile";
     }
+    // Add these methods to your existing CandidatController class
 
-    @PostMapping("/profile/skills-languages")
-    public String updateSkillsAndLanguages(@ModelAttribute SkillsLanguagesDTO dto) {
-        candidatProfileService.updateSkillsAndLanguages(1L, dto);
+    @PostMapping("/profile/language")
+    public String updateLanguage(@ModelAttribute LanguageListDTO languageListDTO) {
+        // Add debug logging
+        logger.info("Received language update request");
+        if (languageListDTO != null && languageListDTO.getLanguages() != null && !languageListDTO.getLanguages().isEmpty()) {
+            LanguageDTO lang = languageListDTO.getLanguages().get(0);
+            logger.info("Language data: ID=" + lang.getId() + ", Name=" + lang.getName() + ", Level=" + lang.getLevel());
+        } else {
+            logger.warning("No language data received");
+        }
+
+        // Process the update
+        candidatProfileService.updateLanguages(1L, languageListDTO);
+        return "redirect:/candidats/profile";
+    }
+
+    @PostMapping("/profile/language/delete")
+    public String deleteLanguage(@RequestParam Long languageId) {
+        candidatProfileService.deleteLanguage(languageId);
         return "redirect:/candidats/profile";
     }
 

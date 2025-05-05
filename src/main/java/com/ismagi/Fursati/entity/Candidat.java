@@ -35,8 +35,6 @@ public class Candidat {
     private List<Education> educations = new ArrayList<>();
 
     @OneToMany(mappedBy = "candidat", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Skill> skills = new ArrayList<>();
-
-    @OneToMany(mappedBy = "candidat", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Language> languages = new ArrayList<>();
+
 }

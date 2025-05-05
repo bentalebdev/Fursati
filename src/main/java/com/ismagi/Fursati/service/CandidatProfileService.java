@@ -7,10 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 @Service
 public class CandidatProfileService {
+    private static final Logger logger = Logger.getLogger(CandidatProfileService.class.getName());
+
 
     @Autowired
     private CandidatRepository candidatRepository;
@@ -31,7 +35,6 @@ public class CandidatProfileService {
         return candidatRepository.findById(1L)
                 .orElseThrow(() -> new RuntimeException("Candidat not found with id: " + id));
     }
-
 
 
     @Transactional
@@ -148,36 +151,50 @@ public class CandidatProfileService {
     public void deleteEducation(Long educationId) {
         educationRepository.deleteById(educationId);
     }
-
     @Transactional
-    public Candidat updateSkillsAndLanguages(Long id, SkillsLanguagesDTO skillsLanguagesDTO) {
-        Candidat candidat = getCandidatById(id);
+    public void updateLanguages(Long candidatId, LanguageListDTO languageListDTO) {
+        logger.info("Updating language for candidate ID: " + candidatId);
 
-        if (skillsLanguagesDTO.getSkills() != null) {
-            candidat.getSkills().clear();
+        Candidat candidat = candidatRepository.findById(candidatId)
+                .orElseThrow(() -> new RuntimeException("Candidat not found with id: " + candidatId));
 
-            for (SkillDTO skillDTO : skillsLanguagesDTO.getSkills()) {
-                Skill skill = new Skill();
-                skill.setName(skillDTO.getName());
-                skill.setProficiency(skillDTO.getProficiency());
-                skill.setCandidat(candidat);
-                candidat.getSkills().add(skill);
-            }
-        }
+        if (languageListDTO.getLanguages() != null && !languageListDTO.getLanguages().isEmpty()) {
+            LanguageDTO languageDTO = languageListDTO.getLanguages().get(0);
+            logger.info("Processing language: " + languageDTO);
 
-        if (skillsLanguagesDTO.getLanguages() != null) {
-            candidat.getLanguages().clear();
+            if (languageDTO.getId() != null && languageDTO.getId() > 0) {
+                // Update existing language
+                logger.info("Updating existing language with ID: " + languageDTO.getId());
 
-            for (LanguageDTO langDTO : skillsLanguagesDTO.getLanguages()) {
+                Language language = languageRepository.findById(languageDTO.getId())
+                        .orElseThrow(() -> new RuntimeException("Language not found with id: " + languageDTO.getId()));
+
+                language.setName(languageDTO.getName());
+                language.setLevel(languageDTO.getLevel());
+
+                languageRepository.save(language);
+                logger.info("Language updated successfully");
+            } else {
+                // Add new language
+                logger.info("Adding new language");
+
                 Language language = new Language();
-                language.setName(langDTO.getName());
-                language.setProficiency(langDTO.getProficiency());
-                language.setProficiencyLevel(langDTO.getProficiencyLevel());
+                language.setName(languageDTO.getName());
+                language.setLevel(languageDTO.getLevel());
                 language.setCandidat(candidat);
-                candidat.getLanguages().add(language);
-            }
-        }
 
-        return candidatRepository.save(candidat);
+                candidat.getLanguages().add(language);
+                candidatRepository.save(candidat);
+                logger.info("New language added successfully");
+            }
+        } else {
+            logger.warning("No language data provided");
+        }
     }
+
+    public void deleteLanguage(Long languageId) {
+        languageRepository.deleteById(languageId);
+    }
+
+
 }
