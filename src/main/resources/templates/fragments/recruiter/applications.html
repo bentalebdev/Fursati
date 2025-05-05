@@ -9,7 +9,7 @@
                         <i class="fas fa-file-alt"></i>
                     </div>
                     <div class="stats-card-content">
-                        <h5 class="stats-card-title">18</h5>
+                        <h5 class="stats-card-title" th:text="${totalDemandes ?: 0}">0</h5>
                         <p class="stats-card-text">Total des candidatures</p>
                     </div>
                 </div>
@@ -22,7 +22,7 @@
                         <i class="fas fa-check-circle"></i>
                     </div>
                     <div class="stats-card-content">
-                        <h5 class="stats-card-title">7</h5>
+                        <h5 class="stats-card-title" th:text="${nouveauCount ?: 0}">0</h5>
                         <p class="stats-card-text">Nouvelles candidatures</p>
                     </div>
                 </div>
@@ -35,7 +35,7 @@
                         <i class="fas fa-clock"></i>
                     </div>
                     <div class="stats-card-content">
-                        <h5 class="stats-card-title">8</h5>
+                        <h5 class="stats-card-title" th:text="${enCoursCount ?: 0}">0</h5>
                         <p class="stats-card-text">En cours d'évaluation</p>
                     </div>
                 </div>
@@ -48,7 +48,7 @@
                         <i class="fas fa-times-circle"></i>
                     </div>
                     <div class="stats-card-content">
-                        <h5 class="stats-card-title">3</h5>
+                        <h5 class="stats-card-title" th:text="${refuseCount ?: 0}">0</h5>
                         <p class="stats-card-text">Refusées</p>
                     </div>
                 </div>
@@ -62,35 +62,37 @@
             <div class="row align-items-center">
                 <div class="col-md-8 mb-3 mb-md-0">
                     <div class="d-flex flex-wrap gap-2">
-                        <select class="form-select form-select-sm">
-                            <option selected>Toutes les offres</option>
-                            <option>Développeur Full-Stack</option>
-                            <option>Designer UX/UI</option>
-                            <option>Chef de Projet Digital</option>
-                            <option>Ingénieur DevOps</option>
-                            <option>Responsable Marketing</option>
+                        <select class="form-select form-select-sm" id="offreFilter" name="offreId">
+                            <option value="" selected>Toutes les offres</option>
+                            <option th:each="offre : ${offres}"
+                                    th:value="${offre.id}"
+                                    th:text="${offre.title}"
+                                    th:selected="${filteredOffreId != null && filteredOffreId == offre.id}">
+                                Titre de l'offre
+                            </option>
                         </select>
-                        <select class="form-select form-select-sm">
-                            <option selected>Tous les statuts</option>
-                            <option>Nouveau</option>
-                            <option>En cours d'évaluation</option>
-                            <option>Entretien planifié</option>
-                            <option>Accepté</option>
-                            <option>Refusé</option>
+                        <select class="form-select form-select-sm" id="statusFilter" name="status">
+                            <option value="" selected>Tous les statuts</option>
+                            <option value="PENDING">Nouveau</option>
+                            <option value="REVIEWED">En cours d'évaluation</option>
+                            <option value="INTERVIEW">Entretien planifié</option>
+                            <option value="ACCEPTED">Accepté</option>
+                            <option value="REJECTED">Refusé</option>
                         </select>
-                        <select class="form-select form-select-sm">
-                            <option selected>Toutes les dates</option>
-                            <option>Aujourd'hui</option>
-                            <option>Cette semaine</option>
-                            <option>Ce mois</option>
-                            <option>Les 3 derniers mois</option>
+                        <select class="form-select form-select-sm" id="dateFilter" name="dateRange">
+                            <option value="" selected>Toutes les dates</option>
+                            <option value="today">Aujourd'hui</option>
+                            <option value="week">Cette semaine</option>
+                            <option value="month">Ce mois</option>
+                            <option value="quarter">Les 3 derniers mois</option>
                         </select>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="input-group">
-                        <input type="text" class="form-control form-control-sm" placeholder="Rechercher un candidat...">
-                        <button class="btn btn-sm btn-primary" type="button">
+                        <input type="text" class="form-control form-control-sm" id="searchInput"
+                               placeholder="Rechercher un candidat...">
+                        <button class="btn btn-sm btn-primary" type="button" id="searchBtn">
                             <i class="fas fa-search"></i>
                         </button>
                     </div>
@@ -120,221 +122,99 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <!-- Row 1 -->
-                    <tr>
+                    <!-- Dynamic rows from database -->
+                    <tr th:each="demande : ${demandes}" th:if="${demandes != null && !demandes.isEmpty()}">
                         <td>
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox">
+                                <input class="form-check-input" type="checkbox" th:value="${demande.idDemande}">
                             </div>
                         </td>
                         <td>
                             <div class="d-flex align-items-center">
                                 <div class="avatar me-2">
-                                    <span>AM</span>
+                                    <span th:text="${#strings.substring(demande.candidat.firstName,0,1) + #strings.substring(demande.candidat.lastName,0,1)}">XY</span>
                                 </div>
                                 <div>
-                                    <h6 class="mb-0">Ahmed Moussaoui</h6>
-                                    <small class="text-muted">ahmed.m@example.com</small>
+                                    <h6 class="mb-0" th:text="${demande.candidat.firstName + ' ' + demande.candidat.lastName}">Nom Prénom</h6>
+                                    <small class="text-muted" th:text="${demande.candidat.email}">email@example.com</small>
                                 </div>
                             </div>
                         </td>
-                        <td>Développeur Full-Stack</td>
-                        <td>15 avril 2025</td>
+                        <td th:text="${demande.offre.title}">Titre du poste</td>
+                        <td th:text="${#dates.format(demande.dateDemande, 'dd MMMM yyyy')}">Date</td>
                         <td>
+                            <!-- Calculate match percentage based on skills -->
                             <div class="progress" style="height: 6px;">
-                                <div class="progress-bar bg-success" style="width: 85%"></div>
+                                <div class="progress-bar"
+                                     th:classappend="${matchPercentages.get(demande.idDemande) >= 70 ? 'bg-success' : (matchPercentages.get(demande.idDemande) >= 50 ? 'bg-warning' : 'bg-danger')}"
+                                     th:style="'width: ' + ${matchPercentages.get(demande.idDemande)} + '%'"></div>
                             </div>
-                            <small class="text-muted">85%</small>
+                            <small class="text-muted" th:text="${matchPercentages.get(demande.idDemande) + '%'}">0%</small>
                         </td>
-                        <td><span class="badge bg-success">Nouveau</span></td>
+                        <td>
+                            <span class="badge"
+                                  th:classappend="${demande.etat == 'PENDING' ? 'bg-success' :
+                                                 (demande.etat == 'REVIEWED' ? 'bg-warning' :
+                                                 (demande.etat == 'INTERVIEW' ? 'bg-info' :
+                                                 (demande.etat == 'ACCEPTED' ? 'bg-primary' : 'bg-danger')))}"
+                                  th:text="${demande.etat == 'PENDING' ? 'Nouveau' : (demande.etat == 'REVIEWED' ? 'En cours d''évaluation' : (demande.etat == 'INTERVIEW' ? 'Entretien planifié' : (demande.etat == 'ACCEPTED' ? 'Accepté' : 'Refusé')))}">
+                                Status
+                            </span>
+                        </td>
                         <td>
                             <div class="dropdown">
                                 <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
                                     Actions
                                 </button>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i>Voir détails</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="fas fa-envelope me-2"></i>Contacter</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="fas fa-calendar me-2"></i>Planifier entretien</a></li>
+                                    <li><a class="dropdown-item" th:href="@{/demandes/{id}(id=${demande.idDemande})}"><i class="fas fa-eye me-2"></i>Voir détails</a></li>
+                                    <li><a class="dropdown-item" href="#" th:onclick="'contactCandidat(' + ${demande.candidat.id} + ')'"><i class="fas fa-envelope me-2"></i>Contacter</a></li>
+
+                                    <!-- Conditional menu items based on status -->
+                                    <li th:if="${demande.etat != 'INTERVIEW' && demande.etat != 'ACCEPTED' && demande.etat != 'REJECTED'}">
+                                        <a class="dropdown-item" href="#" th:onclick="'planifierEntretien(' + ${demande.idDemande} + ')'">
+                                            <i class="fas fa-calendar me-2"></i>Planifier entretien
+                                        </a>
+                                    </li>
+                                    <li th:if="${demande.etat == 'INTERVIEW'}">
+                                        <a class="dropdown-item" href="#" th:onclick="'modifierEntretien(' + ${demande.idDemande} + ')'">
+                                            <i class="fas fa-calendar me-2"></i>Modifier entretien
+                                        </a>
+                                    </li>
+                                    <li th:if="${demande.etat == 'REJECTED'}">
+                                        <a class="dropdown-item" href="#" th:onclick="'reexaminer(' + ${demande.idDemande} + ')'">
+                                            <i class="fas fa-history me-2"></i>Réexaminer
+                                        </a>
+                                    </li>
+                                    <li th:if="${demande.etat == 'ACCEPTED'}">
+                                        <a class="dropdown-item" href="#" th:onclick="'genererContrat(' + ${demande.idDemande} + ')'">
+                                            <i class="fas fa-file-contract me-2"></i>Générer contrat
+                                        </a>
+                                    </li>
+
                                     <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item text-success" href="#"><i class="fas fa-check me-2"></i>Accepter</a></li>
-                                    <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-times me-2"></i>Refuser</a></li>
+
+                                    <!-- Accept/Reject options -->
+                                    <li th:if="${demande.etat != 'ACCEPTED' && demande.etat != 'REJECTED'}">
+                                        <a class="dropdown-item text-success" href="#" th:onclick="'accepter(' + ${demande.idDemande} + ')'">
+                                            <i class="fas fa-check me-2"></i>Accepter
+                                        </a>
+                                    </li>
+                                    <li th:if="${demande.etat != 'REJECTED'}">
+                                        <a class="dropdown-item text-danger" href="#" th:onclick="'refuser(' + ${demande.idDemande} + ')'">
+                                            <i class="fas fa-times me-2"></i>Refuser
+                                        </a>
+                                    </li>
                                 </ul>
                             </div>
                         </td>
                     </tr>
 
-                    <!-- Row 2 -->
-                    <tr>
-                        <td>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox">
-                            </div>
-                        </td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <div class="avatar me-2">
-                                    <span>SB</span>
-                                </div>
-                                <div>
-                                    <h6 class="mb-0">Sara Benali</h6>
-                                    <small class="text-muted">sara.b@example.com</small>
-                                </div>
-                            </div>
-                        </td>
-                        <td>Designer UX/UI</td>
-                        <td>14 avril 2025</td>
-                        <td>
-                            <div class="progress" style="height: 6px;">
-                                <div class="progress-bar bg-success" style="width: 92%"></div>
-                            </div>
-                            <small class="text-muted">92%</small>
-                        </td>
-                        <td><span class="badge bg-warning">En cours d'évaluation</span></td>
-                        <td>
-                            <div class="dropdown">
-                                <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                    Actions
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i>Voir détails</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="fas fa-envelope me-2"></i>Contacter</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="fas fa-calendar me-2"></i>Planifier entretien</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item text-success" href="#"><i class="fas fa-check me-2"></i>Accepter</a></li>
-                                    <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-times me-2"></i>Refuser</a></li>
-                                </ul>
-                            </div>
-                        </td>
-                    </tr>
-
-                    <!-- Row 3 -->
-                    <tr>
-                        <td>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox">
-                            </div>
-                        </td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <div class="avatar me-2">
-                                    <span>YE</span>
-                                </div>
-                                <div>
-                                    <h6 class="mb-0">Youssef El Amrani</h6>
-                                    <small class="text-muted">youssef.e@example.com</small>
-                                </div>
-                            </div>
-                        </td>
-                        <td>Ingénieur DevOps</td>
-                        <td>12 avril 2025</td>
-                        <td>
-                            <div class="progress" style="height: 6px;">
-                                <div class="progress-bar bg-warning" style="width: 68%"></div>
-                            </div>
-                            <small class="text-muted">68%</small>
-                        </td>
-                        <td><span class="badge bg-info">Entretien planifié</span></td>
-                        <td>
-                            <div class="dropdown">
-                                <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                    Actions
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i>Voir détails</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="fas fa-envelope me-2"></i>Contacter</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="fas fa-calendar me-2"></i>Modifier entretien</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item text-success" href="#"><i class="fas fa-check me-2"></i>Accepter</a></li>
-                                    <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-times me-2"></i>Refuser</a></li>
-                                </ul>
-                            </div>
-                        </td>
-                    </tr>
-
-                    <!-- Row 4 -->
-                    <tr>
-                        <td>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox">
-                            </div>
-                        </td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <div class="avatar me-2">
-                                    <span>LO</span>
-                                </div>
-                                <div>
-                                    <h6 class="mb-0">Laila Ouazzani</h6>
-                                    <small class="text-muted">laila.o@example.com</small>
-                                </div>
-                            </div>
-                        </td>
-                        <td>Chef de Projet Digital</td>
-                        <td>10 avril 2025</td>
-                        <td>
-                            <div class="progress" style="height: 6px;">
-                                <div class="progress-bar bg-danger" style="width: 45%"></div>
-                            </div>
-                            <small class="text-muted">45%</small>
-                        </td>
-                        <td><span class="badge bg-danger">Refusé</span></td>
-                        <td>
-                            <div class="dropdown">
-                                <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                    Actions
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i>Voir détails</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="fas fa-envelope me-2"></i>Contacter</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="fas fa-history me-2"></i>Réexaminer</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash me-2"></i>Supprimer</a></li>
-                                </ul>
-                            </div>
-                        </td>
-                    </tr>
-
-                    <!-- Row 5 -->
-                    <tr>
-                        <td>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox">
-                            </div>
-                        </td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <div class="avatar me-2">
-                                    <span>MT</span>
-                                </div>
-                                <div>
-                                    <h6 class="mb-0">Mohammed Tahiri</h6>
-                                    <small class="text-muted">mohammed.t@example.com</small>
-                                </div>
-                            </div>
-                        </td>
-                        <td>Responsable Marketing</td>
-                        <td>8 avril 2025</td>
-                        <td>
-                            <div class="progress" style="height: 6px;">
-                                <div class="progress-bar bg-success" style="width: 78%"></div>
-                            </div>
-                            <small class="text-muted">78%</small>
-                        </td>
-                        <td><span class="badge bg-primary">Accepté</span></td>
-                        <td>
-                            <div class="dropdown">
-                                <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                    Actions
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i>Voir détails</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="fas fa-envelope me-2"></i>Contacter</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="fas fa-file-contract me-2"></i>Générer contrat</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-times me-2"></i>Annuler acceptation</a></li>
-                                </ul>
-                            </div>
+                    <!-- Empty state message -->
+                    <tr th:if="${demandes == null || demandes.isEmpty()}">
+                        <td colspan="7" class="text-center py-4">
+                            <i class="fas fa-inbox fa-2x text-muted mb-3"></i>
+                            <p>Aucune candidature trouvée</p>
                         </td>
                     </tr>
                     </tbody>
@@ -344,20 +224,32 @@
         <div class="card-footer">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <button class="btn btn-sm btn-outline-primary me-2"><i class="fas fa-envelope me-1"></i> Contacter</button>
-                    <button class="btn btn-sm btn-outline-success me-2"><i class="fas fa-check me-1"></i> Accepter</button>
-                    <button class="btn btn-sm btn-outline-danger"><i class="fas fa-times me-1"></i> Refuser</button>
+                    <button class="btn btn-sm btn-outline-primary me-2" id="btnContactBulk"><i class="fas fa-envelope me-1"></i> Contacter</button>
+                    <button class="btn btn-sm btn-outline-success me-2" id="btnAcceptBulk"><i class="fas fa-check me-1"></i> Accepter</button>
+                    <button class="btn btn-sm btn-outline-danger" id="btnRejectBulk"><i class="fas fa-times me-1"></i> Refuser</button>
                 </div>
-                <nav>
+
+                <!-- Pagination -->
+                <nav th:if="${totalPages > 1}">
                     <ul class="pagination pagination-sm mb-0">
-                        <li class="page-item disabled">
-                            <a class="page-link" href="#" tabindex="-1" aria-disabled="true"><i class="fas fa-chevron-left"></i></a>
+                        <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                            <a class="page-link"
+                               th:href="@{/recruteurs/applications(page=${currentPage - 1},size=${pageSize},offreId=${filteredOffreId})}"
+                               tabindex="-1" th:aria-disabled="${currentPage == 0}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
                         </li>
-                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item">
-                            <a class="page-link" href="#"><i class="fas fa-chevron-right"></i></a>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                            th:classappend="${currentPage == i ? 'active' : ''}">
+                            <a class="page-link"
+                               th:href="@{/recruteurs/applications(page=${i},size=${pageSize},offreId=${filteredOffreId})}"
+                               th:text="${i + 1}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${currentPage + 1 >= totalPages ? 'disabled' : ''}">
+                            <a class="page-link"
+                               th:href="@{/recruteurs/applications(page=${currentPage + 1},size=${pageSize},offreId=${filteredOffreId})}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
                         </li>
                     </ul>
                 </nav>
@@ -365,55 +257,788 @@
         </div>
     </div>
 
-    <!-- Bulk Action Modal -->
-    <div class="modal fade" id="bulkActionModal" tabindex="-1" aria-hidden="true">
+    <!-- Modals for different actions -->
+    <!-- Contact Modal -->
+    <div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Action groupée</h5>
+                    <h5 class="modal-title" id="contactModalLabel">Contacter le candidat</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Vous êtes sur le point d'appliquer cette action à 3 candidatures.</p>
-                    <form>
+                    <form id="contactForm">
+                        <input type="hidden" id="contactCandidatId" name="candidatId">
                         <div class="mb-3">
-                            <label class="form-label">Action</label>
-                            <select class="form-select">
-                                <option selected>Changer le statut</option>
-                                <option>Accepter les candidatures</option>
-                                <option>Refuser les candidatures</option>
-                                <option>Planifier des entretiens</option>
-                                <option>Envoyer un message</option>
-                            </select>
+                            <label for="contactSubject" class="form-label">Sujet</label>
+                            <input type="text" class="form-control" id="contactSubject" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Nouveau statut</label>
-                            <select class="form-select">
-                                <option>Nouveau</option>
-                                <option selected>En cours d'évaluation</option>
-                                <option>Entretien planifié</option>
-                                <option>Accepté</option>
-                                <option>Refusé</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Notification par e-mail</label>
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="notifyCandidate" checked>
-                                <label class="form-check-label" for="notifyCandidate">Notifier les candidats</label>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Message (optionnel)</label>
-                            <textarea class="form-control" rows="3" placeholder="Ajouter un message personnalisé..."></textarea>
+                            <label for="contactMessage" class="form-label">Message</label>
+                            <textarea class="form-control" id="contactMessage" rows="5" required></textarea>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="button" class="btn btn-primary">Appliquer</button>
+                    <button type="button" class="btn btn-primary" id="btnSendContact">Envoyer</button>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Interview Scheduling Modal -->
+    <div class="modal fade" id="interviewModal" tabindex="-1" aria-labelledby="interviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="interviewModalLabel">Planifier un entretien</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="interviewForm">
+                        <input type="hidden" id="interviewDemandeId" name="demandeId">
+                        <input type="hidden" id="interviewIsUpdate" name="isUpdate" value="false">
+                        <div class="mb-3">
+                            <label for="interviewDate" class="form-label">Date</label>
+                            <input type="date" class="form-control" id="interviewDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="interviewTime" class="form-label">Heure</label>
+                            <input type="time" class="form-control" id="interviewTime" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="interviewType" class="form-label">Type d'entretien</label>
+                            <select class="form-select" id="interviewType" required>
+                                <option value="VIDEO">Entretien vidéo</option>
+                                <option value="PHONE">Entretien téléphonique</option>
+                                <option value="IN_PERSON">Entretien en personne</option>
+                                <option value="TECHNICAL">Test technique</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="interviewLocation" class="form-label">Lieu / Lien</label>
+                            <input type="text" class="form-control" id="interviewLocation">
+                        </div>
+                        <div class="mb-3">
+                            <label for="interviewNotes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="interviewNotes" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" id="btnSaveInterview">Enregistrer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rejection Reason Modal -->
+    <div class="modal fade" id="rejectionModal" tabindex="-1" aria-labelledby="rejectionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="rejectionModalLabel">Motif de refus</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="rejectionForm">
+                        <input type="hidden" id="rejectionDemandeId" name="demandeId">
+                        <div class="mb-3">
+                            <label for="rejectionReason" class="form-label">Motif de refus</label>
+                            <select class="form-select" id="rejectionReason" required>
+                                <option value="" selected disabled>Sélectionnez un motif</option>
+                                <option value="INSUFFICIENT_EXPERIENCE">Expérience insuffisante</option>
+                                <option value="SKILLS_MISMATCH">Compétences ne correspondent pas</option>
+                                <option value="EDUCATION_MISMATCH">Formation ne correspond pas</option>
+                                <option value="BETTER_CANDIDATE">Candidat(e) plus qualifié(e) sélectionné(e)</option>
+                                <option value="POSITION_FILLED">Poste pourvu</option>
+                                <option value="POSITION_CANCELLED">Poste annulé</option>
+                                <option value="OTHER">Autre raison</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="rejectionComment" class="form-label">Commentaire</label>
+                            <textarea class="form-control" id="rejectionComment" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Envoyer un email de refus</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="sendRejectionEmail" checked>
+                                <label class="form-check-label" for="sendRejectionEmail">
+                                    Envoyer un email automatique au candidat
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-danger" id="btnConfirmReject">Rejeter</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Contact Modal -->
+    <div class="modal fade" id="bulkContactModal" tabindex="-1" aria-labelledby="bulkContactModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bulkContactModalLabel">Contacter les candidats</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="bulkContactForm">
+                        <input type="hidden" id="bulkContactIds" name="demandeIds">
+                        <div class="mb-3">
+                            <label for="bulkContactSubject" class="form-label">Sujet</label>
+                            <input type="text" class="form-control" id="bulkContactSubject" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="bulkContactMessage" class="form-label">Message</label>
+                            <textarea class="form-control" id="bulkContactMessage" rows="5" required></textarea>
+                            <small class="text-muted">Variables disponibles: {nom}, {prenom}, {poste}</small>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" id="btnSendBulkContact">Envoyer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Rejection Modal -->
+    <div class="modal fade" id="bulkRejectionModal" tabindex="-1" aria-labelledby="bulkRejectionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bulkRejectionModalLabel">Refuser plusieurs candidatures</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="bulkRejectionForm">
+                        <input type="hidden" id="bulkRejectionIds" name="demandeIds">
+                        <div class="mb-3">
+                            <label for="bulkRejectionReason" class="form-label">Motif de refus</label>
+                            <select class="form-select" id="bulkRejectionReason" required>
+                                <option value="" selected disabled>Sélectionnez un motif</option>
+                                <option value="INSUFFICIENT_EXPERIENCE">Expérience insuffisante</option>
+                                <option value="SKILLS_MISMATCH">Compétences ne correspondent pas</option>
+                                <option value="BETTER_CANDIDATE">Candidat(e) plus qualifié(e) sélectionné(e)</option>
+                                <option value="POSITION_FILLED">Poste pourvu</option>
+                                <option value="POSITION_CANCELLED">Poste annulé</option>
+                                <option value="OTHER">Autre raison</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="bulkRejectionComment" class="form-label">Commentaire</label>
+                            <textarea class="form-control" id="bulkRejectionComment" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Envoyer un email de refus</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="bulkSendRejectionEmail" checked>
+                                <label class="form-check-label" for="bulkSendRejectionEmail">
+                                    Envoyer un email automatique aux candidats
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-danger" id="btnConfirmBulkReject">Rejeter tout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript for actions -->
+    <script>
+        // Action functions
+        function contactCandidat(candidatId) {
+            console.log('Contact candidat:', candidatId);
+            // Implement contact functionality
+
+            // Show modal with contact form
+            const contactModal = new bootstrap.Modal(document.getElementById('contactModal'));
+            document.getElementById('contactCandidatId').value = candidatId;
+            contactModal.show();
+        }
+
+        function planifierEntretien(demandeId) {
+            console.log('Planifier entretien pour demande:', demandeId);
+            // Show interview scheduling modal
+            const interviewModal = new bootstrap.Modal(document.getElementById('interviewModal'));
+            document.getElementById('interviewDemandeId').value = demandeId;
+            interviewModal.show();
+        }
+
+        function modifierEntretien(demandeId) {
+            console.log('Modifier entretien pour demande:', demandeId);
+            // Fetch current interview data first
+            fetch(`/demandes/${demandeId}/interview`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Pre-fill the interview form
+                        document.getElementById('interviewDate').value = data.date;
+                        document.getElementById('interviewTime').value = data.time;
+                        document.getElementById('interviewType').value = data.type;
+                        document.getElementById('interviewNotes').value = data.notes;
+
+                        // Show the modal
+                        const interviewModal = new bootstrap.Modal(document.getElementById('interviewModal'));
+                        document.getElementById('interviewDemandeId').value = demandeId;
+                        document.getElementById('interviewIsUpdate').value = true;
+                        interviewModal.show();
+                    }
+                });
+        }
+
+        function reexaminer(demandeId) {
+            console.log('Réexaminer demande:', demandeId);
+
+            if (confirm('Êtes-vous sûr de vouloir réexaminer cette candidature?')) {
+                // Example AJAX call
+                fetch(`/demandes/${demandeId}/reexamine`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Refresh the page to show updated status
+                            window.location.reload();
+                        } else {
+                            alert('Erreur: ' + data.error);
+                        }
+                    });
+            }
+        }
+
+        function genererContrat(demandeId) {
+            console.log('Générer contrat pour demande:', demandeId);
+            window.location.href = `/recruteurs/generer-contrat/${demandeId}`;
+        }
+
+        function accepter(demandeId) {
+            console.log('Accepter demande:', demandeId);
+
+            if (confirm('Êtes-vous sûr de vouloir accepter cette candidature?')) {
+                // Example AJAX call
+                fetch(`/demandes/${demandeId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        status: 'ACCEPTED'
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Refresh the page to show updated status
+                            window.location.reload();
+                        } else {
+                            alert('Erreur: ' + data.error);
+                        }
+                    });
+            }
+        }
+
+        function refuser(demandeId) {
+            console.log('Refuser demande:', demandeId);
+
+            // Show rejection reason modal
+            const rejectionModal = new bootstrap.Modal(document.getElementById('rejectionModal'));
+            document.getElementById('rejectionDemandeId').value = demandeId;
+            rejectionModal.show();
+        }
+
+        // Filter handling
+        document.addEventListener('DOMContentLoaded', function() {
+            // Offer filter change event
+            const offreFilter = document.getElementById('offreFilter');
+            if (offreFilter) {
+                offreFilter.addEventListener('change', function() {
+                    window.location.href = `/recruteurs/applications?offreId=${this.value}`;
+                });
+            }
+
+            // Status filter change event
+            const statusFilter = document.getElementById('statusFilter');
+            if (statusFilter) {
+                statusFilter.addEventListener('change', function() {
+                    // Get current URL params
+                    const urlParams = new URLSearchParams(window.location.search);
+                    urlParams.set('status', this.value);
+                    window.location.href = `/recruteurs/applications?${urlParams.toString()}`;
+                });
+            }
+
+            // Date filter change event
+            const dateFilter = document.getElementById('dateFilter');
+            if (dateFilter) {
+                dateFilter.addEventListener('change', function() {
+                    // Get current URL params
+                    const urlParams = new URLSearchParams(window.location.search);
+                    urlParams.set('dateRange', this.value);
+                    window.location.href = `/recruteurs/applications?${urlParams.toString()}`;
+                });
+            }
+
+            // Select all checkbox
+            const selectAllCheckbox = document.getElementById('selectAll');
+            if (selectAllCheckbox) {
+                selectAllCheckbox.addEventListener('change', function() {
+                    const checkboxes = document.querySelectorAll('tbody .form-check-input');
+                    checkboxes.forEach(checkbox => {
+                        checkbox.checked = this.checked;
+                    });
+                    updateBulkActionButtonsState();
+                });
+            }
+
+            // Individual checkboxes change event
+            const individualCheckboxes = document.querySelectorAll('tbody .form-check-input');
+            if (individualCheckboxes) {
+                individualCheckboxes.forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        updateBulkActionButtonsState();
+                    });
+                });
+            }
+
+            // Update bulk action buttons state based on checkbox selection
+            function updateBulkActionButtonsState() {
+                const checkedCount = document.querySelectorAll('tbody .form-check-input:checked').length;
+                const bulkButtons = document.querySelectorAll('#btnContactBulk, #btnAcceptBulk, #btnRejectBulk');
+
+                bulkButtons.forEach(button => {
+                    if (checkedCount > 0) {
+                        button.removeAttribute('disabled');
+                    } else {
+                        button.setAttribute('disabled', 'disabled');
+                    }
+                });
+            }
+
+            // Initialize bulk action buttons state
+            updateBulkActionButtonsState();
+
+            // Bulk action buttons event listeners
+            const btnContactBulk = document.getElementById('btnContactBulk');
+            if (btnContactBulk) {
+                btnContactBulk.addEventListener('click', function() {
+                    const selectedIds = getSelectedDemandeIds();
+                    if (selectedIds.length > 0) {
+                        console.log('Contact en masse pour les demandes:', selectedIds);
+                        // Show bulk contact modal
+                        const bulkContactModal = new bootstrap.Modal(document.getElementById('bulkContactModal'));
+                        document.getElementById('bulkContactIds').value = selectedIds.join(',');
+                        bulkContactModal.show();
+                    }
+                });
+            }
+
+            const btnAcceptBulk = document.getElementById('btnAcceptBulk');
+            if (btnAcceptBulk) {
+                btnAcceptBulk.addEventListener('click', function() {
+                    const selectedIds = getSelectedDemandeIds();
+                    if (selectedIds.length > 0 && confirm(`Êtes-vous sûr de vouloir accepter ${selectedIds.length} candidature(s)?`)) {
+                        console.log('Acceptation en masse pour les demandes:', selectedIds);
+
+                        // Example AJAX call for bulk accept
+                        fetch(`/demandes/bulk-status`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                ids: selectedIds,
+                                status: 'ACCEPTED'
+                            })
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    // Refresh the page to show updated statuses
+                                    window.location.reload();
+                                } else {
+                                    alert('Erreur: ' + data.error);
+                                }
+                            });
+                    }
+                });
+            }
+
+            const btnRejectBulk = document.getElementById('btnRejectBulk');
+            if (btnRejectBulk) {
+                btnRejectBulk.addEventListener('click', function() {
+                    const selectedIds = getSelectedDemandeIds();
+                    if (selectedIds.length > 0) {
+                        console.log('Refus en masse pour les demandes:', selectedIds);
+                        // Show bulk rejection reason modal
+                        const bulkRejectionModal = new bootstrap.Modal(document.getElementById('bulkRejectionModal'));
+                        document.getElementById('bulkRejectionIds').value = selectedIds.join(',');
+                        bulkRejectionModal.show();
+                    }
+                });
+            }
+
+            // Helper function to get selected demande IDs
+            function getSelectedDemandeIds() {
+                const checkboxes = document.querySelectorAll('tbody .form-check-input:checked');
+                return Array.from(checkboxes).map(checkbox => checkbox.value);
+            }
+
+            // Search functionality
+            const searchBtn = document.getElementById('searchBtn');
+            const searchInput = document.getElementById('searchInput');
+            if (searchBtn && searchInput) {
+                searchBtn.addEventListener('click', function() {
+                    const searchTerm = searchInput.value.trim();
+                    if (searchTerm) {
+                        // Get current URL params
+                        const urlParams = new URLSearchParams(window.location.search);
+                        urlParams.set('keyword', searchTerm);
+                        window.location.href = `/recruteurs/applications?${urlParams.toString()}`;
+                    }
+                });
+
+                // Also trigger search on Enter key
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        searchBtn.click();
+                    }
+                });
+            }
+
+            // Modal buttons event listeners
+            const btnSendContact = document.getElementById('btnSendContact');
+            if (btnSendContact) {
+                btnSendContact.addEventListener('click', function() {
+                    const candidatId = document.getElementById('contactCandidatId').value;
+                    const subject = document.getElementById('contactSubject').value;
+                    const message = document.getElementById('contactMessage').value;
+
+                    if (!subject || !message) {
+                        alert('Veuillez remplir tous les champs obligatoires.');
+                        return;
+                    }
+
+                    // Send contact message
+                    fetch('/candidats/contact', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            candidatId: candidatId,
+                            subject: subject,
+                            message: message
+                        })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                const modal = bootstrap.Modal.getInstance(document.getElementById('contactModal'));
+                                modal.hide();
+                                alert('Message envoyé avec succès.');
+
+                                // Reset form
+                                document.getElementById('contactForm').reset();
+                            } else {
+                                alert('Erreur: ' + data.error);
+                            }
+                        });
+                });
+            }
+
+            // Interview form submission
+            const btnSaveInterview = document.getElementById('btnSaveInterview');
+            if (btnSaveInterview) {
+                btnSaveInterview.addEventListener('click', function() {
+                    const demandeId = document.getElementById('interviewDemandeId').value;
+                    const isUpdate = document.getElementById('interviewIsUpdate').value === 'true';
+                    const date = document.getElementById('interviewDate').value;
+                    const time = document.getElementById('interviewTime').value;
+                    const type = document.getElementById('interviewType').value;
+                    const location = document.getElementById('interviewLocation').value;
+                    const notes = document.getElementById('interviewNotes').value;
+
+                    if (!date || !time || !type) {
+                        alert('Veuillez remplir tous les champs obligatoires.');
+                        return;
+                    }
+
+                    // Save interview
+                    fetch(`/demandes/${demandeId}/interview`, {
+                        method: isUpdate ? 'PUT' : 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            date: date,
+                            time: time,
+                            type: type,
+                            location: location,
+                            notes: notes
+                        })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                const modal = bootstrap.Modal.getInstance(document.getElementById('interviewModal'));
+                                modal.hide();
+                                alert(isUpdate ? 'Entretien modifié avec succès.' : 'Entretien planifié avec succès.');
+
+                                // Reset form
+                                document.getElementById('interviewForm').reset();
+
+                                // Reload page
+                                window.location.reload();
+                            } else {
+                                alert('Erreur: ' + data.error);
+                            }
+                        });
+                });
+            }
+
+            // Rejection form submission
+            const btnConfirmReject = document.getElementById('btnConfirmReject');
+            if (btnConfirmReject) {
+                btnConfirmReject.addEventListener('click', function() {
+                    const demandeId = document.getElementById('rejectionDemandeId').value;
+                    const reason = document.getElementById('rejectionReason').value;
+                    const comment = document.getElementById('rejectionComment').value;
+                    const sendEmail = document.getElementById('sendRejectionEmail').checked;
+
+                    if (!reason) {
+                        alert('Veuillez sélectionner un motif de refus.');
+                        return;
+                    }
+
+                    // Reject application
+                    fetch(`/demandes/${demandeId}/status`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            status: 'REJECTED',
+                            reason: reason,
+                            comment: comment,
+                            sendEmail: sendEmail
+                        })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                const modal = bootstrap.Modal.getInstance(document.getElementById('rejectionModal'));
+                                modal.hide();
+                                alert('Candidature refusée avec succès.');
+
+                                // Reset form
+                                document.getElementById('rejectionForm').reset();
+
+                                // Reload page
+                                window.location.reload();
+                            } else {
+                                alert('Erreur: ' + data.error);
+                            }
+                        });
+                });
+            }
+
+            // Bulk contact form submission
+            const btnSendBulkContact = document.getElementById('btnSendBulkContact');
+            if (btnSendBulkContact) {
+                btnSendBulkContact.addEventListener('click', function() {
+                    const demandeIds = document.getElementById('bulkContactIds').value.split(',');
+                    const subject = document.getElementById('bulkContactSubject').value;
+                    const message = document.getElementById('bulkContactMessage').value;
+
+                    if (!subject || !message) {
+                        alert('Veuillez remplir tous les champs obligatoires.');
+                        return;
+                    }
+
+                    // Send bulk contact message
+                    fetch('/candidats/bulk-contact', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            demandeIds: demandeIds,
+                            subject: subject,
+                            message: message
+                        })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                const modal = bootstrap.Modal.getInstance(document.getElementById('bulkContactModal'));
+                                modal.hide();
+                                alert(`Messages envoyés avec succès à ${demandeIds.length} candidat(s).`);
+
+                                // Reset form
+                                document.getElementById('bulkContactForm').reset();
+                            } else {
+                                alert('Erreur: ' + data.error);
+                            }
+                        });
+                });
+            }
+
+            // Bulk rejection form submission
+            const btnConfirmBulkReject = document.getElementById('btnConfirmBulkReject');
+            if (btnConfirmBulkReject) {
+                btnConfirmBulkReject.addEventListener('click', function() {
+                    const demandeIds = document.getElementById('bulkRejectionIds').value.split(',');
+                    const reason = document.getElementById('bulkRejectionReason').value;
+                    const comment = document.getElementById('bulkRejectionComment').value;
+                    const sendEmail = document.getElementById('bulkSendRejectionEmail').checked;
+
+                    if (!reason) {
+                        alert('Veuillez sélectionner un motif de refus.');
+                        return;
+                    }
+
+                    // Reject bulk applications
+                    fetch('/demandes/bulk-status', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            ids: demandeIds,
+                            status: 'REJECTED',
+                            reason: reason,
+                            comment: comment,
+                            sendEmail: sendEmail
+                        })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                const modal = bootstrap.Modal.getInstance(document.getElementById('bulkRejectionModal'));
+                                modal.hide();
+                                alert(`${demandeIds.length} candidature(s) refusée(s) avec succès.`);
+
+                                // Reset form
+                                document.getElementById('bulkRejectionForm').reset();
+
+                                // Reload page
+                                window.location.reload();
+                            } else {
+                                alert('Erreur: ' + data.error);
+                            }
+                        });
+                });
+            }
+        });
+    </script>
+
+    <style>
+        /* Styles for applications page */
+        .stats-card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            height: 100%;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats-card-body {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .stats-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: white;
+        }
+
+        .stats-card-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 0;
+            line-height: 1.2;
+        }
+
+        .stats-card-text {
+            color: #6c757d;
+            margin-bottom: 0;
+            font-size: 14px;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            background-color: #e9ecef;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--bs-primary);
+            border-color: var(--bs-primary);
+        }
+
+        /* Table row hover effect */
+        .table tbody tr:hover {
+            background-color: rgba(0, 123, 255, 0.05);
+        }
+
+        /* Badge styles */
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.35em 0.65em;
+            font-weight: 500;
+        }
+
+        /* Progress bar animation */
+        .progress-bar {
+            transition: width 0.6s ease;
+        }
+
+        /* Page buttons hover effect */
+        .pagination .page-link:hover {
+            background-color: #e9ecef;
+            border-color: #dee2e6;
+            color: #0d6efd;
+        }
+
+        /* Buttons states */
+        .btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.65;
+        }
+    </style>
 </div>

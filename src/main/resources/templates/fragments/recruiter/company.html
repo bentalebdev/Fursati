@@ -1,5 +1,5 @@
 <!-- Company Profile Fragment -->
-<div th:fragment="company">
+<div th:fragment="company" th:object="${company}">
     <!-- Content Container -->
     <div class="row">
         <!-- Left Column - Company Profile Form -->
@@ -10,22 +10,34 @@
                     <span class="badge bg-primary">Profil Vérifié</span>
                 </div>
                 <div class="card-body">
-                    <form>
+                    <form id="companyProfileForm">
+                        <!-- Hidden field for recruiter ID -->
+                        <input type="hidden" id="recruiterId" th:value="${recruitId != null ? recruitId : 1}">
+
                         <!-- Logo Upload -->
                         <div class="mb-4 text-center">
                             <div class="company-logo-upload">
                                 <div class="company-logo-preview">
                                     <div class="company-logo-placeholder">
-                                        <i class="fas fa-building fa-3x"></i>
-                                        <span>Logo</span>
+                                        <!-- Display logo if exists -->
+                                        <img th:if="${company != null && company.logoUrl != null && !company.logoUrl.isEmpty()}"
+                                             th:src="${company.logoUrl}"
+                                             alt="Company Logo"
+                                             class="img-fluid">
+                                        <!-- Display placeholder if no logo -->
+                                        <div th:if="${company == null || company.logoUrl == null || company.logoUrl.isEmpty()}">
+                                            <i class="fas fa-building fa-3x"></i>
+                                            <span>Logo</span>
+                                        </div>
                                     </div>
                                 </div>
+                                <!-- Logo upload section -->
                                 <div class="mt-3">
                                     <label for="companyLogo" class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-upload me-1"></i> Changer le logo
                                     </label>
                                     <input type="file" id="companyLogo" class="d-none">
-                                    <button type="button" class="btn btn-sm btn-outline-danger ms-2">
+                                    <button type="button" id="deleteLogo" class="btn btn-sm btn-outline-danger ms-2">
                                         <i class="fas fa-trash-alt me-1"></i> Supprimer
                                     </button>
                                 </div>
@@ -37,19 +49,20 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Nom de l'entreprise*</label>
-                                <input type="text" class="form-control" value="TechMaghrébine" required>
+                                <input type="text" class="form-control field-update" id="nomEntreprise" th:value="${company.nomEntreprise}" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Secteur d'activité*</label>
-                                <select class="form-select" required>
-                                    <option selected>Technologies de l'information</option>
-                                    <option>Finance & Banque</option>
-                                    <option>Santé & Médical</option>
-                                    <option>Éducation</option>
-                                    <option>Commerce & Distribution</option>
-                                    <option>Industrie & Production</option>
-                                    <option>Services aux entreprises</option>
-                                    <option>Autre</option>
+                                <select class="form-select field-update" id="secteur" required>
+                                    <option value="Technologies de l'information" th:selected="${company.secteur == 'Technologies de l''information'}">Technologies de l'information</option>
+                                    <option value="Finance & Banque" th:selected="${company.secteur == 'Finance & Banque'}">Finance & Banque</option>
+                                    <option value="Santé & Médical" th:selected="${company.secteur == 'Santé & Médical'}">Santé & Médical</option>
+                                    <option value="Éducation" th:selected="${company.secteur == 'Éducation'}">Éducation</option>
+                                    <option value="Commerce & Distribution" th:selected="${company.secteur == 'Commerce & Distribution'}">Commerce & Distribution</option>
+                                    <option value="Industrie & Production" th:selected="${company.secteur == 'Industrie & Production'}">Industrie & Production</option>
+                                    <option value="Services aux entreprises" th:selected="${company.secteur == 'Services aux entreprises'}">Services aux entreprises</option>
+                                    <option value="Assurance" th:selected="${company.secteur == 'Assurance'}">Assurance</option>
+                                    <option value="Autre" th:selected="${company.secteur == 'Autre'}">Autre</option>
                                 </select>
                             </div>
                         </div>
@@ -57,35 +70,35 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Taille de l'entreprise</label>
-                                <select class="form-select">
-                                    <option>1-10 employés</option>
-                                    <option selected>11-50 employés</option>
-                                    <option>51-200 employés</option>
-                                    <option>201-500 employés</option>
-                                    <option>501-1000 employés</option>
-                                    <option>Plus de 1000 employés</option>
+                                <select class="form-select field-update" id="tailleEntreprise">
+                                    <option value="1-10 employés" th:selected="${company.tailleEntreprise == '1-10 employés'}">1-10 employés</option>
+                                    <option value="11-50 employés" th:selected="${company.tailleEntreprise == '11-50 employés'}">11-50 employés</option>
+                                    <option value="51-200 employés" th:selected="${company.tailleEntreprise == '51-200 employés'}">51-200 employés</option>
+                                    <option value="201-500 employés" th:selected="${company.tailleEntreprise == '201-500 employés'}">201-500 employés</option>
+                                    <option value="501-1000 employés" th:selected="${company.tailleEntreprise == '501-1000 employés'}">501-1000 employés</option>
+                                    <option value="1000+" th:selected="${company.tailleEntreprise == '1000+'}">Plus de 1000 employés</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Année de création</label>
-                                <input type="number" class="form-control" value="2018">
+                                <input type="number" class="form-control field-update" id="anneeCreation" th:value="${company.anneeCreation}">
                             </div>
                         </div>
 
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Site web</label>
-                                <input type="url" class="form-control" value="https://techmaghrebine.com">
+                                <input type="url" class="form-control field-update" id="siteWeb" th:value="${company.siteWeb}">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Email de contact*</label>
-                                <input type="email" class="form-control" value="careers@techmaghrebine.com" required>
+                                <input type="email" class="form-control field-update" id="emailContact" th:value="${company.emailContact}" required>
                             </div>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Description de l'entreprise*</label>
-                            <textarea class="form-control" rows="4" required>TechMaghrébine est une entreprise innovante spécialisée dans le développement de solutions numériques pour les entreprises du Maghreb. Fondée en 2018, notre mission est de favoriser la transformation digitale des organisations locales en proposant des solutions adaptées au contexte régional.</textarea>
+                            <textarea class="form-control field-update" id="description" rows="4" required th:text="${company.description}"></textarea>
                             <small class="form-text text-muted">4000 caractères maximum</small>
                         </div>
 
@@ -94,39 +107,39 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Adresse*</label>
-                                <input type="text" class="form-control" value="23 Rue des Entrepreneurs, Technopole" required>
+                                <input type="text" class="form-control field-update" id="adresse" th:value="${company.adresse}" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Ville*</label>
-                                <input type="text" class="form-control" value="Casablanca" required>
+                                <input type="text" class="form-control field-update" id="ville" th:value="${company.ville}" required>
                             </div>
                         </div>
 
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Pays*</label>
-                                <select class="form-select" required>
-                                    <option selected>Maroc</option>
-                                    <option>Algérie</option>
-                                    <option>Tunisie</option>
-                                    <option>France</option>
-                                    <option>Autre</option>
+                                <select class="form-select field-update" id="pays" required>
+                                    <option value="Maroc" th:selected="${company.pays == 'Maroc'}">Maroc</option>
+                                    <option value="Algérie" th:selected="${company.pays == 'Algérie'}">Algérie</option>
+                                    <option value="Tunisie" th:selected="${company.pays == 'Tunisie'}">Tunisie</option>
+                                    <option value="France" th:selected="${company.pays == 'France'}">France</option>
+                                    <option value="Autre" th:selected="${company.pays == 'Autre'}">Autre</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Code postal</label>
-                                <input type="text" class="form-control" value="20250">
+                                <input type="text" class="form-control field-update" id="codePostal" th:value="${company.codePostal}">
                             </div>
                         </div>
 
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Téléphone</label>
-                                <input type="tel" class="form-control" value="+212 522 123 456">
+                                <input type="tel" class="form-control field-update" id="telephone" th:value="${company.telephone}">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Numéro RC / SIRET</label>
-                                <input type="text" class="form-control" value="RC123456789">
+                                <input type="text" class="form-control field-update" id="numeroRC" th:value="${company.numeroRC}">
                             </div>
                         </div>
 
@@ -135,22 +148,22 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label"><i class="fab fa-linkedin me-1"></i> LinkedIn</label>
-                                <input type="url" class="form-control" value="https://linkedin.com/company/techmaghrebine">
+                                <input type="url" class="form-control field-update" id="linkedinUrl" th:value="${company.linkedinUrl}">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label"><i class="fab fa-twitter me-1"></i> Twitter</label>
-                                <input type="url" class="form-control" value="https://twitter.com/techmaghrebine">
+                                <input type="url" class="form-control field-update" id="twitterUrl" th:value="${company.twitterUrl}">
                             </div>
                         </div>
 
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label"><i class="fab fa-facebook me-1"></i> Facebook</label>
-                                <input type="url" class="form-control" value="https://facebook.com/techmaghrebine">
+                                <input type="url" class="form-control field-update" id="facebookUrl" th:value="${company.facebookUrl}">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label"><i class="fab fa-instagram me-1"></i> Instagram</label>
-                                <input type="url" class="form-control" value="https://instagram.com/techmaghrebine">
+                                <input type="url" class="form-control field-update" id="instagramUrl" th:value="${company.instagramUrl}">
                             </div>
                         </div>
 
@@ -158,17 +171,12 @@
                         <h6 class="mt-4 mb-3">Culture d'entreprise</h6>
                         <div class="mb-3">
                             <label class="form-label">Valeurs de l'entreprise</label>
-                            <textarea class="form-control" rows="3">Innovation, Excellence, Collaboration, Intégrité, Engagement local</textarea>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Avantages et bénéfices</label>
-                            <textarea class="form-control" rows="3">Horaires flexibles, Télétravail partiel, Formation continue, Assurance maladie complémentaire, Prime de performance, Événements d'équipe réguliers</textarea>
+                            <textarea class="form-control field-update" id="valeurs" rows="3" th:text="${company.valeurs != null ? company.valeurs : ''}"></textarea>
                         </div>
 
                         <!-- Save Button -->
                         <div class="text-end mt-4">
-                            <button type="submit" class="btn btn-primary">
+                            <button type="button" id="saveAllChanges" class="btn btn-primary">
                                 <i class="fas fa-save me-1"></i> Enregistrer les modifications
                             </button>
                         </div>
@@ -189,21 +197,31 @@
                         <div class="company-preview-header">
                             <div class="company-logo-container">
                                 <div class="company-logo-placeholder">
-                                    <i class="fas fa-building"></i>
+                                    <th:block th:if="${company.logoUrl != null and !company.logoUrl.isEmpty()}">
+                                        <img th:src="${company.logoUrl}" alt="Company Logo" class="img-fluid">
+                                    </th:block>
+                                    <th:block th:unless="${company.logoUrl != null and !company.logoUrl.isEmpty()}">
+                                        <i class="fas fa-building"></i>
+                                    </th:block>
                                 </div>
                             </div>
-                            <h5 class="company-name">TechMaghrébine</h5>
-                            <p class="company-sector">Technologies de l'information</p>
+                            <h5 class="company-name" id="preview-name" th:text="${company.nomEntreprise}">TechMaghrébine</h5>
+                            <p class="company-sector" id="preview-sector" th:text="${company.secteur}">Technologies de l'information</p>
                             <div class="company-location">
-                                <i class="fas fa-map-marker-alt me-1"></i> Casablanca, Maroc
+                                <i class="fas fa-map-marker-alt me-1"></i>
+                                <span id="preview-location" th:text="${company.ville + ', ' + company.pays}">Casablanca, Maroc</span>
                             </div>
                             <div class="company-size mt-1">
-                                <i class="fas fa-users me-1"></i> 11-50 employés
+                                <i class="fas fa-users me-1"></i>
+                                <span id="preview-size" th:text="${company.tailleEntreprise}">11-50 employés</span>
                             </div>
                         </div>
                         <div class="company-preview-body mt-3">
-                            <p class="company-description">TechMaghrébine est une entreprise innovante spécialisée dans le développement de solutions numériques pour les entreprises du Maghreb...</p>
+                            <p class="company-description" id="preview-description" th:text="${#strings.length(company.description) > 200
+                                ? #strings.substring(company.description, 0, 200) + '...'
+                                : company.description}">Description preview...</p>
                             <div class="company-preview-stats">
+                                <!-- You might want to add logic to calculate these dynamically -->
                                 <div class="stat-item">
                                     <span class="stat-value">5</span>
                                     <span class="stat-label">Offres actives</span>
@@ -237,109 +255,317 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label d-block">Recevoir des candidatures</label>
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="receiveApplications" checked>
-                            <label class="form-check-label" for="receiveApplications">Activer</label>
-                        </div>
-                        <small class="form-text text-muted">Si désactivé, les candidats ne pourront pas postuler à vos offres</small>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label d-block">Notifications par email</label>
-                        <div class="form-check form-switch">
+                        <label class="form-label d-block">Notifications</label>
+                        <div class="form-check form-switch mb-2">
                             <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
-                            <label class="form-check-label" for="emailNotifications">Activer</label>
+                            <label class="form-check-label" for="emailNotifications">Notifications par email</label>
                         </div>
-                        <small class="form-text text-muted">Recevoir des notifications pour les nouvelles candidatures</small>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="appNotifications" checked>
+                            <label class="form-check-label" for="appNotifications">Notifications dans l'application</label>
+                        </div>
                     </div>
-
-                    <hr>
 
                     <div class="mb-3">
-                        <label class="form-label">Options de vérification</label>
-                        <div class="d-grid">
-                            <button class="btn btn-outline-success mb-2" disabled>
-                                <i class="fas fa-check-circle me-1"></i> Entreprise vérifiée
-                            </button>
-                            <button class="btn btn-outline-primary">
-                                <i class="fas fa-star me-1"></i> Demander le badge Premium
-                            </button>
+                        <label class="form-label">Préférences de communication</label>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="communicationNewCandidates" checked>
+                            <label class="form-check-label" for="communicationNewCandidates">Nouveaux candidats</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="communicationJobAlerts" checked>
+                            <label class="form-check-label" for="communicationJobAlerts">Alertes d'offres</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="communicationMarketing">
+                            <label class="form-check-label" for="communicationMarketing">Communications marketing</label>
                         </div>
                     </div>
-
-                    <hr>
-
-                    <div class="mb-0">
-                        <label class="form-label text-danger">Zone Danger</label>
-                        <div class="d-grid">
-                            <button class="btn btn-outline-danger">
-                                <i class="fas fa-trash-alt me-1"></i> Supprimer le profil
-                            </button>
-                        </div>
-                        <small class="form-text text-muted">Cette action est irréversible et supprimera toutes vos données</small>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Verification Documents -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">Documents de vérification</h5>
-                </div>
-                <div class="card-body">
-                    <p class="text-muted small">Pour maintenir votre statut d'entreprise vérifiée, veuillez télécharger les documents suivants :</p>
-
-                    <div class="document-item d-flex align-items-center mb-3">
-                        <div class="document-icon me-3">
-                            <i class="fas fa-file-pdf text-danger fa-2x"></i>
-                        </div>
-                        <div class="document-info flex-grow-1">
-                            <h6 class="mb-0">Registre de commerce</h6>
-                            <small class="text-muted">Téléchargé le 12/03/2025</small>
-                        </div>
-                        <div class="document-actions">
-                            <button class="btn btn-sm btn-light">
-                                <i class="fas fa-sync-alt"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="document-item d-flex align-items-center mb-3">
-                        <div class="document-icon me-3">
-                            <i class="fas fa-file-pdf text-danger fa-2x"></i>
-                        </div>
-                        <div class="document-info flex-grow-1">
-                            <h6 class="mb-0">Patente</h6>
-                            <small class="text-muted">Téléchargé le 12/03/2025</small>
-                        </div>
-                        <div class="document-actions">
-                            <button class="btn btn-sm btn-light">
-                                <i class="fas fa-sync-alt"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="document-item d-flex align-items-center">
-                        <div class="document-icon me-3">
-                            <i class="fas fa-file-upload text-muted fa-2x"></i>
-                        </div>
-                        <div class="document-info flex-grow-1">
-                            <h6 class="mb-0">Identité du gérant</h6>
-                            <small class="text-danger">Document requis</small>
-                        </div>
-                        <div class="document-actions">
-                            <button class="btn btn-sm btn-primary">
-                                <i class="fas fa-upload"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <button class="btn btn-outline-primary btn-sm w-100 mt-3">
-                        <i class="fas fa-plus me-1"></i> Ajouter un document
-                    </button>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Status messages for updates -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="updateSuccessToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-success text-white">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong class="me-auto">Succès</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                Les informations ont été mises à jour avec succès.
+            </div>
+        </div>
+
+        <div id="updateErrorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-danger text-white">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <strong class="me-auto">Erreur</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="errorMessage">
+                Une erreur s'est produite lors de la mise à jour des informations.
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript for company profile functionality -->
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get the recruiter ID from the form
+            const recruiterId = document.getElementById('recruiterId').value;
+
+            // Get toast elements
+            const successToast = document.getElementById('updateSuccessToast');
+            const errorToast = document.getElementById('updateErrorToast');
+
+            // Initialize Bootstrap toasts
+            if (typeof bootstrap !== 'undefined') {
+                const updateSuccessToast = new bootstrap.Toast(successToast);
+                const updateErrorToast = new bootstrap.Toast(errorToast);
+
+                // Individual field update
+                document.querySelectorAll('.field-update').forEach(input => {
+                    input.addEventListener('change', function() {
+                        updateField(this.id, this.value);
+
+                        // Also update preview in real-time
+                        updatePreview(this.id, this.value);
+                    });
+                });
+
+                // Function to update a single field via PATCH API
+                function updateField(fieldName, fieldValue) {
+                    fetch(`/company/field/${fieldName}?recruitId=${recruiterId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'text/plain'
+                        },
+                        body: fieldValue
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log('Field updated successfully:', data);
+                            // Show success toast for individual field update
+                            updateSuccessToast.show();
+                        })
+                        .catch(error => {
+                            console.error('Error updating field:', error);
+                            document.getElementById('errorMessage').textContent =
+                                `Erreur lors de la mise à jour de ${fieldName}: ${error.message}`;
+                            updateErrorToast.show();
+                        });
+                }
+
+                // Function to update the preview in real-time
+                function updatePreview(fieldId, value) {
+                    switch(fieldId) {
+                        case 'nomEntreprise':
+                            document.getElementById('preview-name').textContent = value;
+                            break;
+                        case 'secteur':
+                            document.getElementById('preview-sector').textContent = value;
+                            break;
+                        case 'tailleEntreprise':
+                            document.getElementById('preview-size').textContent = value;
+                            break;
+                        case 'description':
+                            const previewText = value.length > 200 ? value.substring(0, 200) + '...' : value;
+                            document.getElementById('preview-description').textContent = previewText;
+                            break;
+                        case 'ville':
+                        case 'pays':
+                            // Get current location components
+                            const ville = document.getElementById('ville').value;
+                            const pays = document.getElementById('pays').value;
+                            document.getElementById('preview-location').textContent = `${ville}, ${pays}`;
+                            break;
+                    }
+                }
+
+                // Logo upload functionality
+                document.getElementById('companyLogo').addEventListener('change', function(e) {
+                    if (this.files && this.files[0]) {
+                        const file = this.files[0];
+
+                        // Validate file type and size
+                        const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+                        const maxSize = 2 * 1024 * 1024; // 2MB
+
+                        if (!validTypes.includes(file.type)) {
+                            alert('Type de fichier non valide. Veuillez utiliser JPG, PNG ou GIF.');
+                            return;
+                        }
+
+                        if (file.size > maxSize) {
+                            alert('Le fichier est trop volumineux. La taille maximale est de 2MB.');
+                            return;
+                        }
+
+                        // Create form data and upload
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        formData.append('recruitId', recruiterId);
+
+                        fetch('/company/upload-logo', {
+                            method: 'POST',
+                            body: formData
+                        })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Upload failed');
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                console.log('Logo uploaded successfully:', data);
+
+                                // Update logo preview with the new logo URL
+                                const logoUrl = data.logoUrl;
+                                const logoPlaceholder = document.querySelector('.company-logo-placeholder');
+
+                                // Clear placeholder content
+                                logoPlaceholder.innerHTML = '';
+
+                                // Create and append new image
+                                const img = document.createElement('img');
+                                img.src = logoUrl;
+                                img.alt = 'Company Logo';
+                                img.className = 'img-fluid';
+                                logoPlaceholder.appendChild(img);
+
+                                // Also update the preview
+                                const previewLogo = document.querySelector('.company-preview-header .company-logo-placeholder');
+                                previewLogo.innerHTML = '';
+                                const previewImg = document.createElement('img');
+                                previewImg.src = logoUrl;
+                                previewImg.alt = 'Company Logo';
+                                previewImg.className = 'img-fluid';
+                                previewLogo.appendChild(previewImg);
+
+                                updateSuccessToast.show();
+                            })
+                            .catch(error => {
+                                console.error('Error uploading logo:', error);
+                                document.getElementById('errorMessage').textContent =
+                                    `Erreur lors de l'upload du logo: ${error.message}`;
+                                updateErrorToast.show();
+                            });
+                    }
+                });
+
+                // Delete logo functionality
+                document.getElementById('deleteLogo').addEventListener('click', function() {
+                    if (confirm('Êtes-vous sûr de vouloir supprimer le logo ?')) {
+                        fetch(`/company/delete-logo?recruitId=${recruiterId}`, {
+                            method: 'DELETE'
+                        })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Delete failed');
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                console.log('Logo deleted successfully:', data);
+
+                                // Update placeholder to show default content
+                                const logoPlaceholder = document.querySelector('.company-logo-placeholder');
+                                logoPlaceholder.innerHTML = `
+                                <i class="fas fa-building fa-3x"></i>
+                                <span>Logo</span>
+                            `;
+
+                                // Also update the preview
+                                const previewLogo = document.querySelector('.company-preview-header .company-logo-placeholder');
+                                previewLogo.innerHTML = `<i class="fas fa-building"></i>`;
+
+                                updateSuccessToast.show();
+                            })
+                            .catch(error => {
+                                console.error('Error deleting logo:', error);
+                                document.getElementById('errorMessage').textContent =
+                                    `Erreur lors de la suppression du logo: ${error.message}`;
+                                updateErrorToast.show();
+                            });
+                    }
+                });
+
+                // Save all changes button
+                document.getElementById('saveAllChanges').addEventListener('click', function() {
+                    // Collect all form data
+                    const company = {
+                        nomEntreprise: document.getElementById('nomEntreprise').value,
+                        secteur: document.getElementById('secteur').value,
+                        tailleEntreprise: document.getElementById('tailleEntreprise').value,
+                        anneeCreation: document.getElementById('anneeCreation').value,
+                        siteWeb: document.getElementById('siteWeb').value,
+                        emailContact: document.getElementById('emailContact').value,
+                        description: document.getElementById('description').value,
+                        adresse: document.getElementById('adresse').value,
+                        ville: document.getElementById('ville').value,
+                        pays: document.getElementById('pays').value,
+                        codePostal: document.getElementById('codePostal').value,
+                        telephone: document.getElementById('telephone').value,
+                        numeroRC: document.getElementById('numeroRC').value,
+                        linkedinUrl: document.getElementById('linkedinUrl').value,
+                        twitterUrl: document.getElementById('twitterUrl').value,
+                        facebookUrl: document.getElementById('facebookUrl').value,
+                        instagramUrl: document.getElementById('instagramUrl').value,
+                        valeurs: document.getElementById('valeurs').value
+                    };
+
+                    // Validate required fields
+                    if (!company.nomEntreprise || !company.secteur || !company.emailContact ||
+                        !company.description || !company.adresse || !company.ville || !company.pays) {
+                        document.getElementById('errorMessage').textContent =
+                            'Veuillez remplir tous les champs obligatoires.';
+                        updateErrorToast.show();
+                        return;
+                    }
+
+                    // Send update request
+                    fetch(`/company/update?recruitId=${recruiterId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(company)
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Update failed');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log('Company updated successfully:', data);
+                            updateSuccessToast.show();
+
+                            // Update preview fields
+                            updatePreview('nomEntreprise', company.nomEntreprise);
+                            updatePreview('secteur', company.secteur);
+                            updatePreview('tailleEntreprise', company.tailleEntreprise);
+                            updatePreview('description', company.description);
+                            updatePreview('ville', company.ville); // This will update the location preview
+                        })
+                        .catch(error => {
+                            console.error('Error updating company:', error);
+                            document.getElementById('errorMessage').textContent =
+                                `Erreur lors de la mise à jour de l'entreprise: ${error.message}`;
+                            updateErrorToast.show();
+                        });
+                });
+            } else {
+                console.error('Bootstrap is not available. Toasts will not work.');
+            }
+        });
+    </script>
 </div>

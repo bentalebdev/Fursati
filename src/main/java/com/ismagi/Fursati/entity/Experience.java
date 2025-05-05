@@ -2,11 +2,15 @@ package com.ismagi.Fursati.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
 @Entity
 @Data
+@Getter
+@Setter
 public class Experience {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

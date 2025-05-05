@@ -3,41 +3,41 @@
     <!-- Header avec filtres de recherche -->
     <div class="card mb-4">
         <div class="card-body">
-            <form class="candidates-search-form">
+            <form class="candidates-search-form" th:action="@{/recruteurs/candidates}" method="get">
                 <div class="row g-3">
                     <div class="col-md-4">
                         <div class="input-group">
-                            <input type="text" class="form-control" placeholder="Rechercher des candidats...">
-                            <button class="btn btn-outline-secondary" type="button">
+                            <input type="text" class="form-control" name="keyword" th:value="${currentKeyword}" placeholder="Rechercher des candidats...">
+                            <button class="btn btn-outline-secondary" type="submit">
                                 <i class="fas fa-search"></i>
                             </button>
                         </div>
                     </div>
                     <div class="col-md-8">
                         <div class="d-flex gap-2 flex-wrap justify-content-md-end">
-                            <select class="form-select" style="max-width: 150px;">
+                            <select class="form-select" style="max-width: 150px;" name="skill">
                                 <option value="">Compétences</option>
-                                <option value="FRONT_END">Front-end</option>
-                                <option value="BACK_END">Back-end</option>
-                                <option value="FULLSTACK">Full Stack</option>
-                                <option value="UI_UX">UI/UX Design</option>
-                                <option value="PROJECT_MANAGEMENT">Gestion de projet</option>
+                                <option value="FRONT_END" th:selected="${currentSkill == 'FRONT_END'}">Front-end</option>
+                                <option value="BACK_END" th:selected="${currentSkill == 'BACK_END'}">Back-end</option>
+                                <option value="FULLSTACK" th:selected="${currentSkill == 'FULLSTACK'}">Full Stack</option>
+                                <option value="UI_UX" th:selected="${currentSkill == 'UI_UX'}">UI/UX Design</option>
+                                <option value="PROJECT_MANAGEMENT" th:selected="${currentSkill == 'PROJECT_MANAGEMENT'}">Gestion de projet</option>
                             </select>
-                            <select class="form-select" style="max-width: 150px;">
+                            <select class="form-select" style="max-width: 150px;" name="experience">
                                 <option value="">Expérience</option>
-                                <option value="ENTRY">Débutant (0-2 ans)</option>
-                                <option value="JUNIOR">Junior (2-3 ans)</option>
-                                <option value="MID_LEVEL">Intermédiaire (3-5 ans)</option>
-                                <option value="SENIOR">Sénior (5-10 ans)</option>
-                                <option value="EXPERT">Expert (10+ ans)</option>
+                                <option value="ENTRY" th:selected="${currentExperience == 'ENTRY'}">Débutant (0-2 ans)</option>
+                                <option value="JUNIOR" th:selected="${currentExperience == 'JUNIOR'}">Junior (2-3 ans)</option>
+                                <option value="MID_LEVEL" th:selected="${currentExperience == 'MID_LEVEL'}">Intermédiaire (3-5 ans)</option>
+                                <option value="SENIOR" th:selected="${currentExperience == 'SENIOR'}">Sénior (5-10 ans)</option>
+                                <option value="EXPERT" th:selected="${currentExperience == 'EXPERT'}">Expert (10+ ans)</option>
                             </select>
-                            <select class="form-select" style="max-width: 150px;">
+                            <select class="form-select" style="max-width: 150px;" name="location">
                                 <option value="">Localisation</option>
-                                <option value="CASABLANCA">Casablanca</option>
-                                <option value="RABAT">Rabat</option>
-                                <option value="MARRAKECH">Marrakech</option>
-                                <option value="TANGER">Tanger</option>
-                                <option value="ANYWHERE">Télétravail</option>
+                                <option value="CASABLANCA" th:selected="${currentLocation == 'CASABLANCA'}">Casablanca</option>
+                                <option value="RABAT" th:selected="${currentLocation == 'RABAT'}">Rabat</option>
+                                <option value="MARRAKECH" th:selected="${currentLocation == 'MARRAKECH'}">Marrakech</option>
+                                <option value="TANGER" th:selected="${currentLocation == 'TANGER'}">Tanger</option>
+                                <option value="ANYWHERE" th:selected="${currentLocation == 'ANYWHERE'}">Télétravail</option>
                             </select>
                             <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#advancedSearchModal">
                                 <i class="fas fa-sliders-h"></i> Filtres avancés
@@ -45,12 +45,29 @@
                         </div>
                     </div>
                 </div>
-                <div id="activeFilters" class="mt-3">
+                <div id="activeFilters" class="mt-3" th:if="${currentKeyword != null || currentSkill != null || currentExperience != null || currentLocation != null}">
                     <div class="d-flex flex-wrap gap-2">
-                        <span class="badge bg-light text-dark p-2">Front-end <i class="fas fa-times ms-1"></i></span>
-                        <span class="badge bg-light text-dark p-2">Intermédiaire (3-5 ans) <i class="fas fa-times ms-1"></i></span>
-                        <span class="badge bg-light text-dark p-2">React <i class="fas fa-times ms-1"></i></span>
-                        <a href="#" class="ms-2 small text-decoration-none">Effacer tous les filtres</a>
+                        <span class="badge bg-light text-dark p-2" th:if="${currentKeyword != null}">
+                            <span th:text="${currentKeyword}"></span> <i class="fas fa-times ms-1"></i>
+                        </span>
+                        <span class="badge bg-light text-dark p-2" th:if="${currentSkill != null}">
+                            <span th:text="${currentSkill == 'FRONT_END' ? 'Front-end' :
+                                          (currentSkill == 'BACK_END' ? 'Back-end' :
+                                          (currentSkill == 'FULLSTACK' ? 'Full Stack' :
+                                          (currentSkill == 'UI_UX' ? 'UI/UX Design' : 'Gestion de projet')))}"></span>
+                            <i class="fas fa-times ms-1"></i>
+                        </span>
+                        <span class="badge bg-light text-dark p-2" th:if="${currentExperience != null}">
+                            <span th:text="${currentExperience == 'ENTRY' ? 'Débutant (0-2 ans)' :
+                                          (currentExperience == 'JUNIOR' ? 'Junior (2-3 ans)' :
+                                          (currentExperience == 'MID_LEVEL' ? 'Intermédiaire (3-5 ans)' :
+                                          (currentExperience == 'SENIOR' ? 'Sénior (5-10 ans)' : 'Expert (10+ ans)')))}"></span>
+                            <i class="fas fa-times ms-1"></i>
+                        </span>
+                        <span class="badge bg-light text-dark p-2" th:if="${currentLocation != null}">
+                            <span th:text="${currentLocation}"></span> <i class="fas fa-times ms-1"></i>
+                        </span>
+                        <a th:href="@{/recruteurs/candidates}" class="ms-2 small text-decoration-none">Effacer tous les filtres</a>
                     </div>
                 </div>
             </form>
@@ -60,379 +77,142 @@
     <!-- Mode d'affichage et tri -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div class="results-count">
-            <h6 class="mb-0">24 candidats trouvés</h6>
+            <h6 class="mb-0">
+                <span th:text="${candidates != null ? candidates.size() : 0}">0</span> candidats trouvés
+            </h6>
         </div>
         <div class="d-flex align-items-center gap-3">
             <div class="btn-group" role="group">
-                <button type="button" class="btn btn-outline-secondary active">
+                <button type="button" class="btn btn-outline-secondary active" id="gridViewBtn">
                     <i class="fas fa-th-large"></i>
                 </button>
-                <button type="button" class="btn btn-outline-secondary">
+                <button type="button" class="btn btn-outline-secondary" id="listViewBtn">
                     <i class="fas fa-list"></i>
                 </button>
             </div>
             <div class="dropdown">
                 <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    Trier par : <span class="sort-label">Pertinence</span>
+                    Trier par : <span class="sort-label" th:text="${currentSort ?: 'Pertinence'}">Pertinence</span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item active" href="#">Pertinence</a></li>
-                    <li><a class="dropdown-item" href="#">Expérience (plus élevée)</a></li>
-                    <li><a class="dropdown-item" href="#">Expérience (moins élevée)</a></li>
-                    <li><a class="dropdown-item" href="#">Plus récent</a></li>
-                    <li><a class="dropdown-item" href="#">Plus ancien</a></li>
+                    <li><a class="dropdown-item" th:classappend="${currentSort == null || currentSort == 'relevance' ? 'active' : ''}"
+                           th:href="@{/recruteurs/candidates(sort='relevance',keyword=${currentKeyword},skill=${currentSkill},experience=${currentExperience},location=${currentLocation},page=${currentPage},size=${pageSize})}">Pertinence</a></li>
+                    <li><a class="dropdown-item" th:classappend="${currentSort == 'experienceDesc' ? 'active' : ''}"
+                           th:href="@{/recruteurs/candidates(sort='experienceDesc',keyword=${currentKeyword},skill=${currentSkill},experience=${currentExperience},location=${currentLocation},page=${currentPage},size=${pageSize})}">Expérience (plus élevée)</a></li>
+                    <li><a class="dropdown-item" th:classappend="${currentSort == 'experienceAsc' ? 'active' : ''}"
+                           th:href="@{/recruteurs/candidates(sort='experienceAsc',keyword=${currentKeyword},skill=${currentSkill},experience=${currentExperience},location=${currentLocation},page=${currentPage},size=${pageSize})}">Expérience (moins élevée)</a></li>
+                    <li><a class="dropdown-item" th:classappend="${currentSort == 'newest' ? 'active' : ''}"
+                           th:href="@{/recruteurs/candidates(sort='newest',keyword=${currentKeyword},skill=${currentSkill},experience=${currentExperience},location=${currentLocation},page=${currentPage},size=${pageSize})}">Plus récent</a></li>
+                    <li><a class="dropdown-item" th:classappend="${currentSort == 'oldest' ? 'active' : ''}"
+                           th:href="@{/recruteurs/candidates(sort='oldest',keyword=${currentKeyword},skill=${currentSkill},experience=${currentExperience},location=${currentLocation},page=${currentPage},size=${pageSize})}">Plus ancien</a></li>
                 </ul>
             </div>
         </div>
     </div>
 
+    <!-- Message si aucun candidat -->
+    <div class="alert alert-info text-center py-5" th:if="${candidates == null || candidates.isEmpty()}">
+        <i class="fas fa-info-circle fa-2x mb-3"></i>
+        <h5>Aucun candidat trouvé</h5>
+        <p>Modifiez vos critères de recherche ou revenez plus tard.</p>
+    </div>
+
     <!-- Grid des candidats -->
-    <div class="row g-4 candidates-grid">
-        <!-- Candidat 1 -->
-        <div class="col-xl-3 col-lg-4 col-md-6">
+    <div class="row g-4 candidates-grid" th:if="${candidates != null && !candidates.isEmpty()}">
+        <!-- Candidat Card -->
+        <div class="col-xl-3 col-lg-4 col-md-6" th:each="candidat : ${candidates}">
             <div class="candidate-card">
                 <div class="candidate-card-header">
-                    <div class="candidate-avatar">YB</div>
+                    <!-- Initiales du candidat pour l'avatar -->
+                    <div class="candidate-avatar" th:text="${#strings.length(candidat.firstName) > 0 ? #strings.substring(candidat.firstName, 0, 1) : ''} +
+                                                         ${#strings.length(candidat.lastName) > 0 ? #strings.substring(candidat.lastName, 0, 1) : ''}">
+                        XY
+                    </div>
                     <div class="candidate-match">
-                        <span class="match-badge">95%</span>
+                        <!-- Simple match percentage based on skills count -->
+                        <span class="match-badge">
+                            <span th:text="${candidat.skills != null ? (candidat.skills.size() * 10 + 50) + '%' : '50%'}">80%</span>
+                        </span>
                     </div>
                 </div>
                 <div class="candidate-card-body">
-                    <h5 class="candidate-name">Youssef Benjelloun</h5>
-                    <p class="candidate-title">Full Stack Developer</p>
+                    <h5 class="candidate-name" th:text="${candidat.firstName + ' ' + candidat.lastName}">Nom Prénom</h5>
+                    <p class="candidate-title">
+                        <!-- Using jobTitle (not title) from first experience -->
+                        <span th:if="${candidat.experiences != null && !candidat.experiences.isEmpty()}"
+                              th:text="${candidat.experiences[0].jobTitle}">Développeur</span>
+                        <span th:unless="${candidat.experiences != null && !candidat.experiences.isEmpty()}">Professionnel</span>
+                    </p>
                     <div class="candidate-meta">
                         <div class="candidate-meta-item">
-                            <i class="fas fa-map-marker-alt"></i> Casablanca
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span th:text="${candidat.address ?: 'Non spécifié'}">Localisation</span>
                         </div>
                         <div class="candidate-meta-item">
-                            <i class="fas fa-briefcase"></i> 5 ans d'exp.
+                            <i class="fas fa-briefcase"></i>
+                            <!-- Simple count of experiences -->
+                            <span th:text="${candidat.experiences != null ? candidat.experiences.size() : 0} + ' expérience(s)'">
+                                5 expérience(s)
+                            </span>
                         </div>
                     </div>
-                    <div class="candidate-skills">
-                        <span class="skill-badge">JavaScript</span>
-                        <span class="skill-badge">React</span>
-                        <span class="skill-badge">Node.js</span>
-                        <span class="skill-badge">MongoDB</span>
-                        <span class="skill-badge">+3</span>
-                    </div>
-                </div>
-                <div class="candidate-card-footer">
-                    <button class="btn btn-sm btn-outline-primary w-100 mb-2">
-                        <i class="fas fa-eye me-1"></i> Voir le profil
-                    </button>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-sm btn-outline-secondary flex-fill">
-                            <i class="fas fa-envelope me-1"></i> Message
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary flex-fill">
-                            <i class="fas fa-bookmark me-1"></i> Sauvegarder
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Candidat 2 -->
-        <div class="col-xl-3 col-lg-4 col-md-6">
-            <div class="candidate-card">
-                <div class="candidate-card-header">
-                    <div class="candidate-avatar">NE</div>
-                    <div class="candidate-match">
-                        <span class="match-badge">90%</span>
-                    </div>
-                </div>
-                <div class="candidate-card-body">
-                    <h5 class="candidate-name">Nadia El Moutaouakil</h5>
-                    <p class="candidate-title">UX/UI Designer</p>
-                    <div class="candidate-meta">
-                        <div class="candidate-meta-item">
-                            <i class="fas fa-map-marker-alt"></i> Rabat
-                        </div>
-                        <div class="candidate-meta-item">
-                            <i class="fas fa-briefcase"></i> 4 ans d'exp.
+                    <!-- Langues -->
+                    <div class="candidate-languages mb-2" th:if="${candidat.languages != null && !candidat.languages.isEmpty()}">
+                        <small class="text-muted d-block mb-1">Langues:</small>
+                        <div class="d-flex flex-wrap gap-1">
+                            <th:block th:each="lang, status : ${candidat.languages}" th:if="${status.index < 3}">
+                                <span class="language-badge"
+                                      th:text="${lang.name}"
+                                      th:title="${lang.proficiency + ' (' + lang.proficiencyLevel + '/100)'}">
+                                    Langue
+                                </span>
+                            </th:block>
+                            <span class="language-badge" th:if="${candidat.languages.size() > 3}"
+                                  th:text="'+' + (${candidat.languages.size() - 3})">+2</span>
                         </div>
                     </div>
-                    <div class="candidate-skills">
-                        <span class="skill-badge">Figma</span>
-                        <span class="skill-badge">Sketch</span>
-                        <span class="skill-badge">Adobe XD</span>
-                        <span class="skill-badge">HTML/CSS</span>
-                        <span class="skill-badge">+2</span>
-                    </div>
-                </div>
-                <div class="candidate-card-footer">
-                    <button class="btn btn-sm btn-outline-primary w-100 mb-2">
-                        <i class="fas fa-eye me-1"></i> Voir le profil
-                    </button>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-sm btn-outline-secondary flex-fill">
-                            <i class="fas fa-envelope me-1"></i> Message
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary flex-fill">
-                            <i class="fas fa-bookmark me-1"></i> Sauvegarder
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Candidat 3 -->
-        <div class="col-xl-3 col-lg-4 col-md-6">
-            <div class="candidate-card">
-                <div class="candidate-card-header">
-                    <div class="candidate-avatar">MB</div>
-                    <div class="candidate-match">
-                        <span class="match-badge">85%</span>
-                    </div>
-                </div>
-                <div class="candidate-card-body">
-                    <h5 class="candidate-name">Mohammed Berrada</h5>
-                    <p class="candidate-title">Project Manager</p>
-                    <div class="candidate-meta">
-                        <div class="candidate-meta-item">
-                            <i class="fas fa-map-marker-alt"></i> Casablanca
-                        </div>
-                        <div class="candidate-meta-item">
-                            <i class="fas fa-briefcase"></i> 7 ans d'exp.
-                        </div>
-                    </div>
+                    <!-- Compétences -->
                     <div class="candidate-skills">
-                        <span class="skill-badge">Agile</span>
-                        <span class="skill-badge">Scrum</span>
-                        <span class="skill-badge">JIRA</span>
-                        <span class="skill-badge">DevOps</span>
-                        <span class="skill-badge">+4</span>
+                        <small class="text-muted d-block mb-1">Compétences:</small>
+                        <th:block th:if="${candidat.skills != null && !candidat.skills.isEmpty()}">
+                            <th:block th:each="skill, status : ${candidat.skills}" th:if="${status.index < 4}">
+                                <span class="skill-badge"
+                                      th:text="${skill.name}"
+                                      th:title="${skill.proficiency}">Compétence</span>
+                            </th:block>
+                            <span class="skill-badge" th:if="${candidat.skills.size() > 4}"
+                                  th:text="'+' + (${candidat.skills.size() - 4})">+3</span>
+                        </th:block>
+                        <span th:unless="${candidat.skills != null && !candidat.skills.isEmpty()}" class="text-muted small">
+                            Aucune compétence spécifiée
+                        </span>
                     </div>
-                </div>
-                <div class="candidate-card-footer">
-                    <button class="btn btn-sm btn-outline-primary w-100 mb-2">
-                        <i class="fas fa-eye me-1"></i> Voir le profil
-                    </button>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-sm btn-outline-secondary flex-fill">
-                            <i class="fas fa-envelope me-1"></i> Message
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary flex-fill">
-                            <i class="fas fa-bookmark me-1"></i> Sauvegarder
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Candidat 4 -->
-        <div class="col-xl-3 col-lg-4 col-md-6">
-            <div class="candidate-card">
-                <div class="candidate-card-header">
-                    <div class="candidate-avatar">LB</div>
-                    <div class="candidate-match">
-                        <span class="match-badge">82%</span>
-                    </div>
-                </div>
-                <div class="candidate-card-body">
-                    <h5 class="candidate-name">Leila Benali</h5>
-                    <p class="candidate-title">Frontend Developer</p>
-                    <div class="candidate-meta">
-                        <div class="candidate-meta-item">
-                            <i class="fas fa-map-marker-alt"></i> Marrakech
+                    <!-- Formation -->
+                    <div class="candidate-education mt-2" th:if="${candidat.educations != null && !candidat.educations.isEmpty()}">
+                        <small class="text-muted d-block mb-1">Formation:</small>
+                        <div class="education-info">
+                            <span th:if="${!candidat.educations.isEmpty()}"
+                                  th:text="${candidat.educations[0].degree + ' - ' + candidat.educations[0].school}">
+                                Master - Université
+                            </span>
                         </div>
-                        <div class="candidate-meta-item">
-                            <i class="fas fa-briefcase"></i> 3 ans d'exp.
-                        </div>
-                    </div>
-                    <div class="candidate-skills">
-                        <span class="skill-badge">HTML/CSS</span>
-                        <span class="skill-badge">JavaScript</span>
-                        <span class="skill-badge">Vue.js</span>
-                        <span class="skill-badge">SASS</span>
-                        <span class="skill-badge">+2</span>
                     </div>
                 </div>
                 <div class="candidate-card-footer">
-                    <button class="btn btn-sm btn-outline-primary w-100 mb-2">
+                    <a class="btn btn-sm btn-outline-primary w-100 mb-2"
+                       th:href="@{/candidats/{id}(id=${candidat.id})}">
                         <i class="fas fa-eye me-1"></i> Voir le profil
-                    </button>
+                    </a>
                     <div class="d-flex gap-2">
-                        <button class="btn btn-sm btn-outline-secondary flex-fill">
+                        <button class="btn btn-sm btn-outline-secondary flex-fill"
+                                th:onclick="'contactCandidat(' + ${candidat.id} + ')'">
                             <i class="fas fa-envelope me-1"></i> Message
                         </button>
-                        <button class="btn btn-sm btn-outline-secondary flex-fill">
-                            <i class="fas fa-bookmark me-1"></i> Sauvegarder
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Candidat 5 -->
-        <div class="col-xl-3 col-lg-4 col-md-6">
-            <div class="candidate-card">
-                <div class="candidate-card-header">
-                    <div class="candidate-avatar">AC</div>
-                    <div class="candidate-match">
-                        <span class="match-badge">80%</span>
-                    </div>
-                </div>
-                <div class="candidate-card-body">
-                    <h5 class="candidate-name">Ahmed Chaoui</h5>
-                    <p class="candidate-title">DevOps Engineer</p>
-                    <div class="candidate-meta">
-                        <div class="candidate-meta-item">
-                            <i class="fas fa-map-marker-alt"></i> Casablanca
-                        </div>
-                        <div class="candidate-meta-item">
-                            <i class="fas fa-briefcase"></i> 6 ans d'exp.
-                        </div>
-                    </div>
-                    <div class="candidate-skills">
-                        <span class="skill-badge">AWS</span>
-                        <span class="skill-badge">Docker</span>
-                        <span class="skill-badge">Kubernetes</span>
-                        <span class="skill-badge">CI/CD</span>
-                        <span class="skill-badge">+5</span>
-                    </div>
-                </div>
-                <div class="candidate-card-footer">
-                    <button class="btn btn-sm btn-outline-primary w-100 mb-2">
-                        <i class="fas fa-eye me-1"></i> Voir le profil
-                    </button>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-sm btn-outline-secondary flex-fill">
-                            <i class="fas fa-envelope me-1"></i> Message
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary flex-fill">
-                            <i class="fas fa-bookmark me-1"></i> Sauvegarder
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Candidat 6 -->
-        <div class="col-xl-3 col-lg-4 col-md-6">
-            <div class="candidate-card">
-                <div class="candidate-card-header">
-                    <div class="candidate-avatar">SL</div>
-                    <div class="candidate-match">
-                        <span class="match-badge">78%</span>
-                    </div>
-                </div>
-                <div class="candidate-card-body">
-                    <h5 class="candidate-name">Sara Lamrani</h5>
-                    <p class="candidate-title">Data Analyst</p>
-                    <div class="candidate-meta">
-                        <div class="candidate-meta-item">
-                            <i class="fas fa-map-marker-alt"></i> Rabat
-                        </div>
-                        <div class="candidate-meta-item">
-                            <i class="fas fa-briefcase"></i> 4 ans d'exp.
-                        </div>
-                    </div>
-                    <div class="candidate-skills">
-                        <span class="skill-badge">SQL</span>
-                        <span class="skill-badge">Python</span>
-                        <span class="skill-badge">Tableau</span>
-                        <span class="skill-badge">Excel</span>
-                        <span class="skill-badge">+3</span>
-                    </div>
-                </div>
-                <div class="candidate-card-footer">
-                    <button class="btn btn-sm btn-outline-primary w-100 mb-2">
-                        <i class="fas fa-eye me-1"></i> Voir le profil
-                    </button>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-sm btn-outline-secondary flex-fill">
-                            <i class="fas fa-envelope me-1"></i> Message
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary flex-fill">
-                            <i class="fas fa-bookmark me-1"></i> Sauvegarder
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Candidat 7 -->
-        <div class="col-xl-3 col-lg-4 col-md-6">
-            <div class="candidate-card">
-                <div class="candidate-card-header">
-                    <div class="candidate-avatar">KH</div>
-                    <div class="candidate-match">
-                        <span class="match-badge">75%</span>
-                    </div>
-                </div>
-                <div class="candidate-card-body">
-                    <h5 class="candidate-name">Karim Hassani</h5>
-                    <p class="candidate-title">Backend Developer</p>
-                    <div class="candidate-meta">
-                        <div class="candidate-meta-item">
-                            <i class="fas fa-map-marker-alt"></i> Tanger
-                        </div>
-                        <div class="candidate-meta-item">
-                            <i class="fas fa-briefcase"></i> 5 ans d'exp.
-                        </div>
-                    </div>
-                    <div class="candidate-skills">
-                        <span class="skill-badge">Java</span>
-                        <span class="skill-badge">Spring</span>
-                        <span class="skill-badge">MySQL</span>
-                        <span class="skill-badge">REST API</span>
-                        <span class="skill-badge">+2</span>
-                    </div>
-                </div>
-                <div class="candidate-card-footer">
-                    <button class="btn btn-sm btn-outline-primary w-100 mb-2">
-                        <i class="fas fa-eye me-1"></i> Voir le profil
-                    </button>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-sm btn-outline-secondary flex-fill">
-                            <i class="fas fa-envelope me-1"></i> Message
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary flex-fill">
-                            <i class="fas fa-bookmark me-1"></i> Sauvegarder
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Candidat 8 -->
-        <div class="col-xl-3 col-lg-4 col-md-6">
-            <div class="candidate-card">
-                <div class="candidate-card-header">
-                    <div class="candidate-avatar">FZ</div>
-                    <div class="candidate-match">
-                        <span class="match-badge">72%</span>
-                    </div>
-                </div>
-                <div class="candidate-card-body">
-                    <h5 class="candidate-name">Fatima Zahra Alami</h5>
-                    <p class="candidate-title">QA Engineer</p>
-                    <div class="candidate-meta">
-                        <div class="candidate-meta-item">
-                            <i class="fas fa-map-marker-alt"></i> Casablanca
-                        </div>
-                        <div class="candidate-meta-item">
-                            <i class="fas fa-briefcase"></i> 3 ans d'exp.
-                        </div>
-                    </div>
-                    <div class="candidate-skills">
-                        <span class="skill-badge">Selenium</span>
-                        <span class="skill-badge">Jira</span>
-                        <span class="skill-badge">TestNG</span>
-                        <span class="skill-badge">Cucumber</span>
-                        <span class="skill-badge">+2</span>
-                    </div>
-                </div>
-                <div class="candidate-card-footer">
-                    <button class="btn btn-sm btn-outline-primary w-100 mb-2">
-                        <i class="fas fa-eye me-1"></i> Voir le profil
-                    </button>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-sm btn-outline-secondary flex-fill">
-                            <i class="fas fa-envelope me-1"></i> Message
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary flex-fill">
+                        <button class="btn btn-sm btn-outline-secondary flex-fill save-candidate"
+                                th:data-candidate-id="${candidat.id}">
                             <i class="fas fa-bookmark me-1"></i> Sauvegarder
                         </button>
                     </div>
@@ -442,22 +222,31 @@
     </div>
 
     <!-- Pagination -->
-    <div class="d-flex justify-content-between align-items-center mt-5">
+    <div class="d-flex justify-content-between align-items-center mt-5" th:if="${candidates != null && !candidates.isEmpty()}">
         <div class="text-muted small">
-            Affichage de 1-8 sur 24 candidats
+            Affichage de <span th:text="${startIndex != null ? startIndex + 1 : 1}">1</span>-<span
+                th:text="${endIndex != null ? endIndex : candidates.size()}">8</span>
+            sur <span th:text="${totalCandidates ?: candidates.size()}">24</span> candidats
         </div>
-        <nav aria-label="Page navigation">
+        <nav aria-label="Page navigation" th:if="${totalPages > 1}">
             <ul class="pagination mb-0">
-                <li class="page-item disabled">
-                    <a class="page-link" href="#" aria-label="Previous">
+                <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                    <a class="page-link"
+                       th:href="@{/recruteurs/candidates(keyword=${currentKeyword},skill=${currentSkill},experience=${currentExperience},location=${currentLocation},page=${currentPage - 1},size=${pageSize},sort=${currentSort})}"
+                       aria-label="Previous">
                         <span aria-hidden="true">&laquo;</span>
                     </a>
                 </li>
-                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item">
-                    <a class="page-link" href="#" aria-label="Next">
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                    th:classappend="${currentPage == i ? 'active' : ''}">
+                    <a class="page-link"
+                       th:href="@{/recruteurs/candidates(keyword=${currentKeyword},skill=${currentSkill},experience=${currentExperience},location=${currentLocation},page=${i},size=${pageSize},sort=${currentSort})}"
+                       th:text="${i + 1}">1</a>
+                </li>
+                <li class="page-item" th:classappend="${currentPage + 1 >= totalPages ? 'disabled' : ''}">
+                    <a class="page-link"
+                       th:href="@{/recruteurs/candidates(keyword=${currentKeyword},skill=${currentSkill},experience=${currentExperience},location=${currentLocation},page=${currentPage + 1},size=${pageSize},sort=${currentSort})}"
+                       aria-label="Next">
                         <span aria-hidden="true">&raquo;</span>
                     </a>
                 </li>
@@ -473,37 +262,39 @@
                     <h5 class="modal-title" id="advancedSearchModalLabel">Recherche avancée de candidats</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <form>
+                <form th:action="@{/recruteurs/candidates}" method="get">
+                    <div class="modal-body">
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Mots-clés</label>
-                                <input type="text" class="form-control" placeholder="Compétences, titres, certifications...">
+                                <input type="text" class="form-control" name="keyword" th:value="${currentKeyword}"
+                                       placeholder="Compétences, titres, certifications...">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Localisation</label>
-                                <input type="text" class="form-control" placeholder="Ville, pays...">
+                                <input type="text" class="form-control" name="location" th:value="${currentLocation}"
+                                       placeholder="Ville, pays...">
                             </div>
                         </div>
 
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Expérience</label>
-                                <select class="form-select">
+                                <select class="form-select" name="experience">
                                     <option value="">Sélectionner</option>
-                                    <option value="0-2">0-2 ans</option>
-                                    <option value="3-5">3-5 ans</option>
-                                    <option value="5-10">5-10 ans</option>
-                                    <option value="10+">10+ ans</option>
+                                    <option value="0-2" th:selected="${currentExperience == '0-2'}">0-2 ans</option>
+                                    <option value="3-5" th:selected="${currentExperience == '3-5'}">3-5 ans</option>
+                                    <option value="5-10" th:selected="${currentExperience == '5-10'}">5-10 ans</option>
+                                    <option value="10+" th:selected="${currentExperience == '10+'}">10+ ans</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Niveau d'éducation</label>
-                                <select class="form-select">
+                                <select class="form-select" name="education">
                                     <option value="">Sélectionner</option>
-                                    <option value="BACHELOR">Licence (Bac+3)</option>
-                                    <option value="MASTER">Master (Bac+5)</option>
-                                    <option value="DOCTORATE">Doctorat</option>
+                                    <option value="BACHELOR" th:selected="${currentEducation == 'BACHELOR'}">Licence (Bac+3)</option>
+                                    <option value="MASTER" th:selected="${currentEducation == 'MASTER'}">Master (Bac+5)</option>
+                                    <option value="DOCTORATE" th:selected="${currentEducation == 'DOCTORATE'}">Doctorat</option>
                                 </select>
                             </div>
                         </div>
@@ -512,86 +303,59 @@
                             <div class="col-md-6">
                                 <label class="form-label">Langues</label>
                                 <div class="input-group mb-2">
-                                    <select class="form-select">
+                                    <select class="form-select" id="languageSelect">
                                         <option value="">Sélectionner une langue</option>
                                         <option value="FR">Français</option>
                                         <option value="EN">Anglais</option>
                                         <option value="AR">Arabe</option>
                                         <option value="ES">Espagnol</option>
                                     </select>
-                                    <select class="form-select" style="max-width: 150px;">
+                                    <select class="form-select" style="max-width: 150px;" id="languageLevelSelect">
                                         <option value="">Niveau</option>
                                         <option value="BASIC">Débutant</option>
                                         <option value="INTERMEDIATE">Intermédiaire</option>
                                         <option value="ADVANCED">Avancé</option>
                                         <option value="FLUENT">Courant</option>
                                     </select>
-                                    <button class="btn btn-outline-secondary" type="button">
+                                    <button class="btn btn-outline-secondary" type="button" id="addLanguageBtn">
                                         <i class="fas fa-plus"></i>
                                     </button>
                                 </div>
-                                <div class="selected-languages">
-                                    <!-- Langues sélectionnées -->
+                                <div id="selectedLanguages" class="selected-languages">
+                                    <!-- Langues sélectionnées seront ajoutées ici par JavaScript -->
                                 </div>
+                                <input type="hidden" name="languages" id="languagesInput">
+                                <input type="hidden" name="languageLevels" id="languageLevelsInput">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Disponibilité</label>
-                                <select class="form-select">
+                                <select class="form-select" name="availability">
                                     <option value="">Sélectionner</option>
-                                    <option value="IMMEDIATELY">Immédiate</option>
-                                    <option value="ONE_MONTH">1 mois</option>
-                                    <option value="THREE_MONTHS">3 mois</option>
+                                    <option value="IMMEDIATELY" th:selected="${currentAvailability == 'IMMEDIATELY'}">Immédiate</option>
+                                    <option value="ONE_MONTH" th:selected="${currentAvailability == 'ONE_MONTH'}">1 mois</option>
+                                    <option value="THREE_MONTHS" th:selected="${currentAvailability == 'THREE_MONTHS'}">3 mois</option>
                                 </select>
                             </div>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Compétences</label>
-                            <input type="text" class="form-control" placeholder="JavaScript, React, Python...">
+                            <input type="text" class="form-control" name="skills" th:value="${currentSkills != null ? #strings.arrayJoin(currentSkills, ',') : ''}"
+                                   placeholder="JavaScript, React, Python...">
                             <div class="form-text">Séparez les compétences par des virgules</div>
                         </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Salaire annuel souhaité (MAD)</label>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <input type="number" class="form-control" placeholder="Min">
-                                </div>
-                                <div class="col-md-6">
-                                    <input type="number" class="form-control" placeholder="Max">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="remoteCheck">
-                                <label class="form-check-label" for="remoteCheck">
-                                    Candidats ouverts au télétravail uniquement
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="activeCheck">
-                                <label class="form-check-label" for="activeCheck">
-                                    Candidats actifs uniquement (connectés ces 30 derniers jours)
-                                </label>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="button" class="btn btn-primary">Appliquer les filtres</button>
-                </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Appliquer les filtres</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
     <style>
-        /* Styles spécifiques pour la page candidats */
+        /* Styles for candidate cards */
         .candidate-card {
             border-radius: 8px;
             overflow: hidden;
@@ -622,7 +386,7 @@
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background-color: var(--primary-color);
+            background-color: #3f51b5;
             color: white;
             display: flex;
             align-items: center;
@@ -639,7 +403,7 @@
         }
 
         .match-badge {
-            color: var(--primary-color);
+            color: #4caf50;
             font-weight: 600;
             font-size: 0.9rem;
         }
@@ -656,7 +420,7 @@
         }
 
         .candidate-title {
-            color: var(--text-gray);
+            color: #777;
             margin-bottom: 10px;
             font-size: 0.9rem;
         }
@@ -670,12 +434,23 @@
 
         .candidate-meta-item {
             margin-right: 15px;
-            color: var(--text-gray);
+            color: #777;
         }
 
         .candidate-meta-item i {
             margin-right: 5px;
-            color: var(--text-gray);
+            color: #777;
+        }
+
+        .language-badge {
+            background-color: rgba(0, 123, 255, 0.1);
+            color: #0275d8;
+            border-radius: 30px;
+            padding: 3px 10px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            margin-right: 5px;
+            margin-bottom: 5px;
         }
 
         .candidate-skills {
@@ -686,8 +461,8 @@
         }
 
         .skill-badge {
-            background-color: var(--bg-light);
-            color: var(--text-dark);
+            background-color: #f1f1f1;
+            color: #333;
             border-radius: 30px;
             padding: 3px 10px;
             font-size: 0.75rem;
@@ -696,25 +471,11 @@
 
         .candidate-card-footer {
             padding: 15px 20px;
-            border-top: 1px solid var(--border-color);
+            border-top: 1px solid #e9e9e9;
             background-color: #f9f9f9;
         }
 
-        /* Styles pour les filtres */
-        #activeFilters .badge {
-            cursor: pointer;
-        }
-
-        #activeFilters .badge i {
-            cursor: pointer;
-        }
-
-        /* Styles pour le modal de recherche avancée */
-        .selected-languages {
-            margin-top: 10px;
-        }
-
-        /* Styles pour le mode liste */
+        /* List view styles */
         .candidates-list .candidate-card {
             flex-direction: row;
             align-items: stretch;
@@ -725,7 +486,7 @@
         .candidates-list .candidate-card-header {
             width: 100px;
             border-bottom: none;
-            border-right: 1px solid var(--border-color);
+            border-right: 1px solid #e9e9e9;
             flex-shrink: 0;
             display: flex;
             flex-direction: column;
@@ -739,71 +500,164 @@
             flex-grow: 1;
         }
 
-        .candidates-list .candidate-name,
-        .candidates-list .candidate-title {
-            margin-bottom: 5px;
-        }
-
-        .candidates-list .candidate-info {
-            flex: 1;
-        }
-
-        .candidates-list .candidate-skills {
-            margin-top: 10px;
-            max-width: 400px;
-        }
-
-        .candidates-list .candidate-meta {
-            margin-bottom: 10px;
-        }
-
-        .candidates-list .candidate-actions {
-            width: 200px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding-right: 15px;
-        }
-
         .candidates-list .candidate-card-footer {
             display: none;
         }
 
-        /* Styles pour les filtres actifs */
-        #activeFilters .badge {
-            background-color: #f0f0f0;
-            color: #333;
-            font-weight: normal;
-            display: inline-flex;
-            align-items: center;
+        /* Pagination styles */
+        .pagination .page-link {
+            color: #3f51b5;
         }
 
-        #activeFilters .badge i {
-            margin-left: 5px;
-            font-size: 0.8rem;
-            opacity: 0.7;
-        }
-
-        #activeFilters .badge:hover {
-            background-color: #e0e0e0;
-        }
-
-        #activeFilters .badge:hover i {
-            opacity: 1;
-        }
-
-        /* Style pour les boutons de toggle d'affichage */
-        .btn-group .btn.active {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-            color: white;
-        }
-
-        /* Style pour le dropdown de tri */
-        .dropdown-item.active {
-            background-color: var(--primary-color);
-            color: white;
+        .pagination .page-item.active .page-link {
+            background-color: #3f51b5;
+            border-color: #3f51b5;
         }
     </style>
 
+    <!-- JavaScript for interactive functionality -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle between grid and list views
+            const gridViewBtn = document.getElementById('gridViewBtn');
+            const listViewBtn = document.getElementById('listViewBtn');
+            const candidatesContainer = document.querySelector('.candidates-grid');
+
+            if (gridViewBtn && listViewBtn && candidatesContainer) {
+                gridViewBtn.addEventListener('click', function() {
+                    candidatesContainer.classList.remove('candidates-list');
+                    gridViewBtn.classList.add('active');
+                    listViewBtn.classList.remove('active');
+                    localStorage.setItem('candidatesViewMode', 'grid');
+                });
+
+                listViewBtn.addEventListener('click', function() {
+                    candidatesContainer.classList.add('candidates-list');
+                    listViewBtn.classList.add('active');
+                    gridViewBtn.classList.remove('active');
+                    localStorage.setItem('candidatesViewMode', 'list');
+                });
+
+                // Apply saved view preference
+                const savedViewMode = localStorage.getItem('candidatesViewMode');
+                if (savedViewMode === 'list') {
+                    candidatesContainer.classList.add('candidates-list');
+                    listViewBtn.classList.add('active');
+                    gridViewBtn.classList.remove('active');
+                }
+            }
+
+            // Handle language selection in advanced search
+            const addLanguageBtn = document.getElementById('addLanguageBtn');
+            const languageSelect = document.getElementById('languageSelect');
+            const languageLevelSelect = document.getElementById('languageLevelSelect');
+            const selectedLanguages = document.getElementById('selectedLanguages');
+            const languagesInput = document.getElementById('languagesInput');
+            const languageLevelsInput = document.getElementById('languageLevelsInput');
+
+            if (addLanguageBtn && languageSelect && languageLevelSelect && selectedLanguages) {
+                const selectedLanguagesArray = [];
+                const selectedLanguageLevelsArray = [];
+
+                addLanguageBtn.addEventListener('click', function() {
+                    const language = languageSelect.value;
+                    const level = languageLevelSelect.value;
+
+                    if (language && level) {
+                        if (selectedLanguagesArray.includes(language)) {
+                            return;
+                        }
+
+                        selectedLanguagesArray.push(language);
+                        selectedLanguageLevelsArray.push(level);
+
+                        languagesInput.value = selectedLanguagesArray.join(',');
+                        languageLevelsInput.value = selectedLanguageLevelsArray.join(',');
+
+                        const languageText = getLanguageText(language);
+                        const levelText = getLevelText(level);
+
+                        const badge = document.createElement('div');
+                        badge.className = 'badge bg-light text-dark p-2 me-2 mb-2';
+                        badge.innerHTML = `${languageText} - ${levelText} <i class="fas fa-times ms-1"></i>`;
+                        badge.setAttribute('data-language', language);
+
+                        badge.querySelector('i').addEventListener('click', function() {
+                            const langIndex = selectedLanguagesArray.indexOf(language);
+                            if (langIndex !== -1) {
+                                selectedLanguagesArray.splice(langIndex, 1);
+                                selectedLanguageLevelsArray.splice(langIndex, 1);
+                                languagesInput.value = selectedLanguagesArray.join(',');
+                                languageLevelsInput.value = selectedLanguageLevelsArray.join(',');
+                            }
+                            badge.remove();
+                        });
+
+                        selectedLanguages.appendChild(badge);
+                    }
+                });
+
+                function getLanguageText(code) {
+                    const languages = {
+                        'FR': 'Français',
+                        'EN': 'Anglais',
+                        'AR': 'Arabe',
+                        'ES': 'Espagnol'
+                    };
+                    return languages[code] || code;
+                }
+
+                function getLevelText(level) {
+                    const levels = {
+                        'BASIC': 'Débutant',
+                        'INTERMEDIATE': 'Intermédiaire',
+                        'ADVANCED': 'Avancé',
+                        'FLUENT': 'Courant'
+                    };
+                    return levels[level] || level;
+                }
+            }
+
+            // Contact candidate functionality
+            window.contactCandidat = function(candidatId) {
+                console.log('Contacter candidat: ' + candidatId);
+                // Implement contact modal
+            };
+
+            // Save candidate functionality
+            const saveBtns = document.querySelectorAll('.save-candidate');
+            if (saveBtns) {
+                saveBtns.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const candidatId = this.getAttribute('data-candidate-id');
+                        const savedCandidates = JSON.parse(localStorage.getItem('savedCandidates') || '[]');
+
+                        if (!savedCandidates.includes(candidatId)) {
+                            savedCandidates.push(candidatId);
+                            localStorage.setItem('savedCandidates', JSON.stringify(savedCandidates));
+                            this.classList.remove('btn-outline-secondary');
+                            this.classList.add('btn-secondary');
+                            this.innerHTML = '<i class="fas fa-bookmark me-1"></i> Sauvegardé';
+                        } else {
+                            const index = savedCandidates.indexOf(candidatId);
+                            savedCandidates.splice(index, 1);
+                            localStorage.setItem('savedCandidates', JSON.stringify(savedCandidates));
+                            this.classList.remove('btn-secondary');
+                            this.classList.add('btn-outline-secondary');
+                            this.innerHTML = '<i class="fas fa-bookmark me-1"></i> Sauvegarder';
+                        }
+                    });
+
+                    // Check if already saved
+                    const candidatId = btn.getAttribute('data-candidate-id');
+                    const savedCandidates = JSON.parse(localStorage.getItem('savedCandidates') || '[]');
+                    if (savedCandidates.includes(candidatId)) {
+                        btn.classList.remove('btn-outline-secondary');
+                        btn.classList.add('btn-secondary');
+                        btn.innerHTML = '<i class="fas fa-bookmark me-1"></i> Sauvegardé';
+                    }
+                });
+            }
+        });
+    </script>
 </div>
