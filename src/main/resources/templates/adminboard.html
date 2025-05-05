@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fursati | Espace Administrateur</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --success-color: #4cc9f0;
+            --info-color: #4895ef;
+            --warning-color: #f72585;
+            --danger-color: #e63946;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --sidebar-width: 280px;
+            --sidebar-collapsed-width: 80px;
+            --header-height: 64px;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fb;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: var(--sidebar-width);
+            background-color: #fff;
+            border-right: 1px solid #e0e6ed;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            overflow-y: auto;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            border-bottom: 1px solid #e0e6ed;
+        }
+
+        .brand {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .sidebar-toggle {
+            border: none;
+            background: transparent;
+            color: #6c757d;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar-toggle:hover {
+            background-color: #f8f9fa;
+        }
+
+        .sidebar-profile {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #e0e6ed;
+        }
+
+        .sidebar-profile-avatar {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-right: 12px;
+        }
+
+        .sidebar-profile-info {
+            overflow: hidden;
+        }
+
+        .sidebar-profile-name {
+            margin: 0;
+            font-weight: 600;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-profile-role {
+            margin: 0;
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .sidebar-menu {
+            padding: 20px;
+        }
+
+        .sidebar-heading {
+            text-transform: uppercase;
+            font-size: 11px;
+            color: #6c757d;
+            margin-bottom: 10px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar .nav-link {
+            color: #495057;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 10px 12px;
+            border-radius: 6px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .sidebar .nav-link i {
+            margin-right: 12px;
+            font-size: 18px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar .nav-link:hover {
+            color: var(--primary-color);
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+
+        .sidebar .nav-link.active {
+            color: var(--primary-color);
+            background-color: rgba(67, 97, 238, 0.1);
+            font-weight: 600;
+        }
+
+        .sidebar .nav-link .badge {
+            margin-left: auto;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 10px;
+            padding: 3px 6px;
+        }
+
+        .sidebar.collapsed .sidebar-profile-info,
+        .sidebar.collapsed .nav-link span,
+        .sidebar.collapsed .sidebar-heading {
+            display: none;
+        }
+
+        .sidebar.collapsed .nav-link {
+            justify-content: center;
+        }
+
+        .sidebar.collapsed .nav-link i {
+            margin-right: 0;
+        }
+
+        .sidebar.collapsed .nav-link .badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            margin-left: 0;
+        }
+
+        /* App Header Styles */
+        .app-header {
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: var(--sidebar-width);
+            height: var(--header-height);
+            background-color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            border-bottom: 1px solid #e0e6ed;
+            z-index: 990;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .app-header.header-expanded {
+            left: var(--sidebar-collapsed-width);
+        }
+
+        .header-search {
+            position: relative;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .header-search i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+
+        .header-search input {
+            padding-left: 36px;
+            border-radius: 6px;
+            border: 1px solid #e0e6ed;
+            background-color: #f8f9fa;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .header-icon {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #495057;
+            margin-left: 8px;
+            text-decoration: none;
+        }
+
+        .header-icon:hover {
+            background-color: #f8f9fa;
+            color: var(--primary-color);
+        }
+
+        .header-icon .badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background-color: var(--warning-color);
+            color: white;
+            font-size: 10px;
+            padding: 3px 6px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-left: 12px;
+            cursor: pointer;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: var(--header-height);
+            min-height: calc(100vh - var(--header-height));
+            transition: all 0.3s ease;
+            padding: 24px;
+        }
+
+        .main-content.expanded {
+            margin-left: var(--sidebar-collapsed-width);
+        }
+
+        .main-content-container {
+            max-width: 1320px;
+            margin: 0 auto;
+        }
+
+        /* Card Styles */
+        .app-card {
+            background-color: #fff;
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 24px;
+        }
+
+        .app-card-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e6ed;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .app-card-title {
+            margin: 0;
+            font-weight: 600;
+            font-size: 16px;
+            color: #343a40;
+        }
+
+        .app-card-body {
+            padding: 20px;
+        }
+
+        .app-card-footer {
+            padding: 15px 20px;
+            border-top: 1px solid #e0e6ed;
+            background-color: #f8f9fa;
+            border-radius: 0 0 12px 12px;
+        }
+
+        /* Stats Card */
+        .stats-card {
+            background-color: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            margin-bottom: 24px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .stats-icon {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            margin-right: 16px;
+            font-size: 24px;
+        }
+
+        .stats-icon-primary {
+            background-color: rgba(67, 97, 238, 0.1);
+            color: var(--primary-color);
+        }
+
+        .stats-icon-success {
+            background-color: rgba(76, 201, 240, 0.1);
+            color: var(--success-color);
+        }
+
+        .stats-icon-warning {
+            background-color: rgba(247, 37, 133, 0.1);
+            color: var(--warning-color);
+        }
+
+        .stats-icon-info {
+            background-color: rgba(72, 149, 239, 0.1);
+            color: var(--info-color);
+        }
+
+        .stats-info {
+            flex: 1;
+        }
+
+        .stats-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+            color: #343a40;
+        }
+
+        .stats-label {
+            font-size: 14px;
+            color: #6c757d;
+            margin: 0;
+        }
+
+        .stats-change {
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            margin-top: 5px;
+        }
+
+        .stats-change.positive {
+            color: #2ecc71;
+        }
+
+        .stats-change.negative {
+            color: #e74c3c;
+        }
+
+        /* Content Panels */
+        .content-panel {
+            display: none;
+        }
+
+        .content-panel.active {
+            display: block !important;
+        }
+
+        /* Table Styles */
+        .app-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .app-table th {
+            font-weight: 600;
+            font-size: 14px;
+            color: #495057;
+            background-color: #f8f9fa;
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e6ed;
+            text-align: left;
+        }
+
+        .app-table td {
+            padding: 12px 15px;
+            font-size: 14px;
+            color: #495057;
+            border-bottom: 1px solid #e0e6ed;
+            vertical-align: middle;
+        }
+
+        .app-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Badge Styles */
+        .status-badge {
+            padding: 5px 10px;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .status-active {
+            background-color: rgba(46, 204, 113, 0.1);
+            color: #2ecc71;
+        }
+
+        .status-pending {
+            background-color: rgba(241, 196, 15, 0.1);
+            color: #f1c40f;
+        }
+
+        .status-expired {
+            background-color: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+        }
+
+        .status-draft {
+            background-color: rgba(149, 165, 166, 0.1);
+            color: #95a5a6;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                box-shadow: none;
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+                box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            }
+
+            .app-header {
+                left: 0;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Sidebar Overlay (for mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <!-- Logo section -->
+    <div class="sidebar-logo">
+        <a href="#" class="brand">Fursati</a>
+        <button class="sidebar-toggle" id="sidebarToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+
+    <!-- User profile section -->
+    <div class="sidebar-profile">
+        <div class="sidebar-profile-avatar">YA</div>
+        <div class="sidebar-profile-info">
+            <p class="sidebar-profile-name">Yousef Alami</p>
+            <p class="sidebar-profile-role">Administrateur</p>
+        </div>
+    </div>
+
+    <!-- Sidebar menu -->
+    <div class="sidebar-menu">
+        <h6 class="sidebar-heading">Administration</h6>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" th:class="${activeTab == 'dashboard' ? 'nav-link active' : 'nav-link'}" th:href="@{/admin/dashboard}">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Tableau de bord</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:class="${activeTab == 'users' ? 'nav-link active' : 'nav-link'}" th:href="@{/admin/users}">
+                    <i class="fas fa-users"></i>
+                    <span>Utilisateurs</span>
+                    <span class="badge rounded-pill">154</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:class="${activeTab == 'recruiters' ? 'nav-link active' : 'nav-link'}" th:href="@{/admin/recruiters}">
+                    <i class="fas fa-user-tie"></i>
+                    <span>Recruteurs</span>
+                    <span class="badge rounded-pill">48</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:class="${activeTab == 'companies' ? 'nav-link active' : 'nav-link'}" th:href="@{/admin/companies}">
+                    <i class="fas fa-building"></i>
+                    <span>Entreprises</span>
+                    <span class="badge rounded-pill">87</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:class="${activeTab == 'jobs' ? 'nav-link active' : 'nav-link'}" th:href="@{/admin/jobs}">
+                    <i class="fas fa-briefcase"></i>
+                    <span>Ofrres d emploi</span>
+                    <span class="badge rounded-pill">87</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:class="${activeTab == 'applications' ? 'nav-link active' : 'nav-link'}" th:href="@{/admin/applications}">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Candidatures</span>
+                    <span class="badge rounded-pill">120</span>
+                </a>
+            </li>
+        </ul>
+
+        <h6 class="sidebar-heading mt-4">Contenu</h6>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" th:class="${activeTab == 'categories' ? 'nav-link active' : 'nav-link'}" th:href="@{/admin/categories}">
+                    <i class="fas fa-tags"></i>
+                    <span>Catégories</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:class="${activeTab == 'skills' ? 'nav-link active' : 'nav-link'}" th:href="@{/admin/skills}">
+                    <i class="fas fa-star"></i>
+                    <span>Compétences</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:class="${activeTab == 'cities' ? 'nav-link active' : 'nav-link'}" th:href="@{/admin/cities}">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Villes</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:class="${activeTab == 'reports' ? 'nav-link active' : 'nav-link'}" th:href="@{/admin/reports}">
+                    <i class="fas fa-flag"></i>
+                    <span>Signalements</span>
+                    <span class="badge rounded-pill">5</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:class="${activeTab == 'cms' ? 'nav-link active' : 'nav-link'}" th:href="@{/admin/cms}">
+                    <i class="fas fa-pager"></i>
+                    <span>Pages CMS</span>
+                </a>
+            </li>
+        </ul>
+
+        <h6 class="sidebar-heading mt-4">Système</h6>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" th:class="${activeTab == 'analytics' ? 'nav-link active' : 'nav-link'}" th:href="@{/admin/analytics}">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Statistiques</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:class="${activeTab == 'plans' ? 'nav-link active' : 'nav-link'}" th:href="@{/admin/plans}">
+                    <i class="fas fa-gem"></i>
+                    <span>Plans & Tarifs</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:class="${activeTab == 'payments' ? 'nav-link active' : 'nav-link'}" th:href="@{/admin/payments}">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Paiements</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:class="${activeTab == 'emails' ? 'nav-link active' : 'nav-link'}" th:href="@{/admin/emails}">
+                    <i class="fas fa-envelope"></i>
+                    <span>Gestion des emails</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:class="${activeTab == 'settings' ? 'nav-link active' : 'nav-link'}" th:href="@{/admin/settings}">
+                    <i class="fas fa-cog"></i>
+                    <span>Paramètres</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" th:class="${activeTab == 'logs' ? 'nav-link active' : 'nav-link'}" th:href="@{/admin/logs}">
+                    <i class="fas fa-list-alt"></i>
+                    <span>Journaux</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Déconnexion</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- Header/AppBar -->
+<div class="app-header app-header-expanded" id="appHeader">
+    <!-- Mobile sidebar toggle -->
+    <button class="d-lg-none me-3 btn btn-sm btn-light border" id="mobileToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Search bar -->
+    <div class="header-search d-none d-md-block">
+        <i class="fas fa-search"></i>
+        <input type="text" class="form-control" placeholder="Rechercher des utilisateurs, entreprises...">
+    </div>
+
+    <!-- Header actions -->
+    <div class="header-actions">
+        <a href="#" class="header-icon">
+            <i class="fas fa-bell"></i>
+            <span class="badge rounded-pill">5</span>
+        </a>
+        <a href="#" class="header-icon">
+            <i class="fas fa-envelope"></i>
+            <span class="badge rounded-pill">3</span>
+        </a>
+        <a href="#" class="header-icon">
+            <i class="fas fa-question-circle"></i>
+        </a>
+
+        <!-- User dropdown -->
+        <div class="user-dropdown dropdown">
+            <div class="user-avatar" data-bs-toggle="dropdown" aria-expanded="false">
+                YA
+            </div>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" th:href="@{/admin/profile}">Mon profil</a></li>
+                <li><a class="dropdown-item" th:href="@{/admin/settings}">Paramètres</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#logout">Déconnexion</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Main content area -->
+<div class="main-content expanded" id="mainContent">
+    <div class="container-fluid main-content-container">
+        <!-- Tab: Dashboard -->
+        <th:block th:if="${activeTab == 'dashboard'}">
+            <div class="content-panel active">
+                <h2 class="mb-4">Tableau de bord administrateur</h2>
+                <div th:replace="~{fragments/admin/dashboard :: dashboard}"></div>
+
+                <!-- Fallback Content (will be shown if fragment is not available) -->
+                <div th:remove="all">
+                    <!-- Stats Row -->
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <div class="stats-icon stats-icon-primary">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="stats-info">
+                                    <h3 class="stats-value">3,846</h3>
+                                    <p class="stats-label">Utilisateurs totaux</p>
+                                    <div class="stats-change positive">
+                                        <i class="fas fa-arrow-up me-1"></i> 12.3% ce mois
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <div class="stats-icon stats-icon-success">
+                                    <i class="fas fa-briefcase"></i>
+                                </div>
+                                <div class="stats-info">
+                                    <h3 class="stats-value">1,254</h3>
+                                    <p class="stats-label">Offres d'emploi actives</p>
+                                    <div class="stats-change positive">
+                                        <i class="fas fa-arrow-up me-1"></i> 5.7% ce mois
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <div class="stats-icon stats-icon-warning">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                                <div class="stats-info">
+                                    <h3 class="stats-value">5,721</h3>
+                                    <p class="stats-label">Candidatures totales</p>
+                                    <div class="stats-change positive">
+                                        <i class="fas fa-arrow-up me-1"></i> 8.2% ce mois
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <div class="stats-icon stats-icon-info">
+                                    <i class="fas fa-building"></i>
+                                </div>
+                                <div class="stats-info">
+                                    <h3 class="stats-value">418</h3>
+                                    <p class="stats-label">Entreprises vérifiées</p>
+                                    <div class="stats-change positive">
+                                        <i class="fas fa-arrow-up me-1"></i> 3.6% ce mois
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Dashboard Content -->
+                    <div class="row mt-4">
+                        <!-- Activity Chart -->
+                        <div class="col-lg-8">
+                            <div class="app-card">
+                                <div class="app-card-header">
+                                    <h5 class="app-card-title">Activité de la plateforme</h5>
+                                    <div>
+                                        <select class="form-select form-select-sm">
+                                            <option>Les 7 derniers jours</option>
+                                            <option>Les 30 derniers jours</option>
+                                            <option>Les 90 derniers jours</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="app-card-body">
+                                    <div style="height: 300px; background-color: #f8f9fa; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+                                        <span class="text-muted">Graphique d'activité</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Stats -->
+                        <div class="col-lg-4">
+                            <div class="app-card">
+                                <div class="app-card-header">
+                                    <h5 class="app-card-title">Statistiques rapides</h5>
+                                    <div>
+                                        <select class="form-select form-select-sm">
+                                            <option>Ce mois</option>
+                                            <option>Mois dernier</option>
+                                            <option>Cette année</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="app-card-body p-0">
+                                    <div class="list-group list-group-flush">
+                                        <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                                            <div>
+                                                <i class="fas fa-user-plus text-primary me-2"></i>
+                                                Nouveaux utilisateurs
+                                            </div>
+                                            <div class="fw-bold">247</div>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                                            <div>
+                                                <i class="fas fa-briefcase text-success me-2"></i>
+                                                Nouvelles offres
+                                            </div>
+                                            <div class="fw-bold">86</div>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                                            <div>
+                                                <i class="fas fa-file-alt text-warning me-2"></i>
+                                                Candidatures
+                                            </div>
+                                            <div class="fw-bold">435</div>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                                            <div>
+                                                <i class="fas fa-building text-info me-2"></i>
+                                                Nouvelles entreprises
+                                            </div>
+                                            <div class="fw-bold">32</div>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                                            <div>
+                                                <i class="fas fa-flag text-danger me-2"></i>
+                                                Signalements en attente
+                                            </div>
+                                            <div class="fw-bold">12</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- System Status -->
+                            <div class="app-card mt-4">
+                                <div class="app-card-header">
+                                    <h5 class="app-card-title">État du système</h5>
+                                </div>
+                                <div class="app-card-body p-0">
+                                    <div class="list-group list-group-flush">
+                                        <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                                            <div>
+                                                <i class="fas fa-server text-success me-2"></i>
+                                                Serveur principal
+                                            </div>
+                                            <div class="badge bg-success">En ligne</div>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                                            <div>
+                                                <i class="fas fa-database text-success me-2"></i>
+                                                Base de données
+                                            </div>
+                                            <div class="badge bg-success">En ligne</div>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                                            <div>
+                                                <i class="fas fa-envelope text-success me-2"></i>
+                                                Service d'e-mail
+                                            </div>
+                                            <div class="badge bg-success">En ligne</div>
+                                        </div>
+                                        <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                                            <div>
+                                                <i class="fas fa-credit-card text-success me-2"></i>
+                                                Service de paiement
+                                            </div>
+                                            <div class="badge bg-success">En ligne</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Activity & Approvals -->
+                    <div class="row mt-4">
+                        <!-- Recent Activity -->
+                        <div class="col-lg-7">
+                            <div class="app-card">
+                                <div class="app-card-header">
+                                    <h5 class="app-card-title">Activité récente</h5>
+                                    <a href="#" class="btn btn-sm btn-outline-primary">Voir tout</a>
+                                </div>
+                                <div class="app-card-body p-0">
+                                    <div class="list-group list-group-flush">
+                                        <div class="list-group-item p-3">
+                                            <div class="d-flex w-100 justify-content-between mb-1">
+                                                <h6 class="mb-0">Nouvelle entreprise inscrite</h6>
+                                                <small class="text-muted">Il y a 23 minutes</small>
+                                            </div>
+                                            <p class="mb-1">Techno Solutions SARL (Casablanca) s'est inscrite.</p>
+                                            <small class="text-muted">Action requise: Vérification du profil</small>
+                                        </div>
+                                        <div class="list-group-item p-3">
+                                            <div class="d-flex w-100 justify-content-between mb-1">
+                                                <h6 class="mb-0">Signalement d'offre d'emploi</h6>
+                                                <small class="text-muted">Il y a 1 heure</small>
+                                            </div>
+                                            <p class="mb-1">L'offre "Développeur Full Stack" a été signalée pour contenu inapproprié.</p>
+                                            <small class="text-muted">Action requise: Révision de l'offre</small>
+                                        </div>
+                                        <div class="list-group-item p-3">
+                                            <div class="d-flex w-100 justify-content-between mb-1">
+                                                <h6 class="mb-0">Nouvel utilisateur Premium</h6>
+                                                <small class="text-muted">Il y a 3 heures</small>
+                                            </div>
+                                            <p class="mb-1">Mohamed Alami a souscrit au plan Premium.</p>
+                                            <small class="text-muted">Action: Aucune action requise</small>
+                                        </div>
+                                        <div class="list-group-item p-3">
+                                            <div class="d-flex w-100 justify-content-between mb-1">
+                                                <h6 class="mb-0">Pic d'utilisation détecté</h6>
+                                                <small class="text-muted">Il y a 5 heures</small>
+                                            </div>
+                                            <p class="mb-1">Augmentation de 150% du trafic dans la section "Informatique".</p>
+                                            <small class="text-muted">Action: Surveiller les performances</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="app-card-footer">
+                                    <a href="#" class="btn btn-sm btn-primary w-100">Charger plus d'activités</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pending Approvals -->
+                        <div class="col-lg-5">
+                            <div class="app-card">
+                                <div class="app-card-header">
+                                    <h5 class="app-card-title">Approbations en attente</h5>
+                                    <a href="#" class="btn btn-sm btn-outline-primary">Voir tout</a>
+                                </div>
+                                <div class="app-card-body p-0">
+                                    <div class="list-group list-group-flush">
+                                        <div class="list-group-item p-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="flex-grow-1">
+                                                    <h6 class="mb-1">Vérification d'entreprise</h6>
+                                                    <p class="mb-1 small">Global Tech SARL - Casablanca</p>
+                                                    <small class="text-muted">Soumis il y a 2 jours</small>
+                                                </div>
+                                                <div class="d-flex">
+                                                    <button class="btn btn-sm btn-success me-2">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="list-group-item p-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="flex-grow-1">
+                                                    <h6 class="mb-1">Offre d'emploi à vérifier</h6>
+                                                    <p class="mb-1 small">"Directeur Financier" - Maroc Télécoms</p>
+                                                    <small class="text-muted">Soumis il y a 1 jour</small>
+                                                </div>
+                                                <div class="d-flex">
+                                                    <button class="btn btn-sm btn-success me-2">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="list-group-item p-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="flex-grow-1">
+                                                    <h6 class="mb-1">Demande de remboursement</h6>
+                                                    <p class="mb-1 small">Utilisateur #24601 - Plan Premium</p>
+                                                    <small class="text-muted">Soumis il y a 3 heures</small>
+                                                </div>
+                                                <div class="d-flex">
+                                                    <button class="btn btn-sm btn-success me-2">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="list-group-item p-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="flex-grow-1">
+                                                    <h6 class="mb-1">Signalement d'utilisateur</h6>
+                                                    <p class="mb-1 small">Utilisateur #18542 - Comportement inapproprié</p>
+                                                    <small class="text-muted">Soumis il y a 6 heures</small>
+                                                </div>
+                                                <div class="d-flex">
+                                                    <button class="btn btn-sm btn-success me-2">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="app-card-footer">
+                                    <a href="#" class="btn btn-sm btn-primary w-100">Voir toutes les approbations</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </th:block>
+
+        <!-- Tab: Users -->
+        <th:block th:if="${activeTab == 'users'}">
+            <div class="content-panel active">
+                <h2 class="mb-4">Gestion des utilisateurs</h2>
+                <div th:replace="~{fragments/admin/users :: users}"></div>
+
+                <!-- Fallback Content -->
+                <div th:remove="all">
+                    <div class="app-card mb-4">
+                        <div class="app-card-header">
+                            <h5 class="app-card-title">Filtres</h5>
+                        </div>
+                        <div class="app-card-body">
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Statut</label>
+                                    <select class="form-select">
+                                        <option value="">Tous les statuts</option>
+                                        <option value="active">Actif</option>
+                                        <option value="pending">En attente</option>
+                                        <option value="blocked">Bloqué</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Type</label>
+                                    <select class="form-select">
+                                        <option value="">Tous les types</option>
+                                        <option value="candidate">Candidat</option>
+                                        <option value="recruiter">Recruteur</option>
+                                        <option value="admin">Administrateur</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Ville</label>
+                                    <select class="form-select">
+                                        <option value="">Toutes les villes</option>
+                                        <option value="Casablanca">Casablanca</option>
+                                        <option value="Rabat">Rabat</option>
+                                        <option value="Marrakech">Marrakech</option>
+                                        <option value="Tanger">Tanger</option>
+                                        <option value="Fès">Fès</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Date d'inscription</label>
+                                    <select class="form-select">
+                                        <option value="">Toutes les dates</option>
+                                        <option value="today">Aujourd'hui</option>
+                                        <option value="week">Cette semaine</option>
+                                        <option value="month">Ce mois</option>
+                                        <option value="year">Cette année</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Recherche</label>
+                                    <input type="text" class="form-control" placeholder="Nom, email, téléphone...">
+                                </div>
+                                <div class="col-md-6 d-flex align-items-end justify-content-end mb-3">
+                                    <button class="btn btn-primary me-2">Appliquer les filtres</button>
+                                    <button class="btn btn-outline-secondary">Réinitialiser</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="app-card">
+                        <div class="app-card-header">
+                            <h5 class="app-card-title">Utilisateurs</h5>
+                            <div>
+                                <button class="btn btn-sm btn-success me-2">
+                                    <i class="fas fa-plus me-1"></i> Ajouter
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary me-2">
+                                    <i class="fas fa-download me-1"></i> Exporter
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash me-1"></i> Supprimer
+                                </button>
+                            </div>
+                        </div>
+                        <div class="app-card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead>
+                                    <tr>
+                                        <th width="40">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="selectAll">
+                                            </div>
+                                        </th>
+                                        <th>Nom</th>
+                                        <th>Email</th>
+                                        <th>Type</th>
+                                        <th>Ville</th>
+                                        <th>Statut</th>
+                                        <th>Date d'inscription</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar avatar-sm me-2 bg-primary rounded">KL</div>
+                                                <div>Karim Lahlou</div>
+                                            </div>
+                                        </td>
+                                        <td>karim.lahlou@example.com</td>
+                                        <td>Candidat</td>
+                                        <td>Casablanca</td>
+                                        <td><span class="badge bg-success">Actif</span></td>
+                                        <td>01/12/2023</td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                    Actions
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="#">Voir détails</a></li>
+                                                    <li><a class="dropdown-item" href="#">Modifier</a></li>
+                                                    <li><a class="dropdown-item" href="#">Bloquer</a></li>
+                                                    <li><a class="dropdown-item text-danger" href="#">Supprimer</a></li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar avatar-sm me-2 bg-info rounded">FZ</div>
+                                                <div>Fatima Zahra</div>
+                                            </div>
+                                        </td>
+                                        <td>fzahra@example.com</td>
+                                        <td>Recruteur</td>
+                                        <td>Rabat</td>
+                                        <td><span class="badge bg-success">Actif</span></td>
+                                        <td>15/11/2023</td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                    Actions
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="#">Voir détails</a></li>
+                                                    <li><a class="dropdown-item" href="#">Modifier</a></li>
+                                                    <li><a class="dropdown-item" href="#">Bloquer</a></li>
+                                                    <li><a class="dropdown-item text-danger" href="#">Supprimer</a></li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar avatar-sm me-2 bg-warning rounded">MA</div>
+                                                <div>Mehdi Alaoui</div>
+                                            </div>
+                                        </td>
+                                        <td>mehdi.alaoui@example.com</td>
+                                        <td>Candidat</td>
+                                        <td>Marrakech</td>
+                                        <td><span class="badge bg-warning text-dark">En attente</span></td>
+                                        <td>05/01/2024</td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                    Actions
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="#">Voir détails</a></li>
+                                                    <li><a class="dropdown-item" href="#">Activer</a></li>
+                                                    <li><a class="dropdown-item" href="#">Modifier</a></li>
+                                                    <li><a class="dropdown-item text-danger" href="#">Supprimer</a></li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar avatar-sm me-2 bg-danger rounded">SB</div>
+                                                <div>Samira Benani</div>
+                                            </div>
+                                        </td>
+                                        <td>s.benani@example.com</td>
+                                        <td>Recruteur</td>
+                                        <td>Tanger</td>
+                                        <td><span class="badge bg-danger">Bloqué</span></td>
+                                        <td>10/10/2023</td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                    Actions
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="#">Voir détails</a></li>
+                                                    <li><a class="dropdown-item" href="#">Débloquer</a></li>
+                                                    <li><a class="dropdown-item" href="#">Modifier</a></li>
+                                                    <li><a class="dropdown-item text-danger" href="#">Supprimer</a></li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar avatar-sm me-2 bg-success rounded">YE</div>
+                                                <div>Youssef El Amrani</div>
+                                            </div>
+                                        </td>
+                                        <td>youssef.elamrani@example.com</td>
+                                        <td>Administrateur</td>
+                                        <td>Casablanca</td>
+                                        <td><span class="badge bg-success">Actif</span></td>
+                                        <td>01/09/2023</td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                    Actions
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="#">Voir détails</a></li>
+                                                    <li><a class="dropdown-item" href="#">Modifier</a></li>
+                                                    <li><a class="dropdown-item" href="#">Bloquer</a></li>
+                                                    <li><a class="dropdown-item text-danger" href="#">Supprimer</a></li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="app-card-footer p-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>Affichage de 1 à 5 sur 154 entrées</div>
+                                <nav>
+                                    <ul class="pagination pagination-sm mb-0">
+                                        <li class="page-item disabled"><a class="page-link" href="#">Précédent</a></li>
+                                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                        <li class="page-item"><a class="page-link" href="#">Suivant</a></li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </th:block>
+
+        <!-- Tab: Companies -->
+        <th:block th:if="${activeTab == 'companies'}">
+            <div class="content-panel active">
+                <h2 class="mb-4">Gestion des entreprises</h2>
+                <div th:replace="~{fragments/admin/companies :: companies}"></div>
+
+                <!-- Fallback Content -->
+                <div th:remove="all">
+                    <div class="app-card mb-4">
+                        <div class="app-card-header">
+                            <h5 class="app-card-title">Filtres</h5>
+                        </div>
+                        <div class="app-card-body">
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Statut de vérification</label>
+                                    <select class="form-select">
+                                        <option value="">Tous les statuts</option>
+                                        <option value="verified">Vérifiée</option>
+                                        <option value="pending">En attente</option>
+                                        <option value="rejected">Rejetée</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Secteur d'activité</label>
+                                    <select class="form-select">
+                                        <option value="">Tous les secteurs</option>
+                                        <option value="it">Informatique & Technologie</option>
+                                        <option value="finance">Finance & Banque</option>
+                                        <option value="healthcare">Santé</option>
+                                        <option value="tourism">Tourisme & Hôtellerie</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Ville</label>
+                                    <select class="form-select">
+                                        <option value="">Toutes les villes</option>
+                                        <option value="Casablanca">Casablanca</option>
+                                        <option value="Rabat">Rabat</option>
+                                        <option value="Marrakech">Marrakech</option>
+                                        <option value="Tanger">Tanger</option>
+                                        <option value="Fès">Fès</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">Taille</label>
+                                    <select class="form-select">
+                                        <option value="">Toutes les tailles</option>
+                                        <option value="1-10">1-10 employés</option>
+                                        <option value="11-50">11-50 employés</option>
+                                        <option value="51-200">51-200 employés</option>
+                                        <option value="201-500">201-500 employés</option>
+                                        <option value="501+">501+ employés</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Recherche</label>
+                                    <input type="text" class="form-control" placeholder="Nom de l'entreprise, numéro RC...">
+                                </div>
+                                <div class="col-md-6 d-flex align-items-end justify-content-end mb-3">
+                                    <button class="btn btn-primary me-2">Appliquer les filtres</button>
+                                    <button class="btn btn-outline-secondary">Réinitialiser</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="app-card">
+                        <div class="app-card-header">
+                            <h5 class="app-card-title">Entreprises</h5>
+                            <div>
+                                <button class="btn btn-sm btn-success me-2">
+                                    <i class="fas fa-plus me-1"></i> Ajouter
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary me-2">
+                                    <i class="fas fa-download me-1"></i> Exporter
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash me-1"></i> Supprimer
+                                </button>
+                            </div>
+                        </div>
+                        <div class="app-card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead>
+                                    <tr>
+                                        <th width="40">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="selectAllCompanies">
+                                            </div>
+                                        </th>
+                                        <th>Entreprise</th>
+                                        <th>Secteur</th>
+                                        <th>Ville</th>
+                                        <th>Taille</th>
+                                        <th>Vérification</th>
+                                        <th>Offres</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-2 bg-light rounded p-1">
+                                                    <img src="https://via.placeholder.com/40" alt="Logo" width="40" height="40">
+                                                </div>
+                                                <div>
+                                                    <div class="fw-semibold">Maroc Digital</div>
+                                                    <div class="small text-muted">maroc-digital.ma</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>Informatique & Technologie</td>
+                                        <td>Casablanca</td>
+                                        <td>51-200 employés</td>
+                                        <td><span class="badge bg-success">Vérifiée</span></td>
+                                        <td>12 offres</td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                    Actions
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="#">Voir détails</a></li>
+                                                    <li><a class="dropdown-item" href="#">Voir offres</a></li>
+                                                    <li><a class="dropdown-item" href="#">Modifier</a></li>
+                                                    <li><a class="dropdown-item text-danger" href="#">Supprimer</a></li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-2 bg-light rounded p-1">
+                                                    <img src="https://via.placeholder.com/40" alt="Logo" width="40" height="40">
+                                                </div>
+                                                <div>
+                                                    <div class="fw-semibold">Banque Atlas</div>
+                                                    <div class="small text-muted">banqueatlas.ma</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>Finance & Banque</td>
+                                        <td>Rabat</td>
+                                        <td>201-500 employés</td>
+                                        <td><span class="badge bg-success">Vérifiée</span></td>
+                                        <td>8 offres</td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                    Actions
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="#">Voir détails</a></li>
+                                                    <li><a class="dropdown-item" href="#">Voir offres</a></li>
+                                                    <li><a class="dropdown-item" href="#">Modifier</a></li>
+                                                    <li><a class="dropdown-item text-danger" href="#">Supprimer</a></li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-2 bg-light rounded p-1">
+                                                    <img src="https://via.placeholder.com/40" alt="Logo" width="40" height="40">
+                                                </div>
+                                                <div>
+                                                    <div class="fw-semibold">Riad Hospitality</div>
+                                                    <div class="small text-muted">riadhospitality.ma</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>Tourisme & Hôtellerie</td>
+                                        <td>Marrakech</td>
+                                        <td>11-50 employés</td>
+                                        <td><span class="badge bg-warning text-dark">En attente</span></td>
+                                        <td>3 offres</td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                    Actions
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="#">Voir détails</a></li>
+                                                    <li><a class="dropdown-item" href="#">Vérifier</a></li>
+                                                    <li><a class="dropdown-item" href="#">Rejeter</a></li>
+                                                    <li><a class="dropdown-item text-danger" href="#">Supprimer</a></li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-2 bg-light rounded p-1">
+                                                    <img src="https://via.placeholder.com/40" alt="Logo" width="40" height="40">
+                                                </div>
+                                                <div>
+                                                    <div class="fw-semibold">Santé Maroc</div>
+                                                    <div class="small text-muted">santemaroc.co.ma</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>Santé</td>
+                                        <td>Fès</td>
+                                        <td>51-200 employés</td>
+                                        <td><span class="badge bg-success">Vérifiée</span></td>
+                                        <td>5 offres</td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                    Actions
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="#">Voir détails</a></li>
+                                                    <li><a class="dropdown-item" href="#">Voir offres</a></li>
+                                                    <li><a class="dropdown-item" href="#">Modifier</a></li>
+                                                    <li><a class="dropdown-item text-danger" href="#">Supprimer</a></li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-2 bg-light rounded p-1">
+                                                    <img src="https://via.placeholder.com/40" alt="Logo" width="40" height="40">
+                                                </div>
+                                                <div>
+                                                    <div class="fw-semibold">Techno Solutions SARL</div>
+                                                    <div class="small text-muted">technosolutions.ma</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>Informatique & Technologie</td>
+                                        <td>Tanger</td>
+                                        <td>1-10 employés</td>
+                                        <td><span class="badge bg-danger">Rejetée</span></td>
+                                        <td>0 offres</td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                    Actions
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="#">Voir détails</a></li>
+                                                    <li><a class="dropdown-item" href="#">Vérifier</a></li>
+                                                    <li><a class="dropdown-item" href="#">Modifier</a></li>
+                                                    <li><a class="dropdown-item text-danger" href="#">Supprimer</a></li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="app-card-footer p-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>Affichage de 1 à 5 sur 87 entrées</div>
+                                <nav>
+                                    <ul class="pagination pagination-sm mb-0">
+                                        <li class="page-item disabled"><a class="page-link" href="#">Précédent</a></li>
+                                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                        <li class="page-item"><a class="page-link" href="#">Suivant</a></li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </th:block>
+        <!-- Tab: Jobs -->
+        <th:block th:if="${activeTab == 'jobs'}">
+            <div class="content-panel active">
+                <h2 class="mb-4">Gestion des offres d'emploi</h2>
+                <div th:replace="~{fragments/admin/jobs :: jobs}"></div>
+            </div>
+        </th:block>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("Script DOM loaded");
+
+        // Elements
+        const sidebar = document.getElementById('sidebar');
+        const appHeader = document.getElementById('appHeader');
+        const mainContent = document.getElementById('mainContent');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const mobileToggle = document.getElementById('mobileToggle');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        // Toggle sidebar on mobile
+        if (mobileToggle) {
+            mobileToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('show');
+                sidebarOverlay.classList.toggle('show');
+            });
+        }
+
+        if (sidebarOverlay) {
+            sidebarOverlay.addEventListener('click', function() {
+                sidebar.classList.remove('show');
+                sidebarOverlay.classList.remove('show');
+            });
+        }
+
+        // Toggle sidebar collapse
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('collapsed');
+                appHeader.classList.toggle('header-expanded');
+                mainContent.classList.toggle('expanded');
+            });
+        }
+    });
+</script>
+
+</body>
+</html>
