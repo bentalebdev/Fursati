@@ -1,7 +1,10 @@
+// Recruteur.java
 package com.ismagi.Fursati.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
+
 import java.util.List;
 
 @Entity
@@ -11,10 +14,14 @@ public class Recruteur {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idRecruteur;
 
-    private String nomEntreprise;
-    private String secteur;
-    private String offresPubliees;
-
     @OneToMany(mappedBy = "recruteur", cascade = CascadeType.ALL)
-    private List<Offre> offres; // A recruiter can post multiple job offers
+    @ToString.Exclude // Add this annotation to exclude from toString()
+    private List<Offre> offres;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id", referencedColumnName = "id", nullable = true)
+    @ToString.Exclude // Add this annotation to exclude from toString()
+    private Company company;
+
+
 }

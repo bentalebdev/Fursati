@@ -16,6 +16,10 @@ public class DemandeService {
         return demandeRepository.findAll();
     }
 
+    public List<Demande> getDemandesByRecruitId(Long recruitId) {
+        return  demandeRepository.getDemandeByOffreRecruteur_IdRecruteur(recruitId);
+    }
+
     public Demande getDemandeById(Long id) {
         return demandeRepository.findById(id).orElse(null);
     }

@@ -28,4 +28,6 @@ public class Demande {
     private String message; // Optional message from candidate
 
     private String cv; // Path to CV file or identifier
+
+
 }

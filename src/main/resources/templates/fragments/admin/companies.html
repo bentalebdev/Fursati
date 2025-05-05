@@ -1,0 +1,165 @@
+<div th:fragment="companies" xmlns:th="http://www.thymeleaf.org">
+  <div class="app-card mb-4">
+    <div class="app-card-header">
+      <h5 class="app-card-title">Filtres</h5>
+    </div>
+    <div class="app-card-body">
+      <div class="row">
+        <div class="col-md-3 mb-3">
+          <label class="form-label">Statut de vérification</label>
+          <select class="form-select">
+            <option value="">Tous les statuts</option>
+            <option value="verified">Vérifiée</option>
+            <option value="pending">En attente</option>
+            <option value="rejected">Rejetée</option>
+          </select>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label">Secteur d'activité</label>
+          <select class="form-select">
+            <option value="">Tous les secteurs</option>
+            <option value="it">Informatique & Technologie</option>
+            <option value="finance">Finance & Banque</option>
+            <option value="healthcare">Santé</option>
+            <option value="tourism">Tourisme & Hôtellerie</option>
+          </select>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label">Ville</label>
+          <select class="form-select">
+            <option value="">Toutes les villes</option>
+            <option value="Casablanca">Casablanca</option>
+            <option value="Rabat">Rabat</option>
+            <option value="Marrakech">Marrakech</option>
+            <option value="Tanger">Tanger</option>
+            <option value="Fès">Fès</option>
+          </select>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label">Taille</label>
+          <select class="form-select">
+            <option value="">Toutes les tailles</option>
+            <option value="1-10">1-10 employés</option>
+            <option value="11-50">11-50 employés</option>
+            <option value="51-200">51-200 employés</option>
+            <option value="201-500">201-500 employés</option>
+            <option value="501+">501+ employés</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Recherche</label>
+          <input type="text" class="form-control" placeholder="Nom de l'entreprise, numéro RC...">
+        </div>
+        <div class="col-md-6 d-flex align-items-end justify-content-end mb-3">
+          <button class="btn btn-primary me-2">Appliquer les filtres</button>
+          <button class="btn btn-outline-secondary">Réinitialiser</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-card">
+    <div class="app-card-header">
+      <h5 class="app-card-title">Entreprises</h5>
+      <div>
+        <button class="btn btn-sm btn-success me-2">
+          <i class="fas fa-plus me-1"></i> Ajouter
+        </button>
+        <button class="btn btn-sm btn-outline-secondary me-2">
+          <i class="fas fa-download me-1"></i> Exporter
+        </button>
+        <button class="btn btn-sm btn-outline-danger">
+          <i class="fas fa-trash me-1"></i> Supprimer
+        </button>
+      </div>
+    </div>
+    <div class="app-card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+          <tr>
+            <th width="40">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="selectAllCompanies">
+              </div>
+            </th>
+            <th>Entreprise</th>
+            <th>Secteur</th>
+            <th>Ville</th>
+            <th>Taille</th>
+            <th>Vérification</th>
+            <th>Offres</th>
+            <th>Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+          <!-- Loop through companies using Thymeleaf -->
+          <tr th:each="company : ${companies}">
+            <td>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" th:value="${company.id}">
+              </div>
+            </td>
+            <td>
+              <div class="d-flex align-items-center">
+                <div class="me-2 bg-light rounded p-1">
+                  <img th:src="${company.logoUrl != null ? company.logoUrl : 'https://via.placeholder.com/40'}" alt="Logo" width="40" height="40">
+                </div>
+                <div>
+                  <div class="fw-semibold" th:text="${company.nomEntreprise}">Nom de l'entreprise</div>
+                  <div class="small text-muted" th:text="${company.siteWeb}">site-web.com</div>
+                </div>
+              </div>
+            </td>
+            <td th:text="${company.secteur}">Secteur</td>
+            <td th:text="${company.ville}">Ville</td>
+            <td th:text="${company.tailleEntreprise}">Taille</td>
+            <td>
+              <!-- Placeholder for verification status - you might need to add this field to your entity -->
+              <span class="badge bg-success">Vérifiée</span>
+            </td>
+            <td>
+              <!-- Placeholder for offer count - you might need to add this functionality -->
+              <span th:text="${company.recruteurs != null ? company.recruteurs.size() + ' recruteurs' : '0 recruteurs'}">Recruteurs</span>
+            </td>
+            <td>
+              <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                  Actions
+                </button>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" th:href="@{/admin/companies/details/{id}(id=${company.id})}">Voir détails</a></li>
+                  <li><a class="dropdown-item" href="#">Voir offres</a></li>
+                  <li><a class="dropdown-item" th:href="@{/admin/companies/edit/{id}(id=${company.id})}">Modifier</a></li>
+                  <li><a class="dropdown-item text-danger" th:href="@{/admin/companies/delete/{id}(id=${company.id})}">Supprimer</a></li>
+                </ul>
+              </div>
+            </td>
+          </tr>
+          <!-- Empty state message when no companies are found -->
+          <tr th:if="${companies.empty}">
+            <td colspan="8" class="text-center py-4">
+              <div class="text-muted">Aucune entreprise n'a été trouvée</div>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="app-card-footer p-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>Affichage de <span th:text="${companies.size() > 0 ? 1 : 0}"></span> à <span th:text="${companies.size()}"></span> sur <span th:text="${companies.size()}"></span> entrées</div>
+        <!-- Pagination would go here - this is a simplified version -->
+        <nav>
+          <ul class="pagination pagination-sm mb-0">
+            <li class="page-item disabled"><a class="page-link" href="#">Précédent</a></li>
+            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+            <li class="page-item"><a class="page-link" href="#">Suivant</a></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>

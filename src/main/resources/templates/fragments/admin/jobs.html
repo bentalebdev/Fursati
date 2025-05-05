@@ -1,0 +1,306 @@
+<div th:fragment="jobs" xmlns:th="http://www.thymeleaf.org">
+  <div class="app-card mb-4">
+    <div class="app-card-header">
+      <h5 class="app-card-title">Filtres</h5>
+    </div>
+    <div class="app-card-body">
+      <div class="row">
+        <div class="col-md-3 mb-3">
+          <label class="form-label">Statut</label>
+          <select class="form-select" id="statusFilter">
+            <option value="">Tous les statuts</option>
+            <option value="ACTIVE">Active</option>
+            <option value="EXPIRED">Expirée</option>
+            <option value="DRAFT">Brouillon</option>
+            <option value="PENDING">En attente</option>
+          </select>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label">Industrie</label>
+          <select class="form-select" id="industryFilter">
+            <option value="">Toutes les industries</option>
+            <option value="it">Informatique & Technologie</option>
+            <option value="finance">Finance & Banque</option>
+            <option value="healthcare">Santé</option>
+            <option value="marketing">Marketing & Communication</option>
+            <option value="engineering">Ingénierie</option>
+          </select>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label">Ville</label>
+          <select class="form-select" id="locationFilter">
+            <option value="">Toutes les villes</option>
+            <option value="Casablanca">Casablanca</option>
+            <option value="Rabat">Rabat</option>
+            <option value="Marrakech">Marrakech</option>
+            <option value="Tanger">Tanger</option>
+            <option value="Fès">Fès</option>
+          </select>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label">Type de contrat</label>
+          <select class="form-select" id="contractTypeFilter">
+            <option value="">Tous les types</option>
+            <option value="CDI">CDI</option>
+            <option value="CDD">CDD</option>
+            <option value="FREELANCE">Freelance</option>
+            <option value="STAGE">Stage</option>
+            <option value="TEMPS_PARTIEL">Temps partiel</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Recherche</label>
+          <input type="text" class="form-control" id="searchInput" placeholder="Titre, entreprise, compétences...">
+        </div>
+        <div class="col-md-6 d-flex align-items-end justify-content-end mb-3">
+          <button class="btn btn-primary me-2" id="applyFilters">Appliquer les filtres</button>
+          <button class="btn btn-outline-secondary" id="resetFilters">Réinitialiser</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-card">
+    <div class="app-card-header">
+      <h5 class="app-card-title">Offres d'emploi</h5>
+      <div>
+        <a href="/admin/jobs/new" class="btn btn-sm btn-success me-2">
+          <i class="fas fa-plus me-1"></i> Ajouter
+        </a>
+        <button class="btn btn-sm btn-outline-secondary me-2">
+          <i class="fas fa-download me-1"></i> Exporter
+        </button>
+        <button class="btn btn-sm btn-outline-danger" id="deleteSelectedBtn">
+          <i class="fas fa-trash me-1"></i> Supprimer
+        </button>
+      </div>
+    </div>
+    <div class="app-card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+          <tr>
+            <th width="40">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="selectAllJobs">
+              </div>
+            </th>
+            <th>Titre</th>
+            <th>Entreprise</th>
+            <th>Industrie</th>
+            <th>Lieu</th>
+            <th>Type</th>
+            <th>Statut</th>
+            <th>Publiée le</th>
+            <th>Vues</th>
+            <th>Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+          <!-- Utilisation de Thymeleaf pour itérer sur la liste des offres d'emploi -->
+          <tr th:each="job : ${jobs}">
+            <td>
+              <div class="form-check">
+                <input class="form-check-input job-checkbox" type="checkbox" th:value="${job.id}">
+              </div>
+            </td>
+            <td>
+              <div class="fw-semibold" th:text="${job.title}">Titre de l'offre</div>
+            </td>
+            <td th:text="${job.companyName}">Nom de l'entreprise</td>
+            <td th:text="${job.industry}">Industrie</td>
+            <td th:text="${job.location}">Lieu</td>
+            <td th:text="${job.contractType}">Type de contrat</td>
+            <td>
+              <!-- Affichage conditionnel du statut avec couleur appropriée -->
+              <span class="status-badge"
+                    th:classappend="${job.status == 'ACTIVE' ? 'status-active' :
+                                     job.status == 'PENDING' ? 'status-pending' :
+                                     job.status == 'EXPIRED' ? 'status-expired' :
+                                     'status-draft'}"
+                    th:text="${job.status == 'ACTIVE' ? 'Active' :
+                             job.status == 'PENDING' ? 'En attente' :
+                             job.status == 'EXPIRED' ? 'Expirée' :
+                             'Brouillon'}">
+              </span>
+            </td>
+            <td th:text="${job.postedAt != null ? #temporals.format(job.postedAt, 'dd/MM/yyyy') : '-'}">Date de publication</td>
+            <td th:text="${job.views}">Vues</td>
+            <td>
+              <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                  Actions
+                </button>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" th:href="@{/admin/jobs/{id}(id=${job.id})}">Voir détails</a></li>
+                  <!-- Affichage conditionnel des actions basées sur le statut -->
+                  <li th:if="${job.status == 'ACTIVE'}"><a class="dropdown-item" th:href="@{/admin/jobs/{id}/applications(id=${job.id})}">Voir candidatures</a></li>
+                  <li><a class="dropdown-item" th:href="@{/admin/jobs/{id}/edit(id=${job.id})}">Modifier</a></li>
+
+                  <!-- Boutons d'action spécifiques selon le statut -->
+                  <li th:if="${job.status == 'ACTIVE'}">
+                    <a class="dropdown-item" href="#" th:data-job-id="${job.id}" onclick="changeJobStatus(this.getAttribute('data-job-id'), 'EXPIRED')">Désactiver</a>
+                  </li>
+                  <li th:if="${job.status == 'PENDING'}">
+                    <a class="dropdown-item" href="#" th:data-job-id="${job.id}" onclick="changeJobStatus(this.getAttribute('data-job-id'), 'ACTIVE')">Approuver</a>
+                  </li>
+                  <li th:if="${job.status == 'PENDING'}">
+                    <a class="dropdown-item" href="#" th:data-job-id="${job.id}" onclick="changeJobStatus(this.getAttribute('data-job-id'), 'DRAFT')">Rejeter</a>
+                  </li>
+                  <li th:if="${job.status == 'EXPIRED'}">
+                    <a class="dropdown-item" href="#" th:data-job-id="${job.id}" onclick="changeJobStatus(this.getAttribute('data-job-id'), 'ACTIVE')">Republier</a>
+                  </li>
+
+                  <li><a class="dropdown-item text-danger" href="#" th:data-job-id="${job.id}" onclick="deleteJob(this.getAttribute('data-job-id'))">Supprimer</a></li>
+                </ul>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Message si aucune offre n'est trouvée -->
+          <tr th:if="${#lists.isEmpty(jobs)}">
+            <td colspan="10" class="text-center py-4">
+              <p class="text-muted mb-0">Aucune offre d'emploi trouvée</p>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="app-card-footer p-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <div th:if="${!#lists.isEmpty(jobs)}">
+          Affichage de <span th:text="${#lists.size(jobs) > 0 ? 1 : 0}"></span> à
+          <span th:text="${#lists.size(jobs)}"></span> sur
+          <span th:text="${#lists.size(jobs)}"></span> entrées
+        </div>
+        <div th:if="${#lists.isEmpty(jobs)}">
+          Aucune entrée à afficher
+        </div>
+        <!-- Pagination à implémenter si nécessaire -->
+        <nav th:if="${!#lists.isEmpty(jobs)}">
+          <ul class="pagination pagination-sm mb-0">
+            <li class="page-item disabled"><a class="page-link" href="#">Précédent</a></li>
+            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+            <li class="page-item"><a class="page-link" href="#">2</a></li>
+            <li class="page-item"><a class="page-link" href="#">3</a></li>
+            <li class="page-item"><a class="page-link" href="#">Suivant</a></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript pour la gestion des actions -->
+  <script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+      // Sélection/désélection de toutes les offres
+      const selectAllCheckbox = document.getElementById('selectAllJobs');
+      const jobCheckboxes = document.querySelectorAll('.job-checkbox');
+
+      if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+          jobCheckboxes.forEach(checkbox => {
+            checkbox.checked = selectAllCheckbox.checked;
+          });
+        });
+      }
+
+      // Réinitialisation des filtres
+      const resetButton = document.getElementById('resetFilters');
+      if (resetButton) {
+        resetButton.addEventListener('click', function() {
+          document.getElementById('statusFilter').value = '';
+          document.getElementById('industryFilter').value = '';
+          document.getElementById('locationFilter').value = '';
+          document.getElementById('contractTypeFilter').value = '';
+          document.getElementById('searchInput').value = '';
+        });
+      }
+    });
+
+    // Fonction pour changer le statut d'une offre
+    function changeJobStatus(jobId, newStatus) {
+      if (confirm("Êtes-vous sûr de vouloir changer le statut de cette offre?")) {
+        fetch(`/admin/jobs/${jobId}/status`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').getAttribute('content')
+          },
+          body: JSON.stringify({ status: newStatus })
+        })
+                .then(response => {
+                  if (response.ok) {
+                    window.location.reload();
+                  } else {
+                    alert("Une erreur est survenue lors du changement de statut");
+                  }
+                })
+                .catch(error => {
+                  console.error('Erreur:', error);
+                  alert("Une erreur est survenue");
+                });
+      }
+    }
+
+    // Fonction pour supprimer une offre
+    function deleteJob(jobId) {
+      if (confirm("Êtes-vous sûr de vouloir supprimer cette offre? Cette action est irréversible.")) {
+        fetch(`/admin/jobs/${jobId}`, {
+          method: 'DELETE',
+          headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').getAttribute('content')
+          }
+        })
+                .then(response => {
+                  if (response.ok) {
+                    window.location.reload();
+                  } else {
+                    alert("Une erreur est survenue lors de la suppression");
+                  }
+                })
+                .catch(error => {
+                  console.error('Erreur:', error);
+                  alert("Une erreur est survenue");
+                });
+      }
+    }
+
+    // Fonction pour supprimer plusieurs offres
+    document.getElementById('deleteSelectedBtn').addEventListener('click', function() {
+      const selectedCheckboxes = document.querySelectorAll('.job-checkbox:checked');
+
+      if (selectedCheckboxes.length === 0) {
+        alert("Veuillez sélectionner au moins une offre à supprimer");
+        return;
+      }
+
+      if (confirm(`Êtes-vous sûr de vouloir supprimer ${selectedCheckboxes.length} offre(s)? Cette action est irréversible.`)) {
+        const selectedIds = Array.from(selectedCheckboxes).map(checkbox => checkbox.value);
+
+        fetch('/admin/jobs/batch-delete', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').getAttribute('content')
+          },
+          body: JSON.stringify({ ids: selectedIds })
+        })
+                .then(response => {
+                  if (response.ok) {
+                    window.location.reload();
+                  } else {
+                    alert("Une erreur est survenue lors de la suppression");
+                  }
+                })
+                .catch(error => {
+                  console.error('Erreur:', error);
+                  alert("Une erreur est survenue");
+                });
+      }
+    });
+  </script>
+</div>

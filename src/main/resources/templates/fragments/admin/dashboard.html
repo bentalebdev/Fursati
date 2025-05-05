@@ -1,0 +1,316 @@
+<div th:fragment="dashboard" xmlns:th="http://www.thymeleaf.org">
+    <!-- Stats Row -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-icon stats-icon-primary">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stats-info">
+                    <h3 class="stats-value">3,846</h3>
+                    <p class="stats-label">Utilisateurs totaux</p>
+                    <div class="stats-change positive">
+                        <i class="fas fa-arrow-up me-1"></i> 12.3% ce mois
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-icon stats-icon-success">
+                    <i class="fas fa-briefcase"></i>
+                </div>
+                <div class="stats-info">
+                    <h3 class="stats-value">1,254</h3>
+                    <p class="stats-label">Offres d'emploi actives</p>
+                    <div class="stats-change positive">
+                        <i class="fas fa-arrow-up me-1"></i> 5.7% ce mois
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-icon stats-icon-warning">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <div class="stats-info">
+                    <h3 class="stats-value">5,721</h3>
+                    <p class="stats-label">Candidatures totales</p>
+                    <div class="stats-change positive">
+                        <i class="fas fa-arrow-up me-1"></i> 8.2% ce mois
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-icon stats-icon-info">
+                    <i class="fas fa-building"></i>
+                </div>
+                <div class="stats-info">
+                    <h3 class="stats-value">418</h3>
+                    <p class="stats-label">Entreprises vérifiées</p>
+                    <div class="stats-change positive">
+                        <i class="fas fa-arrow-up me-1"></i> 3.6% ce mois
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard Content -->
+    <div class="row mt-4">
+        <!-- Activity Chart -->
+        <div class="col-lg-8">
+            <div class="app-card">
+                <div class="app-card-header">
+                    <h5 class="app-card-title">Activité de la plateforme</h5>
+                    <div>
+                        <select class="form-select form-select-sm">
+                            <option>Les 7 derniers jours</option>
+                            <option>Les 30 derniers jours</option>
+                            <option>Les 90 derniers jours</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="app-card-body">
+                    <div style="height: 300px; background-color: #f8f9fa; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+                        <span class="text-muted">Graphique d'activité</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="col-lg-4">
+            <div class="app-card">
+                <div class="app-card-header">
+                    <h5 class="app-card-title">Statistiques rapides</h5>
+                    <div>
+                        <select class="form-select form-select-sm">
+                            <option>Ce mois</option>
+                            <option>Mois dernier</option>
+                            <option>Cette année</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="app-card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                            <div>
+                                <i class="fas fa-user-plus text-primary me-2"></i>
+                                Nouveaux utilisateurs
+                            </div>
+                            <div class="fw-bold">247</div>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                            <div>
+                                <i class="fas fa-briefcase text-success me-2"></i>
+                                Nouvelles offres
+                            </div>
+                            <div class="fw-bold">86</div>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                            <div>
+                                <i class="fas fa-file-alt text-warning me-2"></i>
+                                Candidatures
+                            </div>
+                            <div class="fw-bold">435</div>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                            <div>
+                                <i class="fas fa-building text-info me-2"></i>
+                                Nouvelles entreprises
+                            </div>
+                            <div class="fw-bold">32</div>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                            <div>
+                                <i class="fas fa-flag text-danger me-2"></i>
+                                Signalements en attente
+                            </div>
+                            <div class="fw-bold">12</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Status -->
+            <div class="app-card mt-4">
+                <div class="app-card-header">
+                    <h5 class="app-card-title">État du système</h5>
+                </div>
+                <div class="app-card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                            <div>
+                                <i class="fas fa-server text-success me-2"></i>
+                                Serveur principal
+                            </div>
+                            <div class="badge bg-success">En ligne</div>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                            <div>
+                                <i class="fas fa-database text-success me-2"></i>
+                                Base de données
+                            </div>
+                            <div class="badge bg-success">En ligne</div>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                            <div>
+                                <i class="fas fa-envelope text-success me-2"></i>
+                                Service d'e-mail
+                            </div>
+                            <div class="badge bg-success">En ligne</div>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                            <div>
+                                <i class="fas fa-credit-card text-success me-2"></i>
+                                Service de paiement
+                            </div>
+                            <div class="badge bg-success">En ligne</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity & Approvals -->
+    <div class="row mt-4">
+        <!-- Recent Activity -->
+        <div class="col-lg-7">
+            <div class="app-card">
+                <div class="app-card-header">
+                    <h5 class="app-card-title">Activité récente</h5>
+                    <a href="#" class="btn btn-sm btn-outline-primary">Voir tout</a>
+                </div>
+                <div class="app-card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item p-3">
+                            <div class="d-flex w-100 justify-content-between mb-1">
+                                <h6 class="mb-0">Nouvelle entreprise inscrite</h6>
+                                <small class="text-muted">Il y a 23 minutes</small>
+                            </div>
+                            <p class="mb-1">Techno Solutions SARL (Casablanca) s'est inscrite.</p>
+                            <small class="text-muted">Action requise: Vérification du profil</small>
+                        </div>
+                        <div class="list-group-item p-3">
+                            <div class="d-flex w-100 justify-content-between mb-1">
+                                <h6 class="mb-0">Signalement d'offre d'emploi</h6>
+                                <small class="text-muted">Il y a 1 heure</small>
+                            </div>
+                            <p class="mb-1">L'offre "Développeur Full Stack" a été signalée pour contenu inapproprié.</p>
+                            <small class="text-muted">Action requise: Révision de l'offre</small>
+                        </div>
+                        <div class="list-group-item p-3">
+                            <div class="d-flex w-100 justify-content-between mb-1">
+                                <h6 class="mb-0">Nouvel utilisateur Premium</h6>
+                                <small class="text-muted">Il y a 3 heures</small>
+                            </div>
+                            <p class="mb-1">Mohamed Alami a souscrit au plan Premium.</p>
+                            <small class="text-muted">Action: Aucune action requise</small>
+                        </div>
+                        <div class="list-group-item p-3">
+                            <div class="d-flex w-100 justify-content-between mb-1">
+                                <h6 class="mb-0">Pic d'utilisation détecté</h6>
+                                <small class="text-muted">Il y a 5 heures</small>
+                            </div>
+                            <p class="mb-1">Augmentation de 150% du trafic dans la section "Informatique".</p>
+                            <small class="text-muted">Action: Surveiller les performances</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="app-card-footer">
+                    <a href="#" class="btn btn-sm btn-primary w-100">Charger plus d'activités</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Approvals -->
+        <div class="col-lg-5">
+            <div class="app-card">
+                <div class="app-card-header">
+                    <h5 class="app-card-title">Approbations en attente</h5>
+                    <a href="#" class="btn btn-sm btn-outline-primary">Voir tout</a>
+                </div>
+                <div class="app-card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item p-3">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">Vérification d'entreprise</h6>
+                                    <p class="mb-1 small">Global Tech SARL - Casablanca</p>
+                                    <small class="text-muted">Soumis il y a 2 jours</small>
+                                </div>
+                                <div class="d-flex">
+                                    <button class="btn btn-sm btn-success me-2">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="list-group-item p-3">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">Offre d'emploi à vérifier</h6>
+                                    <p class="mb-1 small">"Directeur Financier" - Maroc Télécoms</p>
+                                    <small class="text-muted">Soumis il y a 1 jour</small>
+                                </div>
+                                <div class="d-flex">
+                                    <button class="btn btn-sm btn-success me-2">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="list-group-item p-3">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">Demande de remboursement</h6>
+                                    <p class="mb-1 small">Utilisateur #24601 - Plan Premium</p>
+                                    <small class="text-muted">Soumis il y a 3 heures</small>
+                                </div>
+                                <div class="d-flex">
+                                    <button class="btn btn-sm btn-success me-2">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="list-group-item p-3">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">Signalement d'utilisateur</h6>
+                                    <p class="mb-1 small">Utilisateur #18542 - Comportement inapproprié</p>
+                                    <small class="text-muted">Soumis il y a 6 heures</small>
+                                </div>
+                                <div class="d-flex">
+                                    <button class="btn btn-sm btn-success me-2">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="app-card-footer">
+                    <a href="#" class="btn btn-sm btn-primary w-100">Voir toutes les approbations</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
