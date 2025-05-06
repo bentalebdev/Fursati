@@ -255,10 +255,7 @@
 
                 <!-- Options de menu personnalisées -->
                 <div th:id="'customDropdown-' + ${offre.id}" class="custom-dropdown-menu">
-                  <li><a href="javascript:void(0)" th:onclick="'window.open(\'' + @{/offres/{id}(id=${offre.id})} + '\', \'_blank\')'"><i class="fas fa-eye text-primary"></i> Voir l'offre</a></li>
                   <li><a href="javascript:void(0)" th:onclick="'window.location.href = \'' + @{/recruteurs/edit-job/{id}(id=${offre.id})} + '\'';"><i class="fas fa-edit text-info"></i> Modifier</a></li>
-                  <li><a href="javascript:void(0)" th:onclick="'window.location.href = \'' + @{/recruteurs/applications(offreId=${offre.id})} + '\'';"><i class="fas fa-users text-success"></i> Voir les candidatures</a></li>
-                  <li><a href="javascript:void(0)" th:onclick="'shareJob(\'' + ${offre.id} + '\')'"><i class="fas fa-share-alt text-warning"></i> Partager</a></li>
                   <li><hr></li>
 
                   <!-- Actions conditionnelles selon le statut -->
@@ -903,33 +900,6 @@
     });
 
     // Job actions
-    function updateJobStatus(jobId, newStatus) {
-      // Close any open dropdowns first
-      document.querySelectorAll('.custom-dropdown-menu').forEach(el => {
-        el.classList.remove('show');
-      });
-
-      if (!jobId) return;
-
-      fetch(`/api/offres/${jobId}/status`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: newStatus })
-      })
-              .then(response => {
-                if (response.ok) {
-                  window.location.reload();
-                } else {
-                  alert('Une erreur s\'est produite lors de la mise à jour du statut.');
-                }
-              })
-              .catch(error => {
-                console.error('Error:', error);
-                alert('Une erreur s\'est produite. Veuillez réessayer.');
-              });
-    }
 
     function renewJob(jobId) {
       // Close any open dropdowns first
@@ -1045,5 +1015,445 @@
                 alert('Une erreur s\'est produite. Veuillez réessayer.');
               });
     }
+    // Functions for filtering and pagination
+    function setStatusFilter(status) {
+      document.getElementById('statusInput').value = status;
+      document.getElementById('pageInput').value = 0; // Reset to first page
+      document.querySelector('.job-filter-form').submit();
+    }
+
+    function setSortBy(sortBy) {
+      document.getElementById('sortByInput').value = sortBy;
+      document.getElementById('pageInput').value = 0; // Reset to first page
+      document.querySelector('.job-filter-form').submit();
+    }
+
+    function setDirection(direction) {
+      document.getElementById('directionInput').value = direction;
+      document.querySelector('.job-filter-form').submit();
+    }
+
+    function goToPage(page) {
+      document.getElementById('pageInput').value = page;
+      document.querySelector('.job-filter-form').submit();
+    }
+
+    function clearAdvancedFilters() {
+      // Clear all inputs in the advanced filters modal
+      const modal = document.getElementById('advancedFiltersModal');
+      const inputs = modal.querySelectorAll('input:not([type="hidden"])');
+      const selects = modal.querySelectorAll('select');
+
+      inputs.forEach(input => {
+        if (input.type === 'checkbox') {
+          input.checked = false;
+        } else {
+          input.value = '';
+        }
+      });
+
+      selects.forEach(select => {
+        select.value = '';
+      });
+    }
+
+    // Improved custom dropdown menu functionality
+    function toggleCustomDropdown(jobId) {
+      // Close all other open dropdowns first
+      document.querySelectorAll('.custom-dropdown-menu').forEach(dropdown => {
+        if (dropdown.id !== 'customDropdown-' + jobId) {
+          dropdown.classList.remove('show');
+        }
+      });
+
+      // Toggle the current dropdown
+      const dropdown = document.getElementById('customDropdown-' + jobId);
+      if (!dropdown) return;
+
+      dropdown.classList.toggle('show');
+
+      if (dropdown.classList.contains('show')) {
+        // Position the dropdown correctly
+        const button = event.target.closest('.custom-dropdown-btn');
+        if (button) {
+          positionDropdown(dropdown, button);
+        }
+      }
+    }
+
+    function positionDropdown(dropdown, button) {
+      // Make sure the dropdown is in the body for proper positioning
+      if (dropdown.parentNode !== document.body) {
+        document.body.appendChild(dropdown);
+      }
+
+      // Get button position
+      const buttonRect = button.getBoundingClientRect();
+
+      // Calculate positioning
+      const dropdownWidth = 220; // Fixed width
+
+      // Position dropdown
+      dropdown.style.position = 'fixed'; // Use fixed instead of absolute for better positioning
+      dropdown.style.width = dropdownWidth + 'px';
+      dropdown.style.top = buttonRect.bottom + 'px';
+      dropdown.style.left = (buttonRect.right - dropdownWidth) + 'px';
+
+      // Check if dropdown would go off screen
+      const viewportWidth = window.innerWidth;
+      if (buttonRect.right - dropdownWidth < 0) {
+        // Left edge off screen, position at left edge
+        dropdown.style.left = '10px';
+      } else if (buttonRect.right > viewportWidth) {
+        // Right edge off screen, position to not go off screen
+        dropdown.style.left = (viewportWidth - dropdownWidth - 10) + 'px';
+      }
+    }
+
+    // Improved job action functions with error handling
+    function updateJobStatus(jobId, newStatus) {
+      // Close any open dropdowns
+      document.querySelectorAll('.custom-dropdown-menu').forEach(dropdown => {
+        dropdown.classList.remove('show');
+      });
+
+      if (!jobId) return;
+
+      // Show loading indicator
+      const loadingEl = document.createElement('div');
+      loadingEl.id = 'action-loading';
+      loadingEl.innerText = 'Modification en cours...';
+      loadingEl.style.position = 'fixed';
+      loadingEl.style.top = '50%';
+      loadingEl.style.left = '50%';
+      loadingEl.style.transform = 'translate(-50%, -50%)';
+      loadingEl.style.background = 'rgba(0,0,0,0.7)';
+      loadingEl.style.color = 'white';
+      loadingEl.style.padding = '15px 20px';
+      loadingEl.style.borderRadius = '5px';
+      loadingEl.style.zIndex = '9999';
+      document.body.appendChild(loadingEl);
+
+      // Utiliser l'URL correcte pour l'API
+      const apiUrl = `/recruteurs/api/offres/${jobId}/status`;
+
+      fetch(apiUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus })
+      })
+              .then(response => {
+                if (response.ok) {
+                  window.location.reload();
+                } else {
+                  console.error(`Status update failed with status: ${response.status}`);
+                  document.body.removeChild(loadingEl);
+                  showErrorMessage('Une erreur s\'est produite lors de la mise à jour du statut.');
+                }
+              })
+              .catch(error => {
+                if (document.body.contains(loadingEl)) {
+                  document.body.removeChild(loadingEl);
+                }
+                console.error('Network Error:', error);
+                showErrorMessage('Une erreur réseau s\'est produite. Veuillez réessayer.');
+              });
+    }
+
+    function renewJob(jobId) {
+      // Close any open dropdowns
+      document.querySelectorAll('.custom-dropdown-menu').forEach(dropdown => {
+        dropdown.classList.remove('show');
+      });
+
+      if (!jobId) return;
+
+      // Show confirmation dialog
+      if (!confirm('Voulez-vous republier cette offre d\'emploi ?')) {
+        return;
+      }
+
+      // Show loading indicator
+      const loadingEl = document.createElement('div');
+      loadingEl.id = 'action-loading';
+      loadingEl.innerText = 'Republication en cours...';
+      loadingEl.style.position = 'fixed';
+      loadingEl.style.top = '50%';
+      loadingEl.style.left = '50%';
+      loadingEl.style.transform = 'translate(-50%, -50%)';
+      loadingEl.style.background = 'rgba(0,0,0,0.7)';
+      loadingEl.style.color = 'white';
+      loadingEl.style.padding = '15px 20px';
+      loadingEl.style.borderRadius = '5px';
+      loadingEl.style.zIndex = '9999';
+      document.body.appendChild(loadingEl);
+
+      fetch(`/api/offres/${jobId}/renew`, {
+        method: 'POST',
+        headers: {
+          'X-CSRF-TOKEN': getCSRFToken() // Add CSRF token if your app uses it
+        }
+      })
+              .then(response => {
+                document.body.removeChild(loadingEl);
+                if (response.ok) {
+                  window.location.reload();
+                } else {
+                  showErrorMessage('Une erreur s\'est produite lors du renouvellement de l\'offre.');
+                  console.error('Renew failed with status:', response.status);
+                }
+                return response.json().catch(() => ({})); // Try to parse JSON but don't fail if it's not JSON
+              })
+              .then(data => {
+                if (data.error) {
+                  console.error('API returned error:', data.error);
+                }
+              })
+              .catch(error => {
+                document.body.removeChild(loadingEl);
+                console.error('Error renewing job:', error);
+                showErrorMessage('Une erreur réseau s\'est produite. Veuillez réessayer.');
+              });
+    }
+
+    function duplicateJob(jobId) {
+      // Close any open dropdowns
+      document.querySelectorAll('.custom-dropdown-menu').forEach(dropdown => {
+        dropdown.classList.remove('show');
+      });
+
+      if (!jobId) return;
+      window.location.href = `/recruteurs/duplicate-job/${jobId}`;
+    }
+
+    function shareJob(jobId) {
+      // Close any open dropdowns
+      document.querySelectorAll('.custom-dropdown-menu').forEach(dropdown => {
+        dropdown.classList.remove('show');
+      });
+
+      if (!jobId) return;
+
+      // Get the job URL
+      const jobUrl = window.location.origin + `/offres/${jobId}`;
+
+      // Try to use the Navigator Share API first if available
+      if (navigator.share) {
+        navigator.share({
+          title: 'Offre d\'emploi',
+          url: jobUrl
+        }).catch(() => {
+          // Fall back to clipboard if share fails
+          copyToClipboard(jobUrl);
+        });
+      } else {
+        // Fall back to clipboard
+        copyToClipboard(jobUrl);
+      }
+    }
+
+    function copyToClipboard(text) {
+      // Try to use the modern Clipboard API first
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text)
+                .then(() => {
+                  showSuccessMessage('URL de l\'offre copiée dans le presse-papier');
+                })
+                .catch(err => {
+                  console.error('Clipboard API failed:', err);
+                  fallbackCopyTextToClipboard(text);
+                });
+      } else {
+        // Fallback for older browsers
+        fallbackCopyTextToClipboard(text);
+      }
+    }
+
+    function fallbackCopyTextToClipboard(text) {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+
+      // Make the textarea out of viewport
+      textArea.style.position = "fixed";
+      textArea.style.left = "-999999px";
+      textArea.style.top = "-999999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+          showSuccessMessage('URL de l\'offre copiée dans le presse-papier');
+        } else {
+          showErrorMessage('Impossible de copier l\'URL');
+        }
+      } catch (err) {
+        console.error('Fallback copy failed:', err);
+        showErrorMessage('Impossible de copier l\'URL: ' + text);
+      }
+
+      document.body.removeChild(textArea);
+    }
+
+    function confirmDeleteJob(jobId) {
+      // Close any open dropdowns
+      document.querySelectorAll('.custom-dropdown-menu').forEach(dropdown => {
+        dropdown.classList.remove('show');
+      });
+
+      if (!jobId) return;
+      document.getElementById('deleteJobId').value = jobId;
+
+      // Use Bootstrap modal if available
+      const modal = document.getElementById('deleteJobModal');
+      if (modal && window.bootstrap && bootstrap.Modal) {
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+      } else {
+        // Fallback to confirm dialog
+        if (confirm('Êtes-vous sûr de vouloir supprimer cette offre d\'emploi ? Cette action est irréversible.')) {
+          deleteJob();
+        }
+      }
+    }
+
+    function deleteJob() {
+      const jobId = document.getElementById('deleteJobId').value;
+      if (!jobId) return;
+
+      // Show loading indicator
+      const loadingEl = document.createElement('div');
+      loadingEl.id = 'action-loading';
+      loadingEl.innerText = 'Suppression en cours...';
+      loadingEl.style.position = 'fixed';
+      loadingEl.style.top = '50%';
+      loadingEl.style.left = '50%';
+      loadingEl.style.transform = 'translate(-50%, -50%)';
+      loadingEl.style.background = 'rgba(0,0,0,0.7)';
+      loadingEl.style.color = 'white';
+      loadingEl.style.padding = '15px 20px';
+      loadingEl.style.borderRadius = '5px';
+      loadingEl.style.zIndex = '9999';
+      document.body.appendChild(loadingEl);
+
+      fetch(`/api/offres/${jobId}`, {
+        method: 'DELETE',
+        headers: {
+          'X-CSRF-TOKEN': getCSRFToken() // Add CSRF token if your app uses it
+        }
+      })
+              .then(response => {
+                document.body.removeChild(loadingEl);
+                if (response.ok) {
+                  window.location.reload();
+                } else {
+                  showErrorMessage('Une erreur s\'est produite lors de la suppression de l\'offre.');
+                  console.error('Delete failed with status:', response.status);
+                }
+              })
+              .catch(error => {
+                document.body.removeChild(loadingEl);
+                console.error('Error deleting job:', error);
+                showErrorMessage('Une erreur réseau s\'est produite. Veuillez réessayer.');
+              });
+    }
+
+    // Helper functions
+    function getCSRFToken() {
+      // Try to get CSRF token from meta tag
+      const metaToken = document.querySelector('meta[name="csrf-token"]');
+      if (metaToken) {
+        return metaToken.getAttribute('content');
+      }
+
+      // Try to get CSRF token from input
+      const inputToken = document.querySelector('input[name="_csrf"]');
+      if (inputToken) {
+        return inputToken.value;
+      }
+
+      return '';
+    }
+
+    function showSuccessMessage(message) {
+      // Create toast notification
+      const toast = document.createElement('div');
+      toast.className = 'position-fixed top-0 end-0 p-3';
+      toast.style.zIndex = '9999';
+      toast.innerHTML = `
+    <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header bg-success text-white">
+        <i class="fas fa-check-circle me-2"></i>
+        <strong class="me-auto">Succès</strong>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close" onclick="this.parentElement.parentElement.parentElement.remove()"></button>
+      </div>
+      <div class="toast-body">
+        ${message}
+      </div>
+    </div>
+  `;
+      document.body.appendChild(toast);
+
+      // Auto remove after 3 seconds
+      setTimeout(() => {
+        if (document.body.contains(toast)) {
+          document.body.removeChild(toast);
+        }
+      }, 3000);
+    }
+
+    function showErrorMessage(message) {
+      // Create toast notification
+      const toast = document.createElement('div');
+      toast.className = 'position-fixed top-0 end-0 p-3';
+      toast.style.zIndex = '9999';
+      toast.innerHTML = `
+    <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header bg-danger text-white">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <strong class="me-auto">Erreur</strong>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close" onclick="this.parentElement.parentElement.parentElement.remove()"></button>
+      </div>
+      <div class="toast-body">
+        ${message}
+      </div>
+    </div>
+  `;
+      document.body.appendChild(toast);
+
+      // Auto remove after 4 seconds
+      setTimeout(() => {
+        if (document.body.contains(toast)) {
+          document.body.removeChild(toast);
+        }
+      }, 4000);
+    }
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(event) {
+      if (!event.target.closest('.custom-dropdown-btn') && !event.target.closest('.custom-dropdown-menu')) {
+        document.querySelectorAll('.custom-dropdown-menu').forEach(dropdown => {
+          dropdown.classList.remove('show');
+        });
+      }
+    });
+
+    // Initialize dropdowns on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      // Prepare all dropdowns
+      document.querySelectorAll('.custom-dropdown-menu').forEach(dropdown => {
+        // Hide the dropdown initially
+        dropdown.classList.remove('show');
+
+        // Move to body for absolute positioning
+        if (dropdown.parentNode !== document.body) {
+          document.body.appendChild(dropdown);
+        }
+      });
+    });
+
   </script>
 </div>
