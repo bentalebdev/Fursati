@@ -556,9 +556,9 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" th:class="${activeTab == 'users' ? 'nav-link active' : 'nav-link'}" th:href="@{/admin/users}">
+                <a class="nav-link" th:class="${activeTab == 'candidats' ? 'nav-link active' : 'nav-link'}" th:href="@{/admin/candidats}">
                     <i class="fas fa-users"></i>
-                    <span>Utilisateurs</span>
+                    <span>candidats</span>
                     <span class="badge rounded-pill">154</span>
                 </a>
             </li>
@@ -1047,10 +1047,10 @@
         </th:block>
 
         <!-- Tab: Users -->
-        <th:block th:if="${activeTab == 'users'}">
+        <th:block th:if="${activeTab == 'candidats'}">
             <div class="content-panel active">
                 <h2 class="mb-4">Gestion des utilisateurs</h2>
-                <div th:replace="~{fragments/admin/users :: users}"></div>
+                <div th:replace="~{fragments/admin/candidats :: candidats}"></div>
 
                 <!-- Fallback Content -->
                 <div th:remove="all">
@@ -1637,6 +1637,12 @@
             <div class="content-panel active">
                 <h2 class="mb-4">Gestion des offres d'emploi</h2>
                 <div th:replace="~{fragments/admin/jobs :: jobs}"></div>
+            </div>
+        </th:block>
+        <th:block th:if="${activeTab == 'applications'}">
+            <div class="content-panel active">
+                <h2 class="mb-4">Gestion des candidatures</h2>
+                <div th:replace="~{fragments/admin/applications :: applications}"></div>
             </div>
         </th:block>
     </div>

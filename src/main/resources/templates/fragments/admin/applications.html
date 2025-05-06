@@ -1,0 +1,231 @@
+<!-- Applications Management Fragment - With Named Fragment -->
+<div th:fragment="applications">
+    <!-- Flash Messages -->
+    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert" th:if="${success != null}">
+        <i class="fas fa-check-circle me-2"></i> <span th:text="${success}">Opération réussie!</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert" th:if="${error != null}">
+        <i class="fas fa-exclamation-circle me-2"></i> <span th:text="${error}">Une erreur s'est produite!</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="app-card mb-4">
+        <div class="app-card-header">
+            <h5 class="app-card-title">Filtres</h5>
+        </div>
+        <div class="app-card-body">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Statut</label>
+                    <select class="form-select">
+                        <option value="">Tous les statuts</option>
+                        <option value="PENDING">En attente</option>
+                        <option value="INTERVIEW">Entretien</option>
+                        <option value="SHORTLISTED">Présélectionné</option>
+                        <option value="REJECTED">Rejeté</option>
+                        <option value="REVIEWED">Examiné</option>
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Entreprise</label>
+                    <select class="form-select">
+                        <option value="">Toutes les entreprises</option>
+                        <option th:each="company : ${uniqueCompanies}"
+                                th:if="${company != null}"
+                                th:value="${company.id}"
+                                th:text="${company.nomEntreprise}">Entreprise</option>
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Date</label>
+                    <select class="form-select">
+                        <option value="">Toutes les dates</option>
+                        <option value="week">Cette semaine</option>
+                        <option value="month">Ce mois</option>
+                        <option value="quarter">Ce trimestre</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-8 mb-3">
+                    <label class="form-label">Recherche</label>
+                    <input type="text" class="form-control" placeholder="Nom du candidat, poste...">
+                </div>
+                <div class="col-md-4 d-flex align-items-end justify-content-end mb-3">
+                    <button class="btn btn-primary">
+                        <i class="fas fa-filter me-1"></i> Filtrer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-card">
+        <div class="app-card-header">
+            <h5 class="app-card-title">Candidatures</h5>
+            <div>
+                <button class="btn btn-sm btn-outline-secondary me-2">
+                    <i class="fas fa-download me-1"></i> Exporter
+                </button>
+            </div>
+        </div>
+        <div class="app-card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                    <tr>
+                        <th>Candidat</th>
+                        <th>Poste</th>
+                        <th>Entreprise</th>
+                        <th>Date</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="demande : ${applications}">
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar avatar-sm me-2 bg-primary rounded"
+                                     th:if="${demande.candidat != null && demande.candidat.firstName != null && demande.candidat.lastName != null}"
+                                     th:text="${#strings.substring(demande.candidat.firstName, 0, 1) + #strings.substring(demande.candidat.lastName, 0, 1)}">HB</div>
+                                <div th:if="${demande.candidat != null}"
+                                     th:text="${demande.candidat.firstName + ' ' + demande.candidat.lastName}">Candidat</div>
+                            </div>
+                        </td>
+                        <td th:text="${demande.offre != null ? demande.offre.title : 'N/A'}">Développeur Full Stack</td>
+                        <td th:text="${demande.offre != null && demande.offre.companyName != null ? demande.offre.companyName : 'N/A'}">Entreprise</td>
+                        <td th:text="${#dates.format(demande.dateDemande, 'dd/MM/yyyy')}">15/04/2024</td>
+                        <td>
+                            <!-- Status badges with French translations -->
+                            <span th:if="${demande.etat == 'PENDING'}" class="badge bg-secondary">En attente</span>
+                            <span th:if="${demande.etat == 'INTERVIEW'}" class="badge bg-primary">Entretien</span>
+                            <span th:if="${demande.etat == 'SHORTLISTED'}" class="badge bg-info">Présélectionné</span>
+                            <span th:if="${demande.etat == 'REJECTED'}" class="badge bg-danger">Rejeté</span>
+                            <span th:if="${demande.etat == 'REVIEWED'}" class="badge bg-warning text-dark">Examiné</span>
+                            <!-- Default badge for any other status -->
+                            <span th:if="${demande.etat != 'PENDING' && demande.etat != 'INTERVIEW' && demande.etat != 'SHORTLISTED' && demande.etat != 'REJECTED' && demande.etat != 'REVIEWED'}"
+                                  class="badge bg-secondary" th:text="${demande.etat}">Autre</span>
+                        </td>
+                        <td>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    Actions
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" th:href="@{/admin/applications/{id}(id=${demande.idDemande})}"><i class="fas fa-eye me-1"></i> Voir détails</a></li>
+                                    <li th:if="${demande.candidat != null}">
+                                        <a class="dropdown-item" th:href="@{/admin/candidats/{id}/cv(id=${demande.candidat.id})}">
+                                            <i class="fas fa-file-alt me-1"></i> Voir CV
+                                        </a>
+                                    </li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-envelope me-1"></i> Contacter</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <!-- Status update options -->
+                                    <li th:if="${demande.etat != 'PENDING'}">
+                                        <a class="dropdown-item text-secondary" th:href="@{/admin/applications/{id}/update-status(id=${demande.idDemande},status='PENDING')}">
+                                            <i class="fas fa-clock me-1"></i> Marquer en attente
+                                        </a>
+                                    </li>
+                                    <li th:if="${demande.etat != 'INTERVIEW'}">
+                                        <a class="dropdown-item text-primary" th:href="@{/admin/applications/{id}/update-status(id=${demande.idDemande},status='INTERVIEW')}">
+                                            <i class="fas fa-users me-1"></i> Fixer un entretien
+                                        </a>
+                                    </li>
+                                    <li th:if="${demande.etat != 'SHORTLISTED'}">
+                                        <a class="dropdown-item text-info" th:href="@{/admin/applications/{id}/update-status(id=${demande.idDemande},status='SHORTLISTED')}">
+                                            <i class="fas fa-star me-1"></i> Présélectionner
+                                        </a>
+                                    </li>
+                                    <li th:if="${demande.etat != 'REVIEWED'}">
+                                        <a class="dropdown-item text-warning" th:href="@{/admin/applications/{id}/update-status(id=${demande.idDemande},status='REVIEWED')}">
+                                            <i class="fas fa-search me-1"></i> Marquer comme examiné
+                                        </a>
+                                    </li>
+                                    <li th:if="${demande.etat != 'REJECTED'}">
+                                        <a class="dropdown-item text-danger" th:href="@{/admin/applications/{id}/update-status(id=${demande.idDemande},status='REJECTED')}">
+                                            <i class="fas fa-times-circle me-1"></i> Rejeter
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${applications.empty}">
+                        <td colspan="6" class="text-center py-4">Aucune candidature trouvée</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="app-card-footer p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div th:if="${not applications.empty}">
+                    Affichage de <span th:text="${applications.size() < 5 ? applications.size() : 5}">5</span> sur <span th:text="${applications.size()}">120</span> candidatures
+                </div>
+                <div th:if="${applications.empty}">
+                    Aucune candidature trouvée
+                </div>
+                <nav th:if="${applications.size() > 5}">
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item disabled"><a class="page-link" href="#">Précédent</a></li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item"><a class="page-link" href="#">Suivant</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Simple Stats Cards -->
+    <div class="row mt-4">
+        <div class="col-md-3 mb-3 mb-md-0">
+            <div class="stats-card">
+                <div class="stats-icon stats-icon-primary">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <div class="stats-info">
+                    <h3 class="stats-value" th:text="${applications.size()}">120</h3>
+                    <p class="stats-label">Candidatures totales</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3 mb-md-0">
+            <div class="stats-card">
+                <div class="stats-icon stats-icon-warning">
+                    <i class="fas fa-hourglass-half"></i>
+                </div>
+                <div class="stats-info">
+                    <h3 class="stats-value" th:text="${inProgressCount}">43</h3>
+                    <p class="stats-label">En cours</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3 mb-md-0">
+            <div class="stats-card">
+                <div class="stats-icon stats-icon-success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stats-info">
+                    <h3 class="stats-value" th:text="${selectedCount}">27</h3>
+                    <p class="stats-label">Sélectionnés</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-icon stats-icon-danger">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <div class="stats-info">
+                    <h3 class="stats-value" th:text="${rejectedCount}">50</h3>
+                    <p class="stats-label">Rejetés</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
