@@ -572,4 +572,107 @@ public class RecruteurController {
             this.status = status;
         }
     }
+    // Add this method to the RecruteurController class
+
+    @GetMapping("/candidate-profile/{id}")
+    public String viewCandidateProfile(@PathVariable Long id,
+                                       @RequestParam(required = false) Long offreId,
+                                       Model model) {
+        try {
+            // Get the candidate
+            Candidat candidat = candidatService.getCandidatById(id);
+            if (candidat == null) {
+                model.addAttribute("errorMessage", "Candidat non trouvé");
+                return "fragments/error-fragment :: error-fragment";
+            }
+
+            // Add candidate to model
+            model.addAttribute("candidat", candidat);
+
+            // Calculate match score if an offer is specified
+            if (offreId != null) {
+                Offre offre = offreService.getOffreById(offreId);
+                if (offre != null) {
+                    // This is a simplified match calculation example
+                    // In a real application, you would implement a more sophisticated algorithm
+                    int matchScore = calculateMatchScore(candidat, offre);
+                    model.addAttribute("matchScore", matchScore);
+                    model.addAttribute("matchingJobTitle", offre.getTitle());
+                }
+            }
+
+            // Get active job offers for comparison options
+            List<Offre> activeOffres = offreService.findOffresByRecruteurIdRecruteur(1L).stream()
+                    .filter(o -> "ACTIVE".equals(o.getStatus()))
+                    .collect(Collectors.toList());
+            model.addAttribute("offres", activeOffres);
+
+            // Set the active tab to track navigation
+            model.addAttribute("activeTab", "candidate-profile");
+
+            return "recruterboard";
+        } catch (Exception e) {
+            logger.severe("Error loading candidate profile: " + e.getMessage());
+            e.printStackTrace();
+            model.addAttribute("errorMessage", "Une erreur s'est produite lors du chargement du profil du candidat");
+            return "fragments/error-fragment :: error-fragment";
+        }
+    }
+
+    /**
+     * Calculate a match score between a candidate and a job offer
+     * This is a simplified implementation for demonstration purposes
+     */
+    private int calculateMatchScore(Candidat candidat, Offre offre) {
+        // Base score
+        int score = 50;
+
+        // Check for matching skills (simplified)
+        if (candidat.getSkills() != null && !candidat.getSkills().isEmpty()) {
+            // In a real implementation, you would compare the skills with the job requirements
+            // For demo, we'll just add points based on skills count
+            score += Math.min(30, candidat.getSkills().size() * 5);
+        }
+
+        // Check for matching experience level (simplified)
+        if (!candidat.getExperiences().isEmpty()) {
+            String expLevel = offre.getExperienceLevel();
+            int candidateYears = calculateTotalExperienceYears(candidat);
+
+            if ("SENIOR".equals(expLevel) && candidateYears >= 5) {
+                score += 10;
+            } else if ("MID".equals(expLevel) && candidateYears >= 2 && candidateYears < 5) {
+                score += 10;
+            } else if ("JUNIOR".equals(expLevel) && candidateYears < 2) {
+                score += 10;
+            }
+        }
+
+        // Add some randomness for demonstration (remove in production)
+        score += (int)(Math.random() * 10);
+
+        // Ensure score is between 0-100
+        return Math.min(100, Math.max(0, score));
+    }
+
+    /**
+     * Calculate the total years of experience for a candidate
+     */
+    private int calculateTotalExperienceYears(Candidat candidat) {
+        int totalYears = 0;
+
+        for (Experience exp : candidat.getExperiences()) {
+            if (exp.getStartDate() != null) {
+                LocalDate endDate = exp.isCurrentJob() ?
+                        LocalDate.now() :
+                        (exp.getEndDate() != null ? exp.getEndDate() : LocalDate.now());
+
+                long years = java.time.temporal.ChronoUnit.YEARS.between(
+                        exp.getStartDate(), endDate);
+                totalYears += years;
+            }
+        }
+
+        return totalYears;
+    }
 }
