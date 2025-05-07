@@ -16,7 +16,6 @@ public class Offre {
 
     private String title;
     private String description;
-    private String companyName;
     private String location;
     private String industry;
     private String contractType;
@@ -29,19 +28,13 @@ public class Offre {
     private LocalDateTime postedAt;
     private LocalDateTime expiresAt;
 
-    private String logoUrl;
-    private String companyWebsite;
-    private String companySize;
-    private String companyHeadquarters;
-    private String companyDescription;
-
     @Column(name = "status")
     private String status = "DRAFT"; // Default status
 
     @Column(name = "views")
     private Long views = 0L; // Default views count
 
-    // Ajout de la relation avec Recruteur
+    // Relation avec Recruteur - le recruteur possède la référence à Company
     @ManyToOne
     @JoinColumn(name = "recruteur_id")
     private Recruteur recruteur;
@@ -89,14 +82,6 @@ public class Offre {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getCompanyName() {
-        return companyName;
-    }
-
-    public void setCompanyName(String companyName) {
-        this.companyName = companyName;
     }
 
     public String getLocation() {
@@ -171,46 +156,6 @@ public class Offre {
         this.expiresAt = expiresAt;
     }
 
-    public String getLogoUrl() {
-        return logoUrl;
-    }
-
-    public void setLogoUrl(String logoUrl) {
-        this.logoUrl = logoUrl;
-    }
-
-    public String getCompanyWebsite() {
-        return companyWebsite;
-    }
-
-    public void setCompanyWebsite(String companyWebsite) {
-        this.companyWebsite = companyWebsite;
-    }
-
-    public String getCompanySize() {
-        return companySize;
-    }
-
-    public void setCompanySize(String companySize) {
-        this.companySize = companySize;
-    }
-
-    public String getCompanyHeadquarters() {
-        return companyHeadquarters;
-    }
-
-    public void setCompanyHeadquarters(String companyHeadquarters) {
-        this.companyHeadquarters = companyHeadquarters;
-    }
-
-    public String getCompanyDescription() {
-        return companyDescription;
-    }
-
-    public void setCompanyDescription(String companyDescription) {
-        this.companyDescription = companyDescription;
-    }
-
     public String getStatus() {
         return status;
     }
@@ -252,12 +197,37 @@ public class Offre {
         this.recruteur = recruteur;
     }
 
+    // Méthodes pratiques pour accéder aux informations de l'entreprise
+    public String getCompanyName() {
+        return recruteur != null && recruteur.getCompany() != null ?
+                recruteur.getCompany().getNomEntreprise() : null;
+    }
+
+    public String getCompanyDescription() {
+        return recruteur != null && recruteur.getCompany() != null ?
+                recruteur.getCompany().getDescription() : null;
+    }
+
+    public String getCompanyWebsite() {
+        return recruteur != null && recruteur.getCompany() != null ?
+                recruteur.getCompany().getSiteWeb() : null;
+    }
+
+    public String getCompanySize() {
+        return recruteur != null && recruteur.getCompany() != null ?
+                recruteur.getCompany().getTailleEntreprise() : null;
+    }
+
+    public String getCompanyLogoUrl() {
+        return recruteur != null && recruteur.getCompany() != null ?
+                recruteur.getCompany().getLogoUrl() : null;
+    }
+
     @Override
     public String toString() {
         return "Offre{" +
                 "id=" + id +
                 ", title='" + title + '\'' +
-                ", companyName='" + companyName + '\'' +
                 ", location='" + location + '\'' +
                 ", contractType='" + contractType + '\'' +
                 '}';

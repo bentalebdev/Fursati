@@ -7,8 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -126,12 +128,129 @@ public class RecruteurController {
         }
     }
 
+    // Mise à jour de la méthode pour afficher le formulaire de création d'offre
+
     @GetMapping("/post-job")
     public String postjob(Model model) {
         logger.info("Loading post-job page...");
+
+        // Récupérer l'ID du recruteur connecté (en production, utiliser l'authentification)
+        Long recruteurId = 1L;
+
+        // Récupérer le recruteur
+        Recruteur recruteur = recruteurService.getRecruteurById(recruteurId);
+
+        // Récupérer l'entreprise associée au recruteur
+        Company company = recruteur != null ? recruteur.getCompany() : null;
+
+        // Créer une nouvelle offre
+        Offre offre = new Offre();
+
+        // Associer le recruteur à l'offre
+        offre.setRecruteur(recruteur);
+
+        // Ajouter les objets au modèle
+        model.addAttribute("offre", offre);
+        model.addAttribute("company", company);
         model.addAttribute("activeTab", "post-job");
-        model.addAttribute("offre", new Offre());
+
         return "recruterboard";
+    }
+
+    // Mise à jour de la méthode pour créer une offre
+    @PostMapping("/create")
+    public String createOffre(@ModelAttribute Offre offre,
+                              @RequestParam(required = false) String responsibilitiesStr,
+                              @RequestParam(required = false) String qualificationsStr,
+                              RedirectAttributes redirectAttributes) {
+
+        System.out.println("DEBUG: Starting createOffre method");
+        System.out.println("DEBUG: Received job title: " + offre.getTitle());
+
+        try {
+            // Récupérer le recruteur
+            System.out.println("DEBUG: Getting recruiter with ID 1");
+            Recruteur recruteur = recruteurService.getRecruteurById(Long.valueOf(1));
+            if (recruteur == null) {
+                System.out.println("DEBUG: CRITICAL ERROR - Recruiter with ID 1 not found!");
+                throw new RuntimeException("Recruiter with ID 1 not found");
+            }
+
+            // Récupérer l'entreprise associée au recruteur
+            Company company = recruteur.getCompany();
+            if (company == null) {
+                throw new RuntimeException("Company information not found for this recruiter");
+            }
+
+            // Associer le recruteur à l'offre
+            offre.setRecruteur(recruteur);
+
+            // IMPORTANT: Ne plus stocker les informations redondantes de l'entreprise
+            // Les champs suivants seront ignorés et les informations seront récupérées depuis company:
+            // - companyName
+            // - companyWebsite
+            // - companySize
+            // - companyHeadquarters
+            // - companyDescription
+
+            // Process responsibilities
+            if (responsibilitiesStr != null && !responsibilitiesStr.isEmpty()) {
+                System.out.println("DEBUG: Processing responsibilities");
+                List<String> responsibilities = new java.util.ArrayList<>();
+                String[] respArray = responsibilitiesStr.split(",");
+                System.out.println("DEBUG: Split responsibilities into " + respArray.length + " items");
+                for (String resp : respArray) {
+                    if (!resp.trim().isEmpty()) {
+                        responsibilities.add(resp.trim());
+                    }
+                }
+                System.out.println("DEBUG: Final responsibilities count: " + responsibilities.size());
+                offre.setResponsibilities(responsibilities);
+            }
+
+            // Process qualifications
+            if (qualificationsStr != null && !qualificationsStr.isEmpty()) {
+                System.out.println("DEBUG: Processing qualifications");
+                List<String> qualifications = new java.util.ArrayList<>();
+                String[] qualArray = qualificationsStr.split(",");
+                System.out.println("DEBUG: Split qualifications into " + qualArray.length + " items");
+                for (String qual : qualArray) {
+                    if (!qual.trim().isEmpty()) {
+                        qualifications.add(qual.trim());
+                    }
+                }
+                System.out.println("DEBUG: Final qualifications count: " + qualifications.size());
+                offre.setQualifications(qualifications);
+            }
+
+            // Set default dates
+            System.out.println("DEBUG: Setting dates");
+            if (offre.getPostedAt() == null) {
+                offre.setPostedAt(LocalDateTime.now());
+            }
+            if (offre.getExpiresAt() == null) {
+                offre.setExpiresAt(LocalDateTime.now().plusDays(30));
+            }
+
+            // Save the offer
+            System.out.println("DEBUG: About to save offer to database");
+            Offre savedOffre = offreService.saveOffre(offre);
+            System.out.println("DEBUG: Successfully saved offer with ID: " + savedOffre.getId());
+
+            // Add success message
+            redirectAttributes.addFlashAttribute("successMessage", "L'offre a été publiée avec succès.");
+            return "redirect:/recruteurs/post-job";
+
+        } catch (Exception e) {
+            System.err.println("DEBUG: EXCEPTION TYPE: " + e.getClass().getName());
+            System.err.println("DEBUG: EXCEPTION MESSAGE: " + e.getMessage());
+            System.err.println("DEBUG: EXCEPTION STACKTRACE:");
+            e.printStackTrace();
+
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Une erreur s'est produite lors de l'enregistrement de l'offre: " + e.getMessage());
+            return "redirect:/recruteurs/post-job";
+        }
     }
 
     @GetMapping("/my-jobs")
@@ -601,7 +720,7 @@ public class RecruteurController {
             copy.setTitle(original.getTitle() + " (Copie)");
             copy.setDescription(original.getDescription());
             copy.setLocation(original.getLocation());
-            copy.setCompanyName(original.getCompanyName());
+
             copy.setContractType(original.getContractType());
             copy.setWorkMode(original.getWorkMode());
             copy.setIndustry(original.getIndustry());

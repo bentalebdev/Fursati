@@ -72,12 +72,12 @@
               <label for="contractType" class="form-label">Type de contrat *</label>
               <select class="form-select" id="contractType" th:field="*{contractType}" required>
                 <option value="">Sélectionner un type</option>
-                <option value="FULL_TIME">Temps plein</option>
-                <option value="PART_TIME">Temps partiel</option>
-                <option value="CONTRACT">Contrat</option>
+                <option value="CDI">CDI</option>
+                <option value="CDD">CDD</option>
+                <option value="STAGE">Stage</option>
                 <option value="FREELANCE">Freelance</option>
-                <option value="INTERNSHIP">Stage</option>
-                <option value="APPRENTICESHIP">Alternance</option>
+                <option value="ALTERNANCE">Alternance</option>
+                <option value="INTERIM">Intérim</option>
               </select>
               <div class="invalid-feedback">Le type de contrat est requis.</div>
             </div>
@@ -85,9 +85,9 @@
               <label for="workMode" class="form-label">Mode de travail *</label>
               <select class="form-select" id="workMode" th:field="*{workMode}" required>
                 <option value="">Sélectionner un mode</option>
-                <option value="ONSITE">Sur site</option>
+                <option value="PRESENTIEL">Sur site</option>
                 <option value="REMOTE">Télétravail</option>
-                <option value="HYBRID">Hybride</option>
+                <option value="HYBRIDE">Hybride</option>
               </select>
               <div class="invalid-feedback">Le mode de travail est requis.</div>
             </div>
@@ -103,9 +103,9 @@
               <label for="experienceLevel" class="form-label">Niveau d'expérience *</label>
               <select class="form-select" id="experienceLevel" th:field="*{experienceLevel}" required>
                 <option value="">Sélectionner un niveau</option>
-                <option value="ENTRY">Débutant (0-2 ans)</option>
+                <option value="DEBUTANT">Débutant (0-2 ans)</option>
                 <option value="JUNIOR">Junior (2-3 ans)</option>
-                <option value="MID_LEVEL">Intermédiaire (3-5 ans)</option>
+                <option value="INTERMEDIAIRE">Intermédiaire (3-5 ans)</option>
                 <option value="SENIOR">Sénior (5-10 ans)</option>
                 <option value="EXPERT">Expert (10+ ans)</option>
               </select>
@@ -126,37 +126,17 @@
 
           <!-- Company Information -->
           <h5 class="mt-4 mb-3">Informations sur l'entreprise</h5>
-          <div class="row mb-3">
-            <div class="col-md-6">
-              <!-- Hidden field for companyName during preview -->
-              <input type="hidden" id="companyName" value="" />
-              <label for="companyWebsite" class="form-label">Site web de l'entreprise</label>
-              <input type="url" class="form-control" id="companyWebsite" th:field="*{companyWebsite}">
-            </div>
-          </div>
-
-          <div class="row mb-3">
-            <div class="col-md-6">
-              <label for="companySize" class="form-label">Taille de l'entreprise</label>
-              <select class="form-select" id="companySize" th:field="*{companySize}">
-                <option value="">Sélectionner</option>
-                <option value="1-10">1-10 employés</option>
-                <option value="11-50">11-50 employés</option>
-                <option value="51-200">51-200 employés</option>
-                <option value="201-500">201-500 employés</option>
-                <option value="501-1000">501-1000 employés</option>
-                <option value="1001+">1001+ employés</option>
-              </select>
-            </div>
-            <div class="col-md-6">
-              <label for="companyHeadquarters" class="form-label">Siège social</label>
-              <input type="text" class="form-control" id="companyHeadquarters" th:field="*{companyHeadquarters}">
-            </div>
-          </div>
-
-          <div class="mb-3">
-            <label for="companyDescription" class="form-label">Description de l'entreprise</label>
-            <textarea class="form-control" id="companyDescription" th:field="*{companyDescription}" rows="3"></textarea>
+          <div class="alert alert-info">
+            <p><i class="fas fa-info-circle me-2"></i>Les informations de votre entreprise seront automatiquement associées à cette offre.</p>
+            <p class="mb-0" th:if="${company != null}">
+              <strong>Entreprise :</strong> <span th:text="${company.nomEntreprise}">Nom de l'entreprise</span><br>
+              <strong>Secteur :</strong> <span th:text="${company.secteur}">Secteur</span><br>
+              <strong>Taille :</strong> <span th:text="${company.tailleEntreprise}">Taille</span><br>
+              <a th:href="@{/recruteurs/company}" class="btn btn-sm btn-outline-primary mt-2">Modifier les informations de l'entreprise</a>
+            </p>
+            <p class="mb-0" th:unless="${company != null}">
+              <strong>Attention :</strong> Aucune information d'entreprise trouvée. Veuillez d'abord <a th:href="@{/recruteurs/company}" class="alert-link">compléter votre profil d'entreprise</a>.
+            </p>
           </div>
 
           <div class="d-flex justify-content-end mt-4">
@@ -301,7 +281,7 @@
               <div class="job-preview">
                 <h4 id="preview-title">Titre du poste</h4>
                 <p class="text-muted mb-2">
-                  <span id="preview-companyName">Nom de l'entreprise</span> •
+                  <span id="preview-companyName" th:text="${company != null ? company.nomEntreprise : 'Nom de l''entreprise'}">Nom de l'entreprise</span> •
                   <span id="preview-location">Lieu</span> •
                   <span id="preview-contractType">Type de contrat</span>
                 </p>
@@ -510,7 +490,7 @@
     document.addEventListener('DOMContentLoaded', function() {
       const successMessage = /*[[${successMessage}]]*/ null;
       const errorMessage = /*[[${errorMessage}]]*/ null;
-      
+
       if (successMessage) {
         toastr.success(successMessage, 'Succès!');
       }
@@ -720,8 +700,8 @@
       function updatePreview() {
         document.getElementById('preview-title').textContent = document.getElementById('title').value || 'Titre du poste';
 
-        // Use the Recruteur company name if available, otherwise use a placeholder
-        document.getElementById('preview-companyName').textContent = document.querySelector('#companyName').value || 'Nom de l\'entreprise';
+        // The company name is already set from the server-side in a span with id="preview-companyName"
+        // We don't need to update it here as it gets its value from th:text="${company != null ? company.nomEntreprise : 'Nom de l''entreprise'}"
 
         document.getElementById('preview-location').textContent = document.getElementById('location').value || 'Lieu';
 
@@ -937,7 +917,7 @@
           this.submit();
         } else {
           // Afficher un message d'erreur
-          alert('Veuillez remplir tous les champs obligatoires.');
+          toastr.error('Veuillez remplir tous les champs obligatoires.', 'Erreur');
 
           // Revenir à la première étape avec erreur
           document.querySelectorAll('.form-step').forEach(step => {

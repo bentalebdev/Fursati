@@ -12,7 +12,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 @Controller
@@ -64,6 +66,84 @@ public class CandidatController {
     public String dashboard(Model model) {
         logger.info("Loading dashboard page...");
         model.addAttribute("activeTab", "dashboard");
+
+        // Get current candidate (hardcoded to ID 1 for now)
+        Long candidatId = 1L;
+        Candidat candidat = candidatService.getCandidatById(candidatId);
+
+        if (candidat != null) {
+            // We'll need to add some methods to the services to get this data
+            // For now, we'll create mock data that would be provided by these methods
+
+            // Count applications (we would need a DemandeService for this)
+            int applicationCount = 12; // This would be demandeService.countByCandidatId(candidatId)
+
+            // Count interviews (Demandes with status "INTERVIEW")
+            int interviewCount = 3; // This would be demandeService.countByCandidatIdAndEtat(candidatId, "INTERVIEW")
+
+            // Count saved offers (we need a method or entity for saved offers)
+            int savedOffersCount = 8; // This would come from a savedOffersService
+
+            // Profile views (we need a method or entity for profile views)
+            int profileViewsCount = 42; // This would come from a profileViewsService
+
+            // Recent activities (last 3 applications, interviews, saved jobs)
+            List<Map<String, Object>> recentActivities = new ArrayList<>();
+            // This would come from a method like demandeService.getRecentActivitiesByCandidatId(candidatId, 3)
+
+            // Mock data for recent activities
+            Map<String, Object> activity1 = new HashMap<>();
+            activity1.put("type", "application");
+            activity1.put("title", "Développeur Full Stack");
+            activity1.put("company", "TechMagic SARL");
+            activity1.put("daysAgo", 2);
+            recentActivities.add(activity1);
+
+            Map<String, Object> activity2 = new HashMap<>();
+            activity2.put("type", "interview");
+            activity2.put("title", "Responsable Marketing");
+            activity2.put("company", "MarketPro");
+            activity2.put("daysAgo", 3);
+            recentActivities.add(activity2);
+
+            Map<String, Object> activity3 = new HashMap<>();
+            activity3.put("type", "saved");
+            activity3.put("title", "Chef de projet Digital");
+            activity3.put("company", "DigiTech");
+            activity3.put("daysAgo", 5);
+            recentActivities.add(activity3);
+
+            // Upcoming interviews
+            List<Map<String, Object>> upcomingInterviews = new ArrayList<>();
+            // This would come from a method like demandeService.getUpcomingInterviewsByCandidatId(candidatId)
+
+            // Mock data for upcoming interviews
+            Map<String, Object> interview1 = new HashMap<>();
+            interview1.put("company", "MarketPro");
+            interview1.put("title", "Responsable Marketing");
+            interview1.put("date", "22 Mars");
+            upcomingInterviews.add(interview1);
+
+            Map<String, Object> interview2 = new HashMap<>();
+            interview2.put("company", "DigiTech");
+            interview2.put("title", "Développeur Front-end");
+            interview2.put("date", "25 Mars");
+            upcomingInterviews.add(interview2);
+
+            Map<String, Object> interview3 = new HashMap<>();
+            interview3.put("company", "Tech Solutions");
+            interview3.put("title", "Chef de Projet");
+            interview3.put("date", "28 Mars");
+            upcomingInterviews.add(interview3);
+
+            // Add all data to the model
+            model.addAttribute("applicationCount", applicationCount);
+            model.addAttribute("interviewCount", interviewCount);
+            model.addAttribute("savedOffersCount", savedOffersCount);
+            model.addAttribute("profileViewsCount", profileViewsCount);
+            model.addAttribute("recentActivities", recentActivities);
+            model.addAttribute("upcomingInterviews", upcomingInterviews);
+        }
 
         // Provide a default Offre object to avoid null pointer exceptions in the view
         if (!model.containsAttribute("offre")) {

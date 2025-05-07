@@ -7,13 +7,13 @@
             <i class="fas fa-arrow-left me-1"></i> Retour aux offres
         </a>
     </div>
-    <div class="card mb-4">
+    <div class="card mb-4" th:if="${offre != null}">
         <div class="card-header bg-white">
             <div class="d-flex justify-content-between align-items-center">
-                <h3 class="mb-0" th:text="${offre != null && offre.title != null ? offre.title : 'Détails de l''offre d''emploi'}">Détails de l'offre d'emploi</h3>
+                <h3 class="mb-0" th:text="${offre.title != null ? offre.title : 'Détails de l''offre d''emploi'}">Détails de l'offre d'emploi</h3>
                 <div>
                     <button class="btn btn-outline-primary me-2"><i class="far fa-bookmark me-1"></i>Sauvegarder</button>
-                    <a href="#" class="btn btn-primary"><i class="fas fa-paper-plane me-1"></i>Postuler</a>
+                    <a th:href="@{/candidats/jobs/apply/{id}(id=${offre.id})}" class="btn btn-primary"><i class="fas fa-paper-plane me-1"></i>Postuler</a>
                 </div>
             </div>
         </div>
@@ -22,40 +22,40 @@
             <div class="row mb-4">
                 <div class="col-md-8">
                     <div class="d-flex align-items-center mb-3">
-                        <img th:src="${offre != null && offre.logoUrl != null ? offre.logoUrl : 'https://via.placeholder.com/80'}"
+                        <img th:src="${offre.companyLogoUrl != null ? offre.companyLogoUrl : 'https://via.placeholder.com/80'}"
                              class="me-3 rounded" alt="Logo entreprise" style="width:80px;height:80px;object-fit:contain;">
                         <div>
-                            <h4 class="mb-1" th:text="${offre != null && offre.companyName != null ? offre.companyName : 'Nom de l''entreprise'}">Nom de l'entreprise</h4>
-                            <p class="mb-0 text-muted" th:text="${offre != null && offre.industry != null ? offre.industry : 'Secteur d''activité'}">Secteur d'activité</p>
+                            <h4 class="mb-1" th:text="${offre.companyName != null ? offre.companyName : 'Nom de l''entreprise'}">Nom de l'entreprise</h4>
+                            <p class="mb-0 text-muted" th:text="${offre.industry != null ? offre.industry : 'Secteur d''activité'}">Secteur d'activité</p>
                         </div>
                     </div>
                     <div class="mb-3">
                         <p class="mb-1"><i class="fas fa-map-marker-alt me-2 text-primary"></i>
-                            <span th:text="${offre != null && offre.location != null ? offre.location : 'Lieu non spécifié'}">Lieu</span>
+                            <span th:text="${offre.location != null ? offre.location : 'Lieu non spécifié'}">Lieu</span>
                         </p>
                         <p class="mb-1"><i class="fas fa-money-bill-wave me-2 text-primary"></i>
-                            <span th:if="${offre != null && offre.minSalary != null && offre.maxSalary != null}">
-                                <span th:text="${#numbers.formatDecimal(offre.minSalary, 1, 2, 'COMMA')}">0</span> -
-                                <span th:text="${#numbers.formatDecimal(offre.maxSalary, 1, 2, 'COMMA')}">0</span> MAD
+                            <span th:if="${offre.minSalary != null && offre.maxSalary != null}">
+                                <span th:text="${#numbers.formatDecimal(offre.minSalary, 1, 0, 'COMMA')}">0</span> -
+                                <span th:text="${#numbers.formatDecimal(offre.maxSalary, 1, 0, 'COMMA')}">0</span> MAD
                             </span>
-                            <span th:unless="${offre != null && offre.minSalary != null && offre.maxSalary != null}">
+                            <span th:unless="${offre.minSalary != null && offre.maxSalary != null}">
                                 Salaire non spécifié
                             </span>
                         </p>
                         <p class="mb-1"><i class="fas fa-calendar-alt me-2 text-primary"></i>
-                            <span th:if="${offre != null && offre.postedAt != null}"
+                            <span th:if="${offre.postedAt != null}"
                                   th:text="${#temporals.format(offre.postedAt, 'dd MMMM yyyy')}">
                                 Date de publication
                             </span>
-                            <span th:unless="${offre != null && offre.postedAt != null}">
+                            <span th:unless="${offre.postedAt != null}">
                                 Date de publication non spécifiée
                             </span>
                         </p>
                     </div>
                     <div class="d-flex flex-wrap gap-2">
-                        <span class="badge bg-primary" th:text="${offre != null && offre.contractType != null ? offre.contractType : 'Type de contrat non spécifié'}">Type de contrat</span>
-                        <span class="badge bg-light text-dark" th:text="${offre != null && offre.workMode != null ? offre.workMode : 'Mode de travail non spécifié'}">Mode de travail</span>
-                        <span class="badge bg-light text-dark" th:text="${offre != null && offre.experienceLevel != null ? offre.experienceLevel : 'Expérience non spécifiée'}">Niveau d'expérience</span>
+                        <span class="badge bg-primary" th:text="${offre.contractType != null ? offre.contractType : 'Type de contrat non spécifié'}">Type de contrat</span>
+                        <span class="badge bg-light text-dark" th:text="${offre.workMode != null ? offre.workMode : 'Mode de travail non spécifié'}">Mode de travail</span>
+                        <span class="badge bg-light text-dark" th:text="${offre.experienceLevel != null ? offre.experienceLevel : 'Expérience non spécifiée'}">Niveau d'expérience</span>
                     </div>
                 </div>
                 <div class="col-md-4 mt-3 mt-md-0">
@@ -64,13 +64,20 @@
                             <h5 class="card-title">Informations sur l'entreprise</h5>
                             <ul class="list-unstyled mb-0">
                                 <li class="mb-2"><i class="fas fa-globe me-2 text-primary"></i>
-                                    <a href="#" class="text-decoration-none" th:text="${offre != null && offre.companyWebsite != null ? offre.companyWebsite : 'Site web'}">Site web</a>
+                                    <a th:href="${offre.companyWebsite != null ? offre.companyWebsite : '#'}"
+                                       th:text="${offre.companyWebsite != null ? offre.companyWebsite : 'Site web non spécifié'}"
+                                       class="text-decoration-none"
+                                       th:target="${offre.companyWebsite != null ? '_blank' : '_self'}">Site web</a>
                                 </li>
                                 <li class="mb-2"><i class="fas fa-users me-2 text-primary"></i>
-                                    <span th:text="${offre != null && offre.companySize != null ? offre.companySize : 'Taille non spécifiée'}">Taille de l'entreprise</span>
+                                    <span th:text="${offre.companySize != null ? offre.companySize : 'Taille non spécifiée'}">Taille de l'entreprise</span>
                                 </li>
                                 <li><i class="fas fa-building me-2 text-primary"></i>
-                                    <span th:text="${offre != null && offre.companyHeadquarters != null ? offre.companyHeadquarters : 'Siège social non spécifié'}">Siège social</span>
+                                    <span th:if="${offre.recruteur != null && offre.recruteur.company != null && offre.recruteur.company.ville != null}"
+                                          th:text="${offre.recruteur.company.ville}">Ville</span>
+                                    <span th:unless="${offre.recruteur != null && offre.recruteur.company != null && offre.recruteur.company.ville != null}">
+                                        Siège social non spécifié
+                                    </span>
                                 </li>
                             </ul>
                         </div>
@@ -81,16 +88,16 @@
             <!-- Description du poste -->
             <div class="mb-4">
                 <h4>Description du poste</h4>
-                <div th:if="${offre != null && offre.description != null}">
+                <div th:if="${offre.description != null}">
                     <p th:text="${offre.description}">Description détaillée du poste.</p>
                 </div>
-                <div th:unless="${offre != null && offre.description != null}">
+                <div th:unless="${offre.description != null}">
                     <p>Aucune description disponible pour cette offre d'emploi.</p>
                 </div>
             </div>
 
             <!-- Responsabilités -->
-            <div class="mb-4" th:if="${offre != null && offre.responsibilities != null}">
+            <div class="mb-4" th:if="${offre.responsibilities != null && !offre.responsibilities.isEmpty()}">
                 <h4>Responsabilités</h4>
                 <ul>
                     <li th:each="responsibility : ${offre.responsibilities}" th:text="${responsibility}">Responsabilité</li>
@@ -98,7 +105,7 @@
             </div>
 
             <!-- Qualifications -->
-            <div class="mb-4" th:if="${offre != null && offre.qualifications != null}">
+            <div class="mb-4" th:if="${offre.qualifications != null && !offre.qualifications.isEmpty()}">
                 <h4>Qualifications</h4>
                 <ul>
                     <li th:each="qualification : ${offre.qualifications}" th:text="${qualification}">Qualification</li>
@@ -106,21 +113,21 @@
             </div>
 
             <!-- À propos de l'entreprise -->
-            <div class="mb-4" th:if="${offre != null && offre.companyDescription != null}">
+            <div class="mb-4" th:if="${offre.companyDescription != null}">
                 <h4>À propos de l'entreprise</h4>
                 <p th:text="${offre.companyDescription}">Description de l'entreprise.</p>
             </div>
 
             <!-- Boutons d'action -->
             <div class="d-flex justify-content-between">
-                <button class="btn btn-outline-primary"><i class="fas fa-share-alt me-1"></i>Partager</button>
-                <a href="#" class="btn btn-primary"><i class="fas fa-paper-plane me-1"></i>Postuler maintenant</a>
+                <button class="btn btn-outline-primary share-button"><i class="fas fa-share-alt me-1"></i>Partager</button>
+                <a th:href="@{/candidats/jobs/apply/{id}(id=${offre.id})}" class="btn btn-primary"><i class="fas fa-paper-plane me-1"></i>Postuler maintenant</a>
             </div>
         </div>
     </div>
 
     <!-- Offres similaires -->
-    <div class="card" th:if="${similarOffers != null and not similarOffers.isEmpty()}">
+    <div class="card" th:if="${similarOffers != null and !similarOffers.isEmpty()}">
         <div class="card-header bg-white">
             <h4 class="mb-0">Offres similaires</h4>
         </div>
@@ -130,7 +137,7 @@
                     <div class="card h-100 hover-card shadow-sm">
                         <div class="card-body">
                             <div class="d-flex mb-3">
-                                <img th:src="${similarOffre.logoUrl != null ? similarOffre.logoUrl : 'https://via.placeholder.com/50'}"
+                                <img th:src="${similarOffre.companyLogoUrl != null ? similarOffre.companyLogoUrl : 'https://via.placeholder.com/50'}"
                                      class="rounded me-3" alt="Logo" style="width:50px;height:50px;object-fit:contain;">
                                 <div>
                                     <h5 class="mb-1" th:text="${similarOffre.title}">Titre du poste</h5>
@@ -155,7 +162,7 @@
     </div>
 
     <!-- Fallback pour démonstration si aucune offre n'est trouvée -->
-    <div class="alert alert-info" th:if="${offre == null || (offre.id == null && offre.title == null && offre.companyName == null)}">
+    <div class="alert alert-info" th:if="${offre == null}">
         <h5 class="alert-heading">Offre non trouvée</h5>
         <p>L'offre d'emploi demandée n'a pas été trouvée. Cela peut être dû à l'une des raisons suivantes :</p>
         <ul>
@@ -166,6 +173,40 @@
         <hr>
         <p class="mb-0">Vous pouvez <a th:href="@{/candidats/jobs}" class="alert-link">retourner à la liste des offres</a> pour découvrir d'autres opportunités.</p>
     </div>
+
+    <!-- Script pour le partage -->
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fonctionnalité de partage
+            const shareButtons = document.querySelectorAll('.share-button');
+
+            shareButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    if (navigator.share) {
+                        // API Web Share si disponible
+                        navigator.share({
+                            title: document.querySelector('h3').textContent,
+                            url: window.location.href
+                        })
+                            .catch(err => {
+                                console.error('Erreur lors du partage:', err);
+                            });
+                    } else {
+                        // Fallback: copier le lien dans le presse-papiers
+                        const el = document.createElement('textarea');
+                        el.value = window.location.href;
+                        document.body.appendChild(el);
+                        el.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(el);
+
+                        // Notification à l'utilisateur
+                        alert('Lien copié dans le presse-papiers!');
+                    }
+                });
+            });
+        });
+    </script>
 </div>
 </body>
 </html>
