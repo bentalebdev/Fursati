@@ -34,11 +34,96 @@ public class RecruteurController {
    private DemandeService demandeService;
    @Autowired
    private CompanyService companyService;
+    // Mise à jour de la méthode dashboard dans RecruteurController.java
+
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
         logger.info("Loading dashboard page...");
-        model.addAttribute("activeTab", "dashboard");
-        return "recruterboard";
+
+        try {
+            Long recruteurId = 1L; // Dans une application réelle, obtenez l'ID depuis l'utilisateur authentifié
+
+            // 1. Récupérer les statistiques principales
+            List<Offre> allOffres = offreService.findOffresByRecruteurIdRecruteur(recruteurId);
+            long activeCount = allOffres.stream().filter(o -> "ACTIVE".equals(o.getStatus())).count();
+            long draftCount = allOffres.stream().filter(o -> "DRAFT".equals(o.getStatus())).count();
+            long expiredCount = allOffres.stream().filter(o -> "EXPIRED".equals(o.getStatus())).count();
+            long closedCount = allOffres.stream().filter(o -> "CLOSED".equals(o.getStatus())).count();
+
+            // 2. Récupérer les offres actives avec le nombre de candidatures
+            List<Offre> activeOffres = allOffres.stream()
+                    .filter(o -> "ACTIVE".equals(o.getStatus()))
+                    .limit(4) // Limiter à 4 offres pour la page d'accueil
+                    .collect(Collectors.toList());
+
+            // 3. Récupérer les candidatures récentes
+            List<Demande> allDemandes = demandeService.getDemandesByRecruitId(recruteurId);
+            List<Demande> recentDemandes = allDemandes.stream()
+                    .sorted((d1, d2) -> {
+                        if (d1.getDateDemande() == null) return 1;
+                        if (d2.getDateDemande() == null) return -1;
+                        return d2.getDateDemande().compareTo(d1.getDateDemande());
+                    })
+                    .limit(5) // Limiter à 5 candidatures pour la page d'accueil
+                    .collect(Collectors.toList());
+
+            // 4. Récupérer les meilleurs candidats
+            List<Candidat> allCandidats = candidatService.getAllCandidats();
+
+            // 4.1 Dans une application réelle, vous utiliseriez un algorithme de correspondance
+            // Ici, nous prenons simplement les 3 premiers pour la démo
+            List<Candidat> topCandidats = allCandidats.stream()
+                    .limit(3)
+                    .collect(Collectors.toList());
+
+            // 5. Calculer le nombre total de candidatures par statut
+            long pendingCount = allDemandes.stream().filter(d -> "PENDING".equals(d.getEtat())).count();
+            long reviewedCount = allDemandes.stream().filter(d -> "REVIEWED".equals(d.getEtat())).count();
+            long interviewCount = allDemandes.stream().filter(d -> "INTERVIEW".equals(d.getEtat())).count();
+            long rejectedCount = allDemandes.stream().filter(d -> "REJECTED".equals(d.getEtat())).count();
+            long acceptedCount = allDemandes.stream().filter(d -> "ACCEPTED".equals(d.getEtat())).count();
+
+            // 6. Ajouter le nombre de candidatures pour chaque offre active
+            Map<Long, Long> offreApplicationCounts = new HashMap<>();
+            for (Offre offre : activeOffres) {
+                long count = allDemandes.stream()
+                        .filter(d -> d.getOffre() != null && offre.getId().equals(d.getOffre().getId()))
+                        .count();
+                offreApplicationCounts.put(offre.getId(), count);
+            }
+
+            // 7. Ajouter tous ces éléments au modèle
+            model.addAttribute("activeCount", activeCount);
+            model.addAttribute("draftCount", draftCount);
+            model.addAttribute("expiredCount", expiredCount);
+            model.addAttribute("closedCount", closedCount);
+
+            model.addAttribute("activeOffres", activeOffres);
+            model.addAttribute("recentDemandes", recentDemandes);
+            model.addAttribute("topCandidates", topCandidats);
+
+            model.addAttribute("totalDemandes", allDemandes.size());
+            model.addAttribute("totalCandidates", allCandidats.size());
+
+            model.addAttribute("pendingCount", pendingCount);
+            model.addAttribute("reviewedCount", reviewedCount);
+            model.addAttribute("interviewCount", interviewCount);
+            model.addAttribute("rejectedCount", rejectedCount);
+            model.addAttribute("acceptedCount", acceptedCount);
+
+            model.addAttribute("offreApplicationCounts", offreApplicationCounts);
+
+            // Marquer le dashboard comme onglet actif
+            model.addAttribute("activeTab", "dashboard");
+
+            return "recruterboard";
+        } catch (Exception e) {
+            logger.severe("Error loading dashboard: " + e.getMessage());
+            e.printStackTrace();
+            model.addAttribute("errorMessage", "Une erreur s'est produite lors du chargement du tableau de bord");
+            model.addAttribute("activeTab", "dashboard");
+            return "recruterboard";
+        }
     }
 
     @GetMapping("/post-job")

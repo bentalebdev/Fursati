@@ -168,7 +168,7 @@
                                 </button>
                                 <ul class="dropdown-menu">
 
-                                    <li><a class="dropdown-item" th:href="@{/demandes/{id}(id=${demande.idDemande})}"><i class="fas fa-eye me-2"></i>Voir détails</a></li>
+                                    <li><a class="dropdown-item" th:href="@{/recruteurs/candidate-profile/{id}(id=${demande.candidat.id})}"><i class="fas fa-eye me-2"></i>Voir Profil</a></li>
                                     <li><a class="dropdown-item" href="#" th:onclick="'contactCandidat(' + ${demande.candidat.id} + ')'"><i class="fas fa-envelope me-2"></i>Contacter</a></li>
 
                                     <!-- Conditional menu items based on status -->
