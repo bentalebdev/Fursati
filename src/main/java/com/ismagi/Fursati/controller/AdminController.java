@@ -1,19 +1,20 @@
 package com.ismagi.Fursati.controller;
 
-import com.ismagi.Fursati.entity.Admin;
-import com.ismagi.Fursati.entity.Company;
-import com.ismagi.Fursati.entity.Demande;
-import com.ismagi.Fursati.entity.Offre;
+import com.ismagi.Fursati.entity.*;
 import com.ismagi.Fursati.service.*;
+import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @Controller
 @RequestMapping("/admin")
@@ -119,6 +120,198 @@ public class AdminController {
         }
         return "redirect:/admin/applications";
     }
+    @Autowired
+    private RecruteurService recruteurService;  // S'assurer que c'est déjà injecté dans votre contrôleur
+
+    /**
+     * Endpoint pour récupérer la liste des recruteurs
+     * @return Liste des recruteurs au format JSON
+     */
+    @GetMapping("/recruteurs/list")
+    @ResponseBody
+    public List<Map<String, Object>> getRecruteursList() {
+        List<Recruteur> recruteurs = recruteurService.getAllRecruteurs();
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        for (Recruteur recruteur : recruteurs) {
+            Map<String, Object> recruteurMap = new HashMap<>();
+            recruteurMap.put("idRecruteur", recruteur.getIdRecruteur());
+
+            String nomEntreprise = "Sans entreprise";
+            if (recruteur.getCompany() != null && recruteur.getCompany().getNomEntreprise() != null) {
+                nomEntreprise = recruteur.getCompany().getNomEntreprise();
+            }
+
+            recruteurMap.put("nomEntreprise", nomEntreprise);
+            result.add(recruteurMap);
+        }
+
+        return result;
+    }
+    // À ajouter dans AdminController.java
+
+    // Endpoint pour récupérer les données d'une offre
+    @GetMapping("/jobs/{id}/data")
+    @ResponseBody
+    public Offre getJobData(@PathVariable Long id) {
+        return offreService.getOffreById(id);
+    }
+
+    // Endpoint pour mettre à jour une offre
+    @PutMapping("/jobs/{id}")
+    @ResponseBody
+    public Map<String, Object> updateJob(@PathVariable Long id, @RequestBody Offre updatedOffre) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            Offre existingOffre = offreService.getOffreById(id);
+            if (existingOffre == null) {
+                response.put("success", false);
+                response.put("error", "Offre non trouvée");
+                return response;
+            }
+
+            // Mise à jour des champs simples
+            existingOffre.setTitle(updatedOffre.getTitle());
+            existingOffre.setDescription(updatedOffre.getDescription());
+            existingOffre.setIndustry(updatedOffre.getIndustry());
+            existingOffre.setLocation(updatedOffre.getLocation());
+            existingOffre.setContractType(updatedOffre.getContractType());
+            existingOffre.setWorkMode(updatedOffre.getWorkMode());
+            existingOffre.setExperienceLevel(updatedOffre.getExperienceLevel());
+            existingOffre.setStatus(updatedOffre.getStatus());
+            existingOffre.setMinSalary(updatedOffre.getMinSalary());
+            existingOffre.setMaxSalary(updatedOffre.getMaxSalary());
+
+            // Mise à jour des responsabilités et qualifications
+            if (updatedOffre.getResponsibilities() != null) {
+                existingOffre.setResponsibilities(updatedOffre.getResponsibilities());
+            }
+
+            if (updatedOffre.getQualifications() != null) {
+                existingOffre.setQualifications(updatedOffre.getQualifications());
+            }
+
+            // Mise à jour du recruteur si spécifié
+            if (updatedOffre.getRecruteur() != null && updatedOffre.getRecruteur().getIdRecruteur() != null) {
+                Recruteur recruteur = recruteurService.getRecruteurById(updatedOffre.getRecruteur().getIdRecruteur());
+                if (recruteur != null) {
+                    existingOffre.setRecruteur(recruteur);
+                }
+            }
+
+            // Enregistrer les modifications
+            offreService.saveOffre(existingOffre);
+
+            response.put("success", true);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("error", e.getMessage());
+        }
+
+        return response;
+    }
+
+    // Endpoint pour supprimer une offre
+    @DeleteMapping("/jobs/{id}")
+    @ResponseBody
+    public Map<String, Object> deleteJob(@PathVariable Long id) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            offreService.deleteOffre(id);
+            response.put("success", true);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("error", e.getMessage());
+        }
+        return response;
+    }
+
+    // Endpoint pour supprimer plusieurs offres
+    @PostMapping("/jobs/batch-delete")
+    @ResponseBody
+    public Map<String, Object> batchDeleteJobs(@RequestBody Map<String, List<Long>> request) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            List<Long> ids = request.get("ids");
+            if (ids != null && !ids.isEmpty()) {
+                for (Long id : ids) {
+                    offreService.deleteOffre(id);
+                }
+                response.put("success", true);
+            } else {
+                response.put("success", false);
+                response.put("error", "Aucun ID fourni");
+            }
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("error", e.getMessage());
+        }
+        return response;
+    }
+
+    // Endpoint pour changer le statut d'une offre
+    @PostMapping("/jobs/{id}/status")
+    @ResponseBody
+    public Map<String, Object> changeJobStatus(@PathVariable Long id, @RequestBody Map<String, String> request) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            String newStatus = request.get("status");
+            if (newStatus == null || newStatus.isEmpty()) {
+                response.put("success", false);
+                response.put("error", "Statut non fourni");
+                return response;
+            }
+
+            Offre offre = offreService.getOffreById(id);
+            if (offre == null) {
+                response.put("success", false);
+                response.put("error", "Offre non trouvée");
+                return response;
+            }
+
+            offre.setStatus(newStatus);
+
+            // Pour les offres activées, mettre à jour les dates
+            if ("ACTIVE".equals(newStatus)) {
+                offre.setPostedAt(LocalDateTime.now());
+                offre.setExpiresAt(LocalDateTime.now().plusDays(30));
+            }
+
+            offreService.saveOffre(offre);
+            response.put("success", true);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("error", e.getMessage());
+        }
+        return response;
+    }
+
+    // Endpoint pour exporter les offres en CSV
+    @GetMapping("/jobs/export")
+    public void exportJobs(HttpServletResponse response) throws IOException {
+        response.setContentType("text/csv");
+        response.setHeader("Content-Disposition", "attachment; filename=\"offres.csv\"");
+
+        List<Offre> offres = offreService.getAllOffres();
+
+        try (CSVPrinter csvPrinter = new CSVPrinter(response.getWriter(), CSVFormat.DEFAULT
+                .withHeader("ID", "Titre", "Entreprise", "Industrie", "Lieu", "Type", "Statut", "Publiée le"))) {
+
+            for (Offre offre : offres) {
+                csvPrinter.printRecord(
+                        offre.getId(),
+                        offre.getTitle(),
+                        offre.getCompanyName(),
+                        offre.getIndustry(),
+                        offre.getLocation(),
+                        offre.getContractType(),
+                        offre.getStatus(),
+                        offre.getPostedAt() != null ? offre.getPostedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "-"
+                );
+            }
+        }
+    }
+
 
 
 

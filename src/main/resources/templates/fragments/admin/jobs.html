@@ -69,9 +69,9 @@
         <a href="/admin/jobs/new" class="btn btn-sm btn-success me-2">
           <i class="fas fa-plus me-1"></i> Ajouter
         </a>
-        <button class="btn btn-sm btn-outline-secondary me-2">
+        <a href="/admin/jobs/export" class="btn btn-sm btn-outline-secondary me-2" id="exportBtn">
           <i class="fas fa-download me-1"></i> Exporter
-        </button>
+        </a>
         <button class="btn btn-sm btn-outline-danger" id="deleteSelectedBtn">
           <i class="fas fa-trash me-1"></i> Supprimer
         </button>
@@ -89,6 +89,7 @@
             </th>
             <th>Titre</th>
             <th>Entreprise</th>
+            <th>Recruteur ID</th>
             <th>Industrie</th>
             <th>Lieu</th>
             <th>Type</th>
@@ -110,6 +111,7 @@
               <div class="fw-semibold" th:text="${job.title}">Titre de l'offre</div>
             </td>
             <td th:text="${job.companyName}">Nom de l'entreprise</td>
+            <td th:text="${job.recruteur != null ? job.recruteur.idRecruteur : '-'}">ID Recruteur</td>
             <td th:text="${job.industry}">Industrie</td>
             <td th:text="${job.location}">Lieu</td>
             <td th:text="${job.contractType}">Type de contrat</td>
@@ -161,7 +163,7 @@
 
           <!-- Message si aucune offre n'est trouvée -->
           <tr th:if="${#lists.isEmpty(jobs)}">
-            <td colspan="10" class="text-center py-4">
+            <td colspan="11" class="text-center py-4">
               <p class="text-muted mb-0">Aucune offre d'emploi trouvée</p>
             </td>
           </tr>
@@ -192,6 +194,279 @@
       </div>
     </div>
   </div>
+  <div class="modal fade" id="addJobModal" tabindex="-1" aria-labelledby="addJobModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addJobModalLabel">Ajouter une offre d'emploi</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="addJobForm" action="/offres/create" method="post">
+            <!-- Basic Info -->
+            <div class="mb-3">
+              <label for="title" class="form-label">Titre de l'offre *</label>
+              <input type="text" class="form-control" id="title" name="title" required>
+            </div>
+
+            <!-- Sélection du recruteur -->
+            <div class="mb-3">
+              <label for="recruteurId" class="form-label">Recruteur *</label>
+              <select class="form-select" id="recruteurId" name="recruteur.idRecruteur" required>
+                <option value="">Sélectionnez un recruteur</option>
+                <!-- Sera rempli dynamiquement -->
+              </select>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="industry" class="form-label">Industrie *</label>
+                <select class="form-select" id="industry" name="industry" required>
+                  <option value="">Sélectionnez une industrie</option>
+                  <option value="it">Informatique & Technologie</option>
+                  <option value="finance">Finance & Banque</option>
+                  <option value="healthcare">Santé</option>
+                  <option value="marketing">Marketing & Communication</option>
+                  <option value="engineering">Ingénierie</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="location" class="form-label">Ville *</label>
+                <select class="form-select" id="location" name="location" required>
+                  <option value="">Sélectionnez une ville</option>
+                  <option value="Casablanca">Casablanca</option>
+                  <option value="Rabat">Rabat</option>
+                  <option value="Marrakech">Marrakech</option>
+                  <option value="Tanger">Tanger</option>
+                  <option value="Fès">Fès</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="contractType" class="form-label">Type de contrat *</label>
+                <select class="form-select" id="contractType" name="contractType" required>
+                  <option value="">Sélectionnez un type</option>
+                  <option value="CDI">CDI</option>
+                  <option value="CDD">CDD</option>
+                  <option value="FREELANCE">Freelance</option>
+                  <option value="STAGE">Stage</option>
+                  <option value="TEMPS_PARTIEL">Temps partiel</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="workMode" class="form-label">Mode de travail</label>
+                <select class="form-select" id="workMode" name="workMode">
+                  <option value="">Sélectionnez un mode</option>
+                  <option value="REMOTE">Télétravail</option>
+                  <option value="ONSITE">Sur site</option>
+                  <option value="HYBRID">Hybride</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="experienceLevel" class="form-label">Niveau d'expérience</label>
+                <select class="form-select" id="experienceLevel" name="experienceLevel">
+                  <option value="">Sélectionnez un niveau</option>
+                  <option value="ENTRY">Débutant</option>
+                  <option value="INTERMEDIATE">Intermédiaire</option>
+                  <option value="SENIOR">Sénior</option>
+                  <option value="EXPERT">Expert</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="status" class="form-label">Statut</label>
+                <select class="form-select" id="status" name="status">
+                  <option value="DRAFT">Brouillon</option>
+                  <option value="ACTIVE">Active</option>
+                  <option value="PENDING">En attente</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="minSalary" class="form-label">Salaire minimum</label>
+                <input type="number" class="form-control" id="minSalary" name="minSalary">
+              </div>
+              <div class="col-md-6">
+                <label for="maxSalary" class="form-label">Salaire maximum</label>
+                <input type="number" class="form-control" id="maxSalary" name="maxSalary">
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div class="mb-3">
+              <label for="description" class="form-label">Description *</label>
+              <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+            </div>
+
+            <!-- Responsibilities -->
+            <div class="mb-3">
+              <label for="responsibilities" class="form-label">Responsabilités</label>
+              <textarea class="form-control" id="responsibilities" name="responsibilitiesStr" rows="3"
+                        placeholder="Entrez chaque responsabilité séparée par une virgule"></textarea>
+            </div>
+
+            <!-- Qualifications -->
+            <div class="mb-3">
+              <label for="qualifications" class="form-label">Qualifications requises</label>
+              <textarea class="form-control" id="qualifications" name="qualificationsStr" rows="3"
+                        placeholder="Entrez chaque qualification séparée par une virgule"></textarea>
+            </div>
+
+            <input type="hidden" name="_csrf" value="">
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-primary" id="saveNewJob">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Job Modal -->
+  <div class="modal fade" id="editJobModal" tabindex="-1" aria-labelledby="editJobModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editJobModalLabel">Modifier une offre d'emploi</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editJobForm" action="/admin/jobs/update" method="post">
+            <input type="hidden" id="editJobId" name="id">
+
+            <!-- Basic Info -->
+            <div class="mb-3">
+              <label for="editTitle" class="form-label">Titre de l'offre *</label>
+              <input type="text" class="form-control" id="editTitle" name="title" required>
+            </div>
+
+            <!-- Sélection du recruteur -->
+            <div class="mb-3">
+              <label for="editRecruteurId" class="form-label">Recruteur *</label>
+              <select class="form-select" id="editRecruteurId" name="recruteur.idRecruteur" required>
+                <option value="">Sélectionnez un recruteur</option>
+                <!-- Sera rempli dynamiquement -->
+              </select>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="editIndustry" class="form-label">Industrie *</label>
+                <select class="form-select" id="editIndustry" name="industry" required>
+                  <option value="">Sélectionnez une industrie</option>
+                  <option value="it">Informatique & Technologie</option>
+                  <option value="finance">Finance & Banque</option>
+                  <option value="healthcare">Santé</option>
+                  <option value="marketing">Marketing & Communication</option>
+                  <option value="engineering">Ingénierie</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="editLocation" class="form-label">Ville *</label>
+                <select class="form-select" id="editLocation" name="location" required>
+                  <option value="">Sélectionnez une ville</option>
+                  <option value="Casablanca">Casablanca</option>
+                  <option value="Rabat">Rabat</option>
+                  <option value="Marrakech">Marrakech</option>
+                  <option value="Tanger">Tanger</option>
+                  <option value="Fès">Fès</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="editContractType" class="form-label">Type de contrat *</label>
+                <select class="form-select" id="editContractType" name="contractType" required>
+                  <option value="">Sélectionnez un type</option>
+                  <option value="CDI">CDI</option>
+                  <option value="CDD">CDD</option>
+                  <option value="FREELANCE">Freelance</option>
+                  <option value="STAGE">Stage</option>
+                  <option value="TEMPS_PARTIEL">Temps partiel</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="editWorkMode" class="form-label">Mode de travail</label>
+                <select class="form-select" id="editWorkMode" name="workMode">
+                  <option value="">Sélectionnez un mode</option>
+                  <option value="REMOTE">Télétravail</option>
+                  <option value="ONSITE">Sur site</option>
+                  <option value="HYBRID">Hybride</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="editExperienceLevel" class="form-label">Niveau d'expérience</label>
+                <select class="form-select" id="editExperienceLevel" name="experienceLevel">
+                  <option value="">Sélectionnez un niveau</option>
+                  <option value="ENTRY">Débutant</option>
+                  <option value="INTERMEDIATE">Intermédiaire</option>
+                  <option value="SENIOR">Sénior</option>
+                  <option value="EXPERT">Expert</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="editStatus" class="form-label">Statut</label>
+                <select class="form-select" id="editStatus" name="status">
+                  <option value="DRAFT">Brouillon</option>
+                  <option value="ACTIVE">Active</option>
+                  <option value="PENDING">En attente</option>
+                  <option value="EXPIRED">Expirée</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="editMinSalary" class="form-label">Salaire minimum</label>
+                <input type="number" class="form-control" id="editMinSalary" name="minSalary">
+              </div>
+              <div class="col-md-6">
+                <label for="editMaxSalary" class="form-label">Salaire maximum</label>
+                <input type="number" class="form-control" id="editMaxSalary" name="maxSalary">
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div class="mb-3">
+              <label for="editDescription" class="form-label">Description *</label>
+              <textarea class="form-control" id="editDescription" name="description" rows="4" required></textarea>
+            </div>
+
+            <!-- Responsibilities -->
+            <div class="mb-3">
+              <label for="editResponsibilities" class="form-label">Responsabilités</label>
+              <textarea class="form-control" id="editResponsibilities" name="responsibilitiesStr" rows="3"
+                        placeholder="Entrez chaque responsabilité séparée par une virgule"></textarea>
+            </div>
+
+            <!-- Qualifications -->
+            <div class="mb-3">
+              <label for="editQualifications" class="form-label">Qualifications requises</label>
+              <textarea class="form-control" id="editQualifications" name="qualificationsStr" rows="3"
+                        placeholder="Entrez chaque qualification séparée par une virgule"></textarea>
+            </div>
+
+            <input type="hidden" name="_csrf" value="">
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-primary" id="updateJob">Mettre à jour</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- JavaScript pour la gestion des actions -->
   <script th:inline="javascript">
@@ -217,6 +492,18 @@
           document.getElementById('locationFilter').value = '';
           document.getElementById('contractTypeFilter').value = '';
           document.getElementById('searchInput').value = '';
+
+          // Appliquer les filtres après réinitialisation
+          filterJobs();
+        });
+      }
+
+      // Ajouter un gestionnaire d'événements pour le bouton d'exportation
+      const exportBtn = document.getElementById('exportBtn');
+      if (exportBtn) {
+        exportBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          window.location.href = '/admin/jobs/export';
         });
       }
     });
@@ -236,12 +523,14 @@
                   if (response.ok) {
                     window.location.reload();
                   } else {
-                    alert("Une erreur est survenue lors du changement de statut");
+                    return response.json().then(data => {
+                      throw new Error(data.error || "Une erreur est survenue lors du changement de statut");
+                    });
                   }
                 })
                 .catch(error => {
                   console.error('Erreur:', error);
-                  alert("Une erreur est survenue");
+                  alert("Erreur: " + error.message);
                 });
       }
     }
@@ -259,12 +548,14 @@
                   if (response.ok) {
                     window.location.reload();
                   } else {
-                    alert("Une erreur est survenue lors de la suppression");
+                    return response.json().then(data => {
+                      throw new Error(data.error || "Une erreur est survenue lors de la suppression");
+                    });
                   }
                 })
                 .catch(error => {
                   console.error('Erreur:', error);
-                  alert("Une erreur est survenue");
+                  alert("Erreur: " + error.message);
                 });
       }
     }
@@ -293,14 +584,507 @@
                   if (response.ok) {
                     window.location.reload();
                   } else {
-                    alert("Une erreur est survenue lors de la suppression");
+                    return response.json().then(data => {
+                      throw new Error(data.error || "Une erreur est survenue lors de la suppression");
+                    });
                   }
                 })
                 .catch(error => {
                   console.error('Erreur:', error);
-                  alert("Une erreur est survenue");
+                  alert("Erreur: " + error.message);
                 });
+      }
+    });
+
+    // Wait for DOM to be fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add the CSRF token to forms
+      const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+      if (csrfToken) {
+        document.querySelectorAll('input[name="_csrf"]').forEach(input => {
+          input.value = csrfToken;
+        });
+      }
+
+      // Récupérer la liste des recruteurs pour les menus déroulants
+      fetchRecruteurs();
+
+      // =========== FILTER FUNCTIONALITY ===========
+      const statusFilter = document.getElementById('statusFilter');
+      const industryFilter = document.getElementById('industryFilter');
+      const locationFilter = document.getElementById('locationFilter');
+      const contractTypeFilter = document.getElementById('contractTypeFilter');
+      const searchInput = document.getElementById('searchInput');
+      const applyFiltersBtn = document.getElementById('applyFilters');
+      const resetFiltersBtn = document.getElementById('resetFilters');
+
+      // Apply filters
+      if (applyFiltersBtn) {
+        applyFiltersBtn.addEventListener('click', function() {
+          filterJobs();
+        });
+      }
+
+      // Filter jobs function
+      function filterJobs() {
+        // Get filter values
+        const status = statusFilter ? statusFilter.value.toLowerCase() : '';
+        const industry = industryFilter ? industryFilter.value.toLowerCase() : '';
+        const location = locationFilter ? locationFilter.value.toLowerCase() : '';
+        const contractType = contractTypeFilter ? contractTypeFilter.value.toLowerCase() : '';
+        const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+
+        // Get all job rows
+        const jobRows = document.querySelectorAll('table tbody tr:not([colspan])');
+
+        let visibleRowsCount = 0;
+
+        // Loop through each job row and check if it matches the filters
+        jobRows.forEach(row => {
+          // Get values from the row (adjust indices if needed)
+          const jobTitle = row.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || '';
+          const companyName = row.querySelector('td:nth-child(3)')?.textContent.toLowerCase() || '';
+          const jobIndustry = row.querySelector('td:nth-child(5)')?.textContent.toLowerCase() || '';
+          const jobLocation = row.querySelector('td:nth-child(6)')?.textContent.toLowerCase() || '';
+          const jobContractType = row.querySelector('td:nth-child(7)')?.textContent.toLowerCase() || '';
+          const jobStatus = row.querySelector('td:nth-child(8) .status-badge')?.textContent.toLowerCase() || '';
+
+          // Check if the row matches all applied filters
+          const matchesStatus = !status || jobStatus.includes(status) ||
+                  (status === 'active' && jobStatus.includes('active')) ||
+                  (status === 'expired' && jobStatus.includes('expirée')) ||
+                  (status === 'draft' && jobStatus.includes('brouillon')) ||
+                  (status === 'pending' && jobStatus.includes('en attente'));
+
+          const matchesIndustry = !industry || jobIndustry.includes(industry);
+          const matchesLocation = !location || jobLocation.includes(location);
+          const matchesContractType = !contractType || jobContractType.includes(contractType);
+
+          // Match search term against title, company, or other relevant fields
+          const matchesSearch = !searchTerm ||
+                  jobTitle.includes(searchTerm) ||
+                  companyName.includes(searchTerm) ||
+                  jobIndustry.includes(searchTerm) ||
+                  jobLocation.includes(searchTerm);
+
+          // Show or hide based on all filters
+          if (matchesStatus && matchesIndustry && matchesLocation && matchesContractType && matchesSearch) {
+            row.style.display = ''; // Show row
+            visibleRowsCount++;
+          } else {
+            row.style.display = 'none'; // Hide row
+          }
+        });
+
+        // Handle empty state
+        const emptyRow = document.querySelector('table tbody tr[colspan]');
+        const tableBody = document.querySelector('table tbody');
+
+        if (visibleRowsCount === 0) {
+          if (!emptyRow) {
+            // Create empty row if it doesn't exist
+            const newEmptyRow = document.createElement('tr');
+            newEmptyRow.innerHTML = '<td colspan="11" class="text-center py-4"><p class="text-muted mb-0">Aucune offre d\'emploi trouvée</p></td>';
+            if (tableBody) {
+              tableBody.appendChild(newEmptyRow);
+            }
+          } else {
+            emptyRow.style.display = '';
+          }
+        } else if (emptyRow) {
+          emptyRow.style.display = 'none';
+        }
+
+        // Update counter in footer
+        updateDisplayCounter(visibleRowsCount);
+      }
+
+      function updateDisplayCounter(visibleCount) {
+        const counterElement = document.querySelector('.app-card-footer .d-flex > div:first-child');
+        if (counterElement) {
+          if (visibleCount > 0) {
+            counterElement.innerHTML = `Affichage de <span>1</span> à <span>${visibleCount}</span> sur <span>${visibleCount}</span> entrées`;
+          } else {
+            counterElement.innerHTML = 'Aucune entrée à afficher';
+          }
+        }
+      }
+
+      // =========== ADD JOB MODAL ===========
+      // Open Add Job Modal
+      const addJobButton = document.querySelector('a[href="/admin/jobs/new"]');
+      if (addJobButton) {
+        addJobButton.addEventListener('click', function(e) {
+          e.preventDefault();
+          const addJobModal = new bootstrap.Modal(document.getElementById('addJobModal'));
+          addJobModal.show();
+        });
+      }
+
+      // Handle Add Job Form Submission
+      const saveNewJobButton = document.getElementById('saveNewJob');
+      if (saveNewJobButton) {
+        saveNewJobButton.addEventListener('click', function() {
+          const form = document.getElementById('addJobForm');
+
+          // Basic form validation
+          if (!validateForm(form)) {
+            return;
+          }
+
+          // Get form data
+          const formData = new FormData(form);
+
+          // Send AJAX request
+          fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'X-CSRF-TOKEN': csrfToken
+            }
+          })
+                  .then(response => {
+                    if (response.ok) {
+                      // Success - close modal and reload page
+                      bootstrap.Modal.getInstance(document.getElementById('addJobModal')).hide();
+                      window.location.reload();
+                    } else {
+                      return response.text().then(text => {
+                        throw new Error(text || 'Une erreur est survenue lors de l\'enregistrement de l\'offre');
+                      });
+                    }
+                  })
+                  .catch(error => {
+                    console.error('Error:', error);
+                    alert('Erreur: ' + error.message);
+                  });
+        });
+      }
+
+      // =========== EDIT JOB MODAL ===========
+      // Open Edit Job Modal when clicking on "Modifier" in dropdown
+      document.querySelectorAll('a[href^="/admin/jobs/"][href$="/edit"]').forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+
+          // Extract job ID from href
+          const href = this.getAttribute('href');
+          const jobId = href.match(/\/admin\/jobs\/(\d+)\/edit/)[1];
+
+          // Fetch job data
+          fetch(`/admin/jobs/${jobId}/data`)
+                  .then(response => {
+                    if (!response.ok) {
+                      throw new Error('Impossible de récupérer les données de l\'offre');
+                    }
+                    return response.json();
+                  })
+                  .then(job => {
+                    // Populate form fields
+                    document.getElementById('editJobId').value = job.id;
+                    document.getElementById('editTitle').value = job.title;
+
+                    // Set recruteur if exists
+                    if (job.recruteur && job.recruteur.idRecruteur) {
+                      document.getElementById('editRecruteurId').value = job.recruteur.idRecruteur;
+                    }
+
+                    document.getElementById('editIndustry').value = job.industry;
+                    document.getElementById('editLocation').value = job.location;
+                    document.getElementById('editContractType').value = job.contractType;
+                    document.getElementById('editWorkMode').value = job.workMode || '';
+                    document.getElementById('editExperienceLevel').value = job.experienceLevel || '';
+                    document.getElementById('editStatus').value = job.status;
+                    document.getElementById('editMinSalary').value = job.minSalary || '';
+                    document.getElementById('editMaxSalary').value = job.maxSalary || '';
+                    document.getElementById('editDescription').value = job.description;
+
+                    // Handle responsibilities and qualifications
+                    if (job.responsibilities && job.responsibilities.length > 0) {
+                      document.getElementById('editResponsibilities').value = job.responsibilities.join(', ');
+                    }
+
+                    if (job.qualifications && job.qualifications.length > 0) {
+                      document.getElementById('editQualifications').value = job.qualifications.join(', ');
+                    }
+
+                    // Show modal
+                    const editJobModal = new bootstrap.Modal(document.getElementById('editJobModal'));
+                    editJobModal.show();
+                  })
+                  .catch(error => {
+                    console.error('Error:', error);
+                    alert('Erreur: ' + error.message);
+                  });
+        });
+      });
+
+      // Create a mock job data handler for demo until actual endpoint is implemented
+      // This will be replaced by actual backend endpoint
+      function mockJobDataEndpoint() {
+        const editLinks = document.querySelectorAll('a[href^="/admin/jobs/"][href$="/edit"]');
+
+        editLinks.forEach(link => {
+          const href = link.getAttribute('href');
+          const jobId = href.match(/\/admin\/jobs\/(\d+)\/edit/)?.[1];
+
+          if (jobId) {
+            // Find this job's row to extract information
+            const row = link.closest('tr');
+            if (row) {
+              const mockDataEndpoint = `/admin/jobs/${jobId}/data`;
+
+              // Create a mock response function
+              window.fetch = window.fetch || {};
+              const originalFetch = window.fetch;
+
+              window.fetch = function(url, options) {
+                if (url === mockDataEndpoint) {
+                  return new Promise((resolve) => {
+                    // Extract data from the row
+                    const title = row.querySelector('td:nth-child(2)').textContent.trim();
+                    const company = row.querySelector('td:nth-child(3)').textContent.trim();
+                    const recruteurId = row.querySelector('td:nth-child(4)').textContent.trim();
+                    const industry = row.querySelector('td:nth-child(5)').textContent.trim();
+                    const location = row.querySelector('td:nth-child(6)').textContent.trim();
+                    const contractType = row.querySelector('td:nth-child(7)').textContent.trim();
+                    const status = row.querySelector('td:nth-child(8) .status-badge').textContent.trim();
+
+                    // Map display status to actual status value
+                    let statusValue = 'DRAFT';
+                    if (status === 'Active') statusValue = 'ACTIVE';
+                    else if (status === 'En attente') statusValue = 'PENDING';
+                    else if (status === 'Expirée') statusValue = 'EXPIRED';
+
+                    // Create a more complete mock job object
+                    const mockJob = {
+                      id: jobId,
+                      title: title,
+                      companyName: company,
+                      industry: industry,
+                      location: location,
+                      contractType: contractType,
+                      status: statusValue,
+                      description: "Description de l'offre " + title,
+                      workMode: "ONSITE",
+                      experienceLevel: "INTERMEDIATE",
+                      minSalary: 30000,
+                      maxSalary: 45000,
+                      responsibilities: ["Responsabilité 1", "Responsabilité 2", "Responsabilité 3"],
+                      qualifications: ["Qualification 1", "Qualification 2", "Qualification 3"],
+                      postedAt: new Date().toISOString(),
+                      expiresAt: new Date(new Date().setDate(new Date().getDate() + 30)).toISOString(),
+                      views: Math.floor(Math.random() * 100),
+                      recruteur: {
+                        idRecruteur: recruteurId === '-' ? 1 : parseInt(recruteurId),
+                        company: {
+                          nomEntreprise: company
+                        }
+                      }
+                    };
+
+                    resolve({
+                      ok: true,
+                      json: () => Promise.resolve(mockJob)
+                    });
+                  });
+                }
+                return originalFetch(url, options);
+              };
+            }
+          }
+        });
+      }
+
+      // Initialize mock data endpoint for demo
+      mockJobDataEndpoint();
+
+      // Fonction pour récupérer les recruteurs depuis l'API
+      function fetchRecruteurs() {
+        fetch('/admin/recruteurs/list')
+                .then(response => {
+                  if (!response.ok) {
+                    // Si l'endpoint n'existe pas encore, utiliser des données de démonstration
+                    return Promise.resolve(mockRecruteursData());
+                  }
+                  return response.json();
+                })
+                .then(recruteurs => {
+                  populateRecruteursDropdowns(recruteurs);
+                })
+                .catch(error => {
+                  console.error('Erreur lors de la récupération des recruteurs:', error);
+                  // En cas d'erreur, utiliser des données de démonstration
+                  populateRecruteursDropdowns(mockRecruteursData());
+                });
+      }
+
+      // Fonction pour générer des données de recruteurs de démonstration
+      function mockRecruteursData() {
+        return [
+          { idRecruteur: 1, nomEntreprise: "TechMaroc" },
+          { idRecruteur: 2, nomEntreprise: "Finance Plus" },
+          { idRecruteur: 3, nomEntreprise: "Santé Maroc" },
+          { idRecruteur: 4, nomEntreprise: "Ingénierie Solutions" }
+        ];
+      }
+
+      // Fonction pour remplir les menus déroulants avec les recruteurs
+      function populateRecruteursDropdowns(recruteurs) {
+        const addDropdown = document.getElementById('recruteurId');
+        const editDropdown = document.getElementById('editRecruteurId');
+
+        if (addDropdown) {
+          // Vider le dropdown sauf l'option par défaut
+          while (addDropdown.options.length > 1) {
+            addDropdown.remove(1);
+          }
+
+          // Ajouter les recruteurs au dropdown
+          recruteurs.forEach(recruteur => {
+            const option = document.createElement('option');
+            option.value = recruteur.idRecruteur;
+            option.textContent = recruteur.nomEntreprise ?
+                    `${recruteur.nomEntreprise} (ID: ${recruteur.idRecruteur})` :
+                    `Recruteur ID: ${recruteur.idRecruteur}`;
+            addDropdown.appendChild(option);
+          });
+        }
+
+        if (editDropdown) {
+          // Vider le dropdown sauf l'option par défaut
+          while (editDropdown.options.length > 1) {
+            editDropdown.remove(1);
+          }
+
+          // Ajouter les recruteurs au dropdown
+          recruteurs.forEach(recruteur => {
+            const option = document.createElement('option');
+            option.value = recruteur.idRecruteur;
+            option.textContent = recruteur.nomEntreprise ?
+                    `${recruteur.nomEntreprise} (ID: ${recruteur.idRecruteur})` :
+                    `Recruteur ID: ${recruteur.idRecruteur}`;
+            editDropdown.appendChild(option);
+          });
+        }
+      }
+
+      // Handle Edit Job Form Submission
+      const updateJobButton = document.getElementById('updateJob');
+      if (updateJobButton) {
+        updateJobButton.addEventListener('click', function() {
+          const form = document.getElementById('editJobForm');
+
+          // Basic form validation
+          if (!validateForm(form)) {
+            return;
+          }
+
+          // Get form data
+          const formData = new FormData(form);
+          const jobId = formData.get('id');
+
+          // Convert to JSON
+          const jsonData = {};
+          formData.forEach((value, key) => {
+            jsonData[key] = value;
+          });
+
+          // Special handling for responsibilities and qualifications
+          if (jsonData.responsibilitiesStr) {
+            jsonData.responsibilities = jsonData.responsibilitiesStr
+                    .split(',')
+                    .map(item => item.trim())
+                    .filter(item => item.length > 0);
+            delete jsonData.responsibilitiesStr;
+          }
+
+          if (jsonData.qualificationsStr) {
+            jsonData.qualifications = jsonData.qualificationsStr
+                    .split(',')
+                    .map(item => item.trim())
+                    .filter(item => item.length > 0);
+            delete jsonData.qualificationsStr;
+          }
+
+          // Send AJAX request
+          fetch(`/admin/jobs/${jobId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-TOKEN': csrfToken
+            },
+            body: JSON.stringify(jsonData)
+          })
+                  .then(response => {
+                    if (response.ok) {
+                      // Success - close modal and reload page
+                      bootstrap.Modal.getInstance(document.getElementById('editJobModal')).hide();
+                      window.location.reload();
+                    } else {
+                      return response.json().then(data => {
+                        throw new Error(data.error || 'Une erreur est survenue lors de la mise à jour de l\'offre');
+                      });
+                    }
+                  })
+                  .catch(error => {
+                    console.error('Error:', error);
+                    alert('Erreur: ' + error.message);
+                  });
+        });
+      }
+
+      // Form validation helper
+      function validateForm(form) {
+        const requiredFields = form.querySelectorAll('[required]');
+        let isValid = true;
+
+        requiredFields.forEach(field => {
+          if (!field.value.trim()) {
+            field.classList.add('is-invalid');
+            isValid = false;
+          } else {
+            field.classList.remove('is-invalid');
+          }
+        });
+
+        if (!isValid) {
+          alert('Veuillez remplir tous les champs obligatoires.');
+        }
+
+        return isValid;
       }
     });
   </script>
 </div>
+<style>
+  .status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .status-active {
+    background-color: rgba(25, 135, 84, 0.15);
+    color: #198754;
+  }
+
+  .status-pending {
+    background-color: rgba(255, 193, 7, 0.15);
+    color: #ffc107;
+  }
+
+  .status-expired {
+    background-color: rgba(108, 117, 125, 0.15);
+    color: #6c757d;
+  }
+
+  .status-draft {
+    background-color: rgba(13, 110, 253, 0.15);
+    color: #0d6efd;
+  }
+</style>

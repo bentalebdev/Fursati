@@ -40,7 +40,7 @@ public class OffreController {
         try {
             // Get recruiter
             System.out.println("DEBUG: Getting recruiter with ID 1");
-            Recruteur recruteur = recruteurService.getRecruteurById(Long.valueOf(1));
+            Recruteur recruteur = recruteurService.getRecruteurById(offre.getRecruteur().getIdRecruteur());
             if (recruteur == null) {
                 System.out.println("DEBUG: CRITICAL ERROR - Recruiter with ID 1 not found!");
                 throw new RuntimeException("Recruiter with ID 1 not found");
