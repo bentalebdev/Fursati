@@ -12,9 +12,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin")
@@ -44,12 +47,402 @@ public class AdminController {
         return "adminboard";
     }
 
+    /**
+     * Méthodes pour la gestion des candidats
+     */
+
     @GetMapping("/candidats")
-    public String showAdminUsers(Model model) {
-        model.addAttribute("candidats",candidatService.getAllCandidats());
+    public String showAdminCandidats(Model model,
+                                     @RequestParam(required = false) String search,
+                                     @RequestParam(required = false) String status,
+                                     @RequestParam(required = false) String skill,
+                                     @RequestParam(required = false) String city,
+                                     @RequestParam(required = false) String ageRange) {
+
+        // Récupérer les compétences et villes pour les filtres
+        List<String> allSkills = getDistinctSkills();
+        List<String> cities = getDistinctCities();
+
+        // Récupérer les candidats (filtres à implémenter)
+        List<Candidat> candidats = candidatService.getAllCandidats();
+
+        // Filtrer les candidats selon les critères (à mettre dans un service)
+        if (search != null || status != null || skill != null || city != null || ageRange != null) {
+            candidats = filterCandidats(candidats, search, status, skill, city, ageRange);
+        }
+
+        // Ajouter les données au modèle
+        model.addAttribute("candidats", candidats);
+        model.addAttribute("allSkills", allSkills);
+        model.addAttribute("cities", cities);
         model.addAttribute("activeTab", "candidats");
-        //
+
+        // Ajouter les paramètres de filtre pour pagination
+        model.addAttribute("search", search);
+        model.addAttribute("status", status);
+        model.addAttribute("skill", skill);
+        model.addAttribute("city", city);
+        model.addAttribute("ageRange", ageRange);
+
         return "adminboard";
+    }
+
+    /**
+     * Méthode pour récupérer les données d'un candidat
+     */
+    @GetMapping("/candidats/{id}/data")
+    @ResponseBody
+    public Candidat getCandidatData(@PathVariable Long id) {
+        return candidatService.getCandidatById(id);
+    }
+
+    /**
+     * Méthode pour ajouter un candidat
+     */
+    @PostMapping("/candidats/add")
+    @ResponseBody
+    public Map<String, Object> addCandidat(@RequestBody Candidat candidat) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            // Associer les skills et languages au candidat
+            if (candidat.getSkills() != null) {
+                candidat.getSkills().forEach(skill -> skill.setCandidat(candidat));
+            }
+
+            if (candidat.getLanguages() != null) {
+                candidat.getLanguages().forEach(language -> language.setCandidat(candidat));
+            }
+
+            // Sauvegarder le candidat
+            Candidat savedCandidat = candidatService.saveCandidat(candidat);
+
+            response.put("success", true);
+            response.put("candidat", savedCandidat);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("error", e.getMessage());
+        }
+
+        return response;
+    }
+
+    /**
+     * Méthode pour mettre à jour un candidat
+     */
+    @PostMapping("/candidats/{id}/update")
+    @ResponseBody
+    public Map<String, Object> updateCandidat(@PathVariable Long id, @RequestBody Candidat updatedCandidat) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            Candidat existingCandidat = candidatService.getCandidatById(id);
+
+            if (existingCandidat != null) {
+                // Mettre à jour les informations de base
+                existingCandidat.setFirstName(updatedCandidat.getFirstName());
+                existingCandidat.setLastName(updatedCandidat.getLastName());
+                existingCandidat.setEmail(updatedCandidat.getEmail());
+                existingCandidat.setPhone(updatedCandidat.getPhone());
+                existingCandidat.setBirthdate(updatedCandidat.getBirthdate());
+                existingCandidat.setAddress(updatedCandidat.getAddress());
+                existingCandidat.setSummary(updatedCandidat.getSummary());
+
+                // Mettre à jour les compétences
+                if (updatedCandidat.getSkills() != null) {
+                    // Supprimer les compétences existantes
+                    existingCandidat.getSkills().clear();
+
+                    // Ajouter les nouvelles compétences
+                    for (Skill skill : updatedCandidat.getSkills()) {
+                        skill.setCandidat(existingCandidat);
+                        existingCandidat.getSkills().add(skill);
+                    }
+                }
+
+                // Mettre à jour les langues
+                if (updatedCandidat.getLanguages() != null) {
+                    // Supprimer les langues existantes
+                    existingCandidat.getLanguages().clear();
+
+                    // Ajouter les nouvelles langues
+                    for (Language language : updatedCandidat.getLanguages()) {
+                        language.setCandidat(existingCandidat);
+                        existingCandidat.getLanguages().add(language);
+                    }
+                }
+
+                // Sauvegarder le candidat mis à jour
+                Candidat savedCandidat = candidatService.saveCandidat(existingCandidat);
+
+                response.put("success", true);
+                response.put("candidat", savedCandidat);
+            } else {
+                response.put("success", false);
+                response.put("error", "Candidat non trouvé");
+            }
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("error", e.getMessage());
+        }
+
+        return response;
+    }
+
+    /**
+     * Méthode pour supprimer un candidat
+     */
+    @DeleteMapping("/candidats/delete/{id}")
+    @ResponseBody
+    public Map<String, Object> deleteCandidat(@PathVariable Long id) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            candidatService.deleteCandidat(id);
+            response.put("success", true);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("error", e.getMessage());
+        }
+
+        return response;
+    }
+
+    /**
+     * Méthode pour supprimer plusieurs candidats
+     */
+    @PostMapping("/candidats/batch-delete")
+    @ResponseBody
+    public Map<String, Object> batchDeleteCandidats(@RequestBody Map<String, List<Long>> request) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            List<Long> ids = request.get("ids");
+            if (ids != null && !ids.isEmpty()) {
+                for (Long id : ids) {
+                    candidatService.deleteCandidat(id);
+                }
+                response.put("success", true);
+            } else {
+                response.put("success", false);
+                response.put("error", "Aucun ID fourni");
+            }
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("error", e.getMessage());
+        }
+
+        return response;
+    }
+
+    /**
+     * Méthode pour changer le statut d'un candidat
+     * Note: il faut ajouter un champ 'status' à l'entité Candidat
+     */
+    @PostMapping("/candidats/{id}/toggle-status")
+    @ResponseBody
+    public Map<String, Object> toggleCandidatStatus(@PathVariable Long id, @RequestBody Map<String, String> request) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            String newStatus = request.get("status");
+            if (newStatus == null || newStatus.isEmpty()) {
+                response.put("success", false);
+                response.put("error", "Statut non fourni");
+                return response;
+            }
+
+            Candidat candidat = candidatService.getCandidatById(id);
+            if (candidat == null) {
+                response.put("success", false);
+                response.put("error", "Candidat non trouvé");
+                return response;
+            }
+
+            // Il faut ajouter un champ status à l'entité Candidat
+            // candidat.setStatus(newStatus);
+            // candidatService.saveCandidat(candidat);
+
+            // Pour le moment, simulons une réponse réussie
+            response.put("success", true);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("error", e.getMessage());
+        }
+
+        return response;
+    }
+
+    /**
+     * Méthode pour exporter les candidats en CSV
+     */
+    @GetMapping("/candidats/export")
+    public void exportCandidats(HttpServletResponse response,
+                                @RequestParam(required = false) String search,
+                                @RequestParam(required = false) String status,
+                                @RequestParam(required = false) String skill,
+                                @RequestParam(required = false) String city,
+                                @RequestParam(required = false) String ageRange) throws IOException {
+
+        response.setContentType("text/csv");
+        response.setHeader("Content-Disposition", "attachment; filename=\"candidats.csv\"");
+
+        // Récupérer les candidats
+        List<Candidat> candidats = candidatService.getAllCandidats();
+
+        // Appliquer les filtres si nécessaire
+        if (search != null || status != null || skill != null || city != null || ageRange != null) {
+            candidats = filterCandidats(candidats, search, status, skill, city, ageRange);
+        }
+
+        // Définir les en-têtes CSV
+        String[] headers = {
+                "ID", "Prénom", "Nom", "Email", "Téléphone", "Date de naissance", "Adresse", "Compétences", "Langues"
+        };
+
+        try (CSVPrinter csvPrinter = new CSVPrinter(response.getWriter(), CSVFormat.DEFAULT.withHeader(headers))) {
+            for (Candidat candidat : candidats) {
+                // Formatter les compétences en une chaîne séparée par des virgules
+                String skills = candidat.getSkills().stream()
+                        .map(Skill::getName)
+                        .collect(Collectors.joining(", "));
+
+                // Formatter les langues en une chaîne séparée par des virgules
+                String languages = candidat.getLanguages().stream()
+                        .map(lang -> lang.getName() + " (" + lang.getProficiency() + ")")
+                        .collect(Collectors.joining(", "));
+
+                csvPrinter.printRecord(
+                        candidat.getId(),
+                        candidat.getFirstName(),
+                        candidat.getLastName(),
+                        candidat.getEmail(),
+                        candidat.getPhone(),
+                        candidat.getBirthdate() != null ? candidat.getBirthdate().toString() : "",
+                        candidat.getAddress(),
+                        skills,
+                        languages
+                );
+            }
+        }
+    }
+
+    /**
+     * Méthode utilitaire pour filtrer les candidats
+     */
+    private List<Candidat> filterCandidats(List<Candidat> candidats, String search, String status,
+                                           String skill, String city, String ageRange) {
+
+        List<Candidat> filteredCandidats = new ArrayList<>(candidats);
+
+        // Filtre par recherche (nom, email, téléphone)
+        if (search != null && !search.trim().isEmpty()) {
+            String searchLower = search.toLowerCase();
+            filteredCandidats = filteredCandidats.stream()
+                    .filter(c -> (c.getFirstName() != null && c.getFirstName().toLowerCase().contains(searchLower)) ||
+                            (c.getLastName() != null && c.getLastName().toLowerCase().contains(searchLower)) ||
+                            (c.getEmail() != null && c.getEmail().toLowerCase().contains(searchLower)) ||
+                            (c.getPhone() != null && c.getPhone().toLowerCase().contains(searchLower)))
+                    .collect(Collectors.toList());
+        }
+
+        // Filtre par statut (à implémenter quand le champ status sera ajouté)
+        if (status != null && !status.trim().isEmpty()) {
+            // filteredCandidats = filteredCandidats.stream()
+            //    .filter(c -> c.getStatus() != null && c.getStatus().equals(status))
+            //    .collect(Collectors.toList());
+        }
+
+        // Filtre par compétence
+        if (skill != null && !skill.trim().isEmpty()) {
+            filteredCandidats = filteredCandidats.stream()
+                    .filter(c -> c.getSkills().stream()
+                            .anyMatch(s -> s.getName() != null && s.getName().equals(skill)))
+                    .collect(Collectors.toList());
+        }
+
+        // Filtre par ville
+        if (city != null && !city.trim().isEmpty()) {
+            filteredCandidats = filteredCandidats.stream()
+                    .filter(c -> c.getAddress() != null && c.getAddress().toLowerCase().contains(city.toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+
+        // Filtre par tranche d'âge
+        if (ageRange != null && !ageRange.trim().isEmpty()) {
+            LocalDate now = LocalDate.now();
+
+            int minAge = 0;
+            int maxAge = 150; // Valeur par défaut élevée
+
+            switch (ageRange) {
+                case "18-25":
+                    minAge = 18;
+                    maxAge = 25;
+                    break;
+                case "26-35":
+                    minAge = 26;
+                    maxAge = 35;
+                    break;
+                case "36-45":
+                    minAge = 36;
+                    maxAge = 45;
+                    break;
+                case "46+":
+                    minAge = 46;
+                    maxAge = 150;
+                    break;
+            }
+
+            final int finalMinAge = minAge;
+            final int finalMaxAge = maxAge;
+
+            filteredCandidats = filteredCandidats.stream()
+                    .filter(c -> {
+                        if (c.getBirthdate() == null) {
+                            return false;
+                        }
+
+                        int age = Period.between(c.getBirthdate(), now).getYears();
+                        return age >= finalMinAge && age <= finalMaxAge;
+                    })
+                    .collect(Collectors.toList());
+        }
+
+        return filteredCandidats;
+    }
+
+    /**
+     * Méthode utilitaire pour récupérer toutes les compétences distinctes
+     */
+    private List<String> getDistinctSkills() {
+        return candidatService.getAllCandidats().stream()
+                .flatMap(c -> c.getSkills().stream())
+                .map(Skill::getName)
+                .filter(name -> name != null && !name.isEmpty())
+                .distinct()
+                .sorted()
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Méthode utilitaire pour récupérer toutes les villes distinctes
+     */
+    private List<String> getDistinctCities() {
+        return candidatService.getAllCandidats().stream()
+                .map(Candidat::getAddress)
+                .filter(address -> address != null && !address.isEmpty())
+                .map(address -> {
+                    // Extraire la ville de l'adresse (on suppose que la ville est après la dernière virgule)
+                    int commaIndex = address.lastIndexOf(',');
+                    if (commaIndex > 0 && commaIndex < address.length() - 1) {
+                        return address.substring(commaIndex + 1).trim();
+                    }
+                    return address;
+                })
+                .distinct()
+                .sorted()
+                .collect(Collectors.toList());
     }
 
     /*

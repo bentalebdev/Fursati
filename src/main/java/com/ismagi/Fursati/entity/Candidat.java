@@ -1,9 +1,6 @@
 package com.ismagi.Fursati.entity;
 
-import com.ismagi.Fursati.entity.Education;
-import com.ismagi.Fursati.entity.Experience;
-import com.ismagi.Fursati.entity.Language;
-import com.ismagi.Fursati.entity.Skill;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -28,15 +25,22 @@ public class Candidat {
     private String profilePicture;
     private String summary;
 
+    // Ajout d'un champ status
+    private String status = "active"; // Valeur par défaut
+
     @OneToMany(mappedBy = "candidat", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties("candidat")
     private List<Experience> experiences = new ArrayList<>();
 
     @OneToMany(mappedBy = "candidat", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties("candidat")
     private List<Education> educations = new ArrayList<>();
 
     @OneToMany(mappedBy = "candidat", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties("candidat")
     private List<Skill> skills = new ArrayList<>();
 
     @OneToMany(mappedBy = "candidat", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties("candidat")
     private List<Language> languages = new ArrayList<>();
 }

@@ -1,5 +1,6 @@
 package com.ismagi.Fursati.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
@@ -26,5 +27,6 @@ public class Experience {
 
     @ManyToOne
     @JoinColumn(name = "candidat_id")
+    @JsonIgnoreProperties({"skills", "languages", "experiences", "educations"})
     private Candidat candidat;
 }
