@@ -3,30 +3,35 @@ package com.ismagi.Fursati.controller;
 import com.ismagi.Fursati.dto.*;
 import com.ismagi.Fursati.entity.Candidat;
 import com.ismagi.Fursati.entity.Offre;
+import com.ismagi.Fursati.service.AuthService;
 import com.ismagi.Fursati.service.CandidatProfileService;
 import com.ismagi.Fursati.service.CandidatService;
 import com.ismagi.Fursati.service.OffreService;
+import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 @Controller
 @RequestMapping("/candidats")
-public class CandidatController {
-    private static final Logger logger = Logger.getLogger(CandidatController.class.getName());
+public class CandidatController extends BaseController {
+    private static final Logger logger = LoggerFactory.getLogger(CandidatController.class);
 
     @Autowired
     private CandidatService candidatService;
+
     @Autowired
     private CandidatProfileService candidatProfileService;
-
 
     @Autowired
     private OffreService offreService;
@@ -34,25 +39,42 @@ public class CandidatController {
     // API endpoints
     @GetMapping("/api")
     @ResponseBody
-    public List<Candidat> getAllCandidats() {
+    public List<Candidat> getAllCandidats(HttpServletRequest request) {
+        // Only ADMIN should see all candidates
+        AuthService.UserType userType = getAuthenticatedUserType(request);
+        if (userType != AuthService.UserType.ADMIN) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only administrators can access all candidates");
+        }
         return candidatService.getAllCandidats();
     }
 
     @GetMapping("/api/{id}")
     @ResponseBody
-    public Candidat getCandidatById(@PathVariable Long id) {
+    public Candidat getCandidatById(@PathVariable Long id, HttpServletRequest request) {
+        // Verify user can only access their own data (unless admin)
+        verifyAuthenticatedUser(request, id);
         return candidatService.getCandidatById(id);
     }
 
     @PostMapping("/api")
     @ResponseBody
-    public Candidat createCandidat(@RequestBody Candidat candidat) {
+    public Candidat createCandidat(@RequestBody Candidat candidat, HttpServletRequest request) {
+        // Only ADMIN should be able to create candidates via API
+        AuthService.UserType userType = getAuthenticatedUserType(request);
+        if (userType != AuthService.UserType.ADMIN) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only administrators can create candidates via API");
+        }
         return candidatService.saveCandidat(candidat);
     }
 
     @DeleteMapping("/api/{id}")
     @ResponseBody
-    public void deleteCandidat(@PathVariable Long id) {
+    public void deleteCandidat(@PathVariable Long id, HttpServletRequest request) {
+        // Only ADMIN should be able to delete candidates
+        AuthService.UserType userType = getAuthenticatedUserType(request);
+        if (userType != AuthService.UserType.ADMIN) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only administrators can delete candidates");
+        }
         candidatService.deleteCandidat(id);
     }
 
@@ -63,12 +85,19 @@ public class CandidatController {
     }
 
     @GetMapping("/dashboard")
-    public String dashboard(Model model) {
+    public String dashboard(Model model, HttpServletRequest request) {
         logger.info("Loading dashboard page...");
         model.addAttribute("activeTab", "dashboard");
 
-        // Get current candidate (hardcoded to ID 1 for now)
-        Long candidatId = 1L;
+        // Get current candidate from the authenticated user
+        Long candidatId = getUserIdAsLong(request);
+
+        // Verify user type is CANDIDAT
+        AuthService.UserType userType = getAuthenticatedUserType(request);
+        if (userType != AuthService.UserType.CANDIDAT) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+
         Candidat candidat = candidatService.getCandidatById(candidatId);
 
         if (candidat != null) {
@@ -143,6 +172,7 @@ public class CandidatController {
             model.addAttribute("profileViewsCount", profileViewsCount);
             model.addAttribute("recentActivities", recentActivities);
             model.addAttribute("upcomingInterviews", upcomingInterviews);
+            model.addAttribute("candidat", candidat);
         }
 
         // Provide a default Offre object to avoid null pointer exceptions in the view
@@ -154,8 +184,15 @@ public class CandidatController {
     }
 
     @GetMapping("/jobs")
-    public String jobs(Model model) {
+    public String jobs(Model model, HttpServletRequest request) {
         logger.info("Loading jobs page...");
+
+        // Verify user type is CANDIDAT
+        AuthService.UserType userType = getAuthenticatedUserType(request);
+        if (userType != AuthService.UserType.CANDIDAT) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+
         List<Offre> offres = offreService.getAllOffres();
 
         // If no offers found, provide an empty list instead of null
@@ -175,8 +212,14 @@ public class CandidatController {
     }
 
     @GetMapping("/jobs/details/{id}")
-    public String jobDetails(@PathVariable Long id, Model model) {
+    public String jobDetails(@PathVariable Long id, Model model, HttpServletRequest request) {
         try {
+            // Verify user type is CANDIDAT
+            AuthService.UserType userType = getAuthenticatedUserType(request);
+            if (userType != AuthService.UserType.CANDIDAT) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+            }
+
             // Utiliser la méthode getOffreById pour récupérer l'offre réelle
             Offre offre = offreService.getOffreById(id);
 
@@ -199,9 +242,11 @@ public class CandidatController {
             model.addAttribute("similarOffers", similarOffers);
             model.addAttribute("activeTab", "jobsdetails");
             return "candidateboard";
+        } catch (ResponseStatusException rse) {
+            throw rse; // Rethrow authorization exceptions
         } catch (Exception e) {
             // Log l'exception complète
-            e.printStackTrace();
+            logger.error("Error viewing job details: ", e);
             // Ajouter un message d'erreur à afficher à l'utilisateur
             model.addAttribute("errorMessage", "Une erreur s'est produite : " + e.getMessage());
             model.addAttribute("activeTab", "jobs");
@@ -210,8 +255,21 @@ public class CandidatController {
     }
 
     @GetMapping("/applications")
-    public String applications(Model model) {
+    public String applications(Model model, HttpServletRequest request) {
         logger.info("Loading applications page...");
+
+        // Verify user type is CANDIDAT
+        AuthService.UserType userType = getAuthenticatedUserType(request);
+        if (userType != AuthService.UserType.CANDIDAT) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+
+        // Get candidat ID from authenticated user
+        Long candidatId = getUserIdAsLong(request);
+
+        // Load applications for this candidate
+        // List<Demande> applications = demandeService.getDemandesByCandidatId(candidatId);
+        // model.addAttribute("applications", applications);
 
         model.addAttribute("activeTab", "applications");
 
@@ -226,12 +284,21 @@ public class CandidatController {
     // === PROFILE ===
 
     @GetMapping("/profile")
-    public String profile(Model model) {
+    public String profile(Model model, HttpServletRequest request) {
         logger.info("Loading profile page...");
+
+        // Verify user type is CANDIDAT
+        AuthService.UserType userType = getAuthenticatedUserType(request);
+        if (userType != AuthService.UserType.CANDIDAT) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+
+        // Get candidat ID from authenticated user
+        Long candidatId = getUserIdAsLong(request);
 
         model.addAttribute("activeTab", "profile");
 
-        Candidat c = candidatProfileService.getCandidatById(1L);
+        Candidat c = candidatProfileService.getCandidatById(candidatId);
 
         // Provide a default Offre object to avoid null pointer exceptions in the view
         if (!model.containsAttribute("offre")) {
@@ -243,50 +310,130 @@ public class CandidatController {
     }
 
     @PostMapping("/profile/basic-info")
-    public String updateBasicInfo(@ModelAttribute BasicInfoDTO basicInfoDTO) {
-        candidatProfileService.updateBasicInfo(1L, basicInfoDTO);
+    public String updateBasicInfo(@ModelAttribute BasicInfoDTO basicInfoDTO, HttpServletRequest request) {
+        // Verify user type is CANDIDAT
+        AuthService.UserType userType = getAuthenticatedUserType(request);
+        if (userType != AuthService.UserType.CANDIDAT) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+
+        // Get candidat ID from authenticated user
+        Long candidatId = getUserIdAsLong(request);
+
+        candidatProfileService.updateBasicInfo(candidatId, basicInfoDTO);
         return "redirect:/candidats/profile";
     }
 
     @PostMapping("/profile/summary")
-    public String updateSummary(@ModelAttribute SummaryDTO summaryDTO) {
-        candidatProfileService.updateSummary(1L, summaryDTO);
+    public String updateSummary(@ModelAttribute SummaryDTO summaryDTO, HttpServletRequest request) {
+        // Verify user type is CANDIDAT
+        AuthService.UserType userType = getAuthenticatedUserType(request);
+        if (userType != AuthService.UserType.CANDIDAT) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+
+        // Get candidat ID from authenticated user
+        Long candidatId = getUserIdAsLong(request);
+
+        candidatProfileService.updateSummary(candidatId, summaryDTO);
         return "redirect:/candidats/profile";
     }
 
     @PostMapping("/profile/experience")
-    public String updateExperience(@ModelAttribute ExperienceListDTO experienceListDTO) {
-        candidatProfileService.updateExperiences(1L, experienceListDTO);
+    public String updateExperience(@ModelAttribute ExperienceListDTO experienceListDTO, HttpServletRequest request) {
+        // Verify user type is CANDIDAT
+        AuthService.UserType userType = getAuthenticatedUserType(request);
+        if (userType != AuthService.UserType.CANDIDAT) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+
+        // Get candidat ID from authenticated user
+        Long candidatId = getUserIdAsLong(request);
+
+        candidatProfileService.updateExperiences(candidatId, experienceListDTO);
         return "redirect:/candidats/profile";
     }
 
     @PostMapping("/profile/experience/delete")
-    public String deleteExperience(@RequestParam Long experienceId) {
+    public String deleteExperience(@RequestParam Long experienceId, HttpServletRequest request) {
+        // Verify user type is CANDIDAT
+        AuthService.UserType userType = getAuthenticatedUserType(request);
+        if (userType != AuthService.UserType.CANDIDAT) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+
+        // Get candidat ID from authenticated user
+        Long candidatId = getUserIdAsLong(request);
+
+        // Verify this experience belongs to the authenticated user
+        // This would be implemented in the service layer
+        // experienceService.verifyOwnership(experienceId, candidatId);
+
         candidatProfileService.deleteExperience(experienceId);
         return "redirect:/candidats/profile";
     }
 
     @PostMapping("/profile/education")
-    public String updateEducation(@ModelAttribute EducationListDTO educationListDTO) {
-        candidatProfileService.updateEducations(1L, educationListDTO);
+    public String updateEducation(@ModelAttribute EducationListDTO educationListDTO, HttpServletRequest request) {
+        // Verify user type is CANDIDAT
+        AuthService.UserType userType = getAuthenticatedUserType(request);
+        if (userType != AuthService.UserType.CANDIDAT) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+
+        // Get candidat ID from authenticated user
+        Long candidatId = getUserIdAsLong(request);
+
+        candidatProfileService.updateEducations(candidatId, educationListDTO);
         return "redirect:/candidats/profile";
     }
 
     @PostMapping("/profile/education/delete")
-    public String deleteEducation(@RequestParam Long educationId) {
+    public String deleteEducation(@RequestParam Long educationId, HttpServletRequest request) {
+        // Verify user type is CANDIDAT
+        AuthService.UserType userType = getAuthenticatedUserType(request);
+        if (userType != AuthService.UserType.CANDIDAT) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+
+        // Get candidat ID from authenticated user
+        Long candidatId = getUserIdAsLong(request);
+
+        // Verify this education belongs to the authenticated user
+        // This would be implemented in the service layer
+        // educationService.verifyOwnership(educationId, candidatId);
+
         candidatProfileService.deleteEducation(educationId);
         return "redirect:/candidats/profile";
     }
 
     @PostMapping("/profile/skills-languages")
-    public String updateSkillsAndLanguages(@ModelAttribute SkillsLanguagesDTO dto) {
-        candidatProfileService.updateSkillsAndLanguages(1L, dto);
+    public String updateSkillsAndLanguages(@ModelAttribute SkillsLanguagesDTO dto, HttpServletRequest request) {
+        // Verify user type is CANDIDAT
+        AuthService.UserType userType = getAuthenticatedUserType(request);
+        if (userType != AuthService.UserType.CANDIDAT) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+
+        // Get candidat ID from authenticated user
+        Long candidatId = getUserIdAsLong(request);
+
+        candidatProfileService.updateSkillsAndLanguages(candidatId, dto);
         return "redirect:/candidats/profile";
     }
 
     @GetMapping("/documents")
-    public String documents(Model model) {
+    public String documents(Model model, HttpServletRequest request) {
         logger.info("Loading documents page...");
+
+        // Verify user type is CANDIDAT
+        AuthService.UserType userType = getAuthenticatedUserType(request);
+        if (userType != AuthService.UserType.CANDIDAT) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+
+        // Get candidat ID from authenticated user
+        Long candidatId = getUserIdAsLong(request);
 
         model.addAttribute("activeTab", "documents");
 
@@ -299,8 +446,21 @@ public class CandidatController {
     }
 
     @GetMapping("/settings")
-    public String settings(Model model) {
+    public String settings(Model model, HttpServletRequest request) {
         logger.info("Loading settings page...");
+
+        // Verify user type is CANDIDAT
+        AuthService.UserType userType = getAuthenticatedUserType(request);
+        if (userType != AuthService.UserType.CANDIDAT) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+
+        // Get candidat ID from authenticated user
+        Long candidatId = getUserIdAsLong(request);
+
+        // Load settings for this candidate
+        Candidat candidat = candidatService.getCandidatById(candidatId);
+        model.addAttribute("candidat", candidat);
 
         model.addAttribute("activeTab", "settings");
 

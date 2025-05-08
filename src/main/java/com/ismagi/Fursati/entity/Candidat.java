@@ -24,6 +24,7 @@ public class Candidat {
     private String address;
     private String profilePicture;
     private String summary;
+    private String password;
 
     // Ajout d'un champ status
     private String status = "active"; // Valeur par défaut

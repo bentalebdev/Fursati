@@ -44,9 +44,142 @@ public class AdminController {
     @GetMapping("/dashboard")
     public String showAdminDashboard(Model model) {
         model.addAttribute("activeTab", "dashboard");
-        // Add dashboard data...
+        // Alimenter le dashboard avec les données
+        prepareAdminDashboard(model);
         return "adminboard";
     }
+
+    /**
+     * Méthode pour préparer les données du dashboard
+     */
+    private void prepareAdminDashboard(Model model) {
+        // Récupérer les statistiques globales
+        Map<String, Long> stats = getGlobalStats();
+        model.addAttribute("totalCandidats", stats.get("totalCandidats"));
+        model.addAttribute("totalOffres", stats.get("totalOffres"));
+        model.addAttribute("totalDemandes", stats.get("totalDemandes"));
+        model.addAttribute("totalRecruteurs", stats.get("totalRecruteurs"));
+        model.addAttribute("totalEntreprises", stats.get("totalEntreprises"));
+        model.addAttribute("offresActives", stats.get("offresActives"));
+
+        // Statistiques des candidatures
+        Map<String, Long> demandeStats = getDemandeStats();
+        model.addAttribute("demandesPending", demandeStats.get("PENDING"));
+        model.addAttribute("demandesReviewed", demandeStats.get("REVIEWED"));
+        model.addAttribute("demandesInterview", demandeStats.get("INTERVIEW"));
+        model.addAttribute("demandesAccepted", demandeStats.get("SHORTLISTED"));
+        model.addAttribute("demandesRejected", demandeStats.get("REJECTED"));
+
+        // Récentes activités
+        model.addAttribute("recentDemandes", getRecentDemandes());
+        model.addAttribute("recentOffres", getRecentOffres());
+
+        // Candidats récents
+        model.addAttribute("recentCandidats", getRecentCandidats());
+    }
+
+    /**
+     * Récupère les statistiques globales du système
+     */
+    private Map<String, Long> getGlobalStats() {
+        Map<String, Long> stats = new HashMap<>();
+
+        // Candidats
+        List<Candidat> candidats = candidatService.getAllCandidats();
+        stats.put("totalCandidats", (long) candidats.size());
+
+        // Offres
+        List<Offre> offres = offreService.getAllOffres();
+        stats.put("totalOffres", (long) offres.size());
+
+        // Offres actives
+        long offresActives = offres.stream()
+                .filter(o -> "ACTIVE".equals(o.getStatus()))
+                .count();
+        stats.put("offresActives", offresActives);
+
+        // Demandes
+        List<Demande> demandes = demandeService.getAllDemandes();
+        stats.put("totalDemandes", (long) demandes.size());
+
+        // Recruteurs
+        List<Recruteur> recruteurs = recruteurService.getAllRecruteurs();
+        stats.put("totalRecruteurs", (long) recruteurs.size());
+
+        // Entreprises
+        List<Company> entreprises = companyService.getCompanies();
+        stats.put("totalEntreprises", (long) entreprises.size());
+
+        return stats;
+    }
+
+    /**
+     * Récupère les statistiques des demandes par état
+     */
+    private Map<String, Long> getDemandeStats() {
+        Map<String, Long> stats = new HashMap<>();
+        List<Demande> demandes = demandeService.getAllDemandes();
+
+        // Initialiser tous les états à 0
+        stats.put("PENDING", 0L);
+        stats.put("REVIEWED", 0L);
+        stats.put("INTERVIEW", 0L);
+        stats.put("SHORTLISTED", 0L);
+        stats.put("REJECTED", 0L);
+
+        // Compter les demandes par état
+        for (Demande demande : demandes) {
+            String etat = demande.getEtat();
+            if (etat != null) {
+                stats.put(etat, stats.getOrDefault(etat, 0L) + 1);
+            }
+        }
+
+        return stats;
+    }
+
+    /**
+     * Récupère les demandes récentes (5 dernières)
+     */
+    private List<Demande> getRecentDemandes() {
+        List<Demande> allDemandes = demandeService.getAllDemandes();
+
+        // Trier par date de demande (la plus récente en premier)
+        return allDemandes.stream()
+                .filter(d -> d.getDateDemande() != null)
+                .sorted(Comparator.comparing(Demande::getDateDemande).reversed())
+                .limit(5)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Récupère les offres récentes (5 dernières)
+     */
+    private List<Offre> getRecentOffres() {
+        List<Offre> allOffres = offreService.getAllOffres();
+
+        // Trier par date de publication (la plus récente en premier)
+        return allOffres.stream()
+                .filter(o -> o.getPostedAt() != null)
+                .sorted(Comparator.comparing(Offre::getPostedAt).reversed())
+                .limit(5)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Récupère les candidats récents (5 derniers)
+     */
+    private List<Candidat> getRecentCandidats() {
+        List<Candidat> allCandidats = candidatService.getAllCandidats();
+
+        // Ici, nous n'avons pas de date d'inscription pour les candidats
+        // On prend simplement les 5 derniers par ID (hypothèse que l'ID est auto-incrémenté)
+        return allCandidats.stream()
+                .sorted(Comparator.comparing(Candidat::getId).reversed())
+                .limit(5)
+                .collect(Collectors.toList());
+    }
+
 
     /**
      * Méthodes pour la gestion des candidats
@@ -1293,6 +1426,317 @@ public class AdminController {
             }
         }
     }
+    /**
+     * Méthodes pour la gestion des recruteurs
+     */
+
+    @GetMapping("/recruiters")
+    public String showRecruiters(Model model,
+                                 @RequestParam(required = false) String search,
+                                 @RequestParam(required = false) String status,
+                                 @RequestParam(required = false) Long company,
+                                 @RequestParam(required = false, defaultValue = "0") int page,
+                                 @RequestParam(required = false, defaultValue = "10") int size) {
+
+        // Récupérer tous les recruteurs
+        List<Recruteur> recruteurs = recruteurService.getAllRecruteurs();
+
+        // Récupérer toutes les entreprises pour le filtre
+        List<Company> companies = companyService.getCompanies();
+
+        // Appliquer les filtres si nécessaire
+        if (search != null || status != null || company != null) {
+            recruteurs = filterRecruiters(recruteurs, search, status, company);
+        }
+
+        // Calculer la pagination
+        int totalRecruiters = recruteurs.size();
+        int totalPages = (int) Math.ceil((double) totalRecruiters / size);
+
+        // S'assurer que la page est dans les limites
+        if (page < 0) page = 0;
+        if (page >= totalPages && totalPages > 0) page = totalPages - 1;
+
+        // Sous-ensemble des recruteurs pour la page actuelle
+        int start = page * size;
+        int end = Math.min(start + size, totalRecruiters);
+
+        List<Recruteur> pagedRecruiters = start < totalRecruiters ? recruteurs.subList(start, end) : new ArrayList<>();
+
+        // Ajouter les données au modèle
+        model.addAttribute("recruteurs", pagedRecruiters);
+        model.addAttribute("companies", companies);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("pageSize", size);
+
+        // Ajouter les paramètres de filtre pour la pagination
+        model.addAttribute("search", search);
+        model.addAttribute("status", status);
+        model.addAttribute("company", company);
+
+        if (company != null) {
+            Optional<Company> selectedCompany = companyService.findById(company);
+            selectedCompany.ifPresent(value -> model.addAttribute("selectedCompany", value));
+        }
+
+        model.addAttribute("activeTab", "recruiters");
+        return "adminboard";
+    }
+
+    /**
+     * Méthode utilitaire pour filtrer les recruteurs
+     */
+    private List<Recruteur> filterRecruiters(List<Recruteur> recruteurs, String search, String status, Long companyId) {
+        List<Recruteur> filteredRecruiters = new ArrayList<>(recruteurs);
+
+        // Filtre par recherche (nom, email, téléphone)
+        if (search != null && !search.trim().isEmpty()) {
+            String searchLower = search.toLowerCase();
+            filteredRecruiters = filteredRecruiters.stream()
+                    .filter(r -> (r.getNom() != null && r.getNom().toLowerCase().contains(searchLower)) ||
+                            (r.getPrenom() != null && r.getPrenom().toLowerCase().contains(searchLower)) ||
+                            (r.getEmail() != null && r.getEmail().toLowerCase().contains(searchLower)) ||
+                            (r.getTelephone() != null && r.getTelephone().toLowerCase().contains(searchLower)))
+                    .collect(Collectors.toList());
+        }
+
+        // Filtre par statut
+        if (status != null && !status.trim().isEmpty()) {
+            filteredRecruiters = filteredRecruiters.stream()
+                    .filter(r -> r.getStatus() != null && r.getStatus().equals(status))
+                    .collect(Collectors.toList());
+        }
+
+        // Filtre par entreprise
+        if (companyId != null) {
+            filteredRecruiters = filteredRecruiters.stream()
+                    .filter(r -> r.getCompany() != null && r.getCompany().getId().equals(companyId))
+                    .collect(Collectors.toList());
+        }
+
+        return filteredRecruiters;
+    }
+
+    /**
+     * Endpoint pour récupérer les données d'un recruteur
+     */
+    @GetMapping("/recruteurs/{id}/data")
+    @ResponseBody
+    public Recruteur getRecruiterData(@PathVariable Long id) {
+        return recruteurService.getRecruteurById(id);
+    }
+
+    /**
+     * Endpoint pour ajouter un recruteur
+     */
+    @PostMapping("/recruteurs/add")
+    @ResponseBody
+    public Map<String, Object> addRecruiter(@RequestBody Recruteur recruteur) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            // Définir la date d'inscription si elle n'est pas définie
+            if (recruteur.getDateInscription() == null) {
+                recruteur.setDateInscription(LocalDate.now());
+            }
+
+            // Sauvegarder le recruteur
+            Recruteur savedRecruiter = recruteurService.saveRecruteur(recruteur);
+
+            response.put("success", true);
+            response.put("recruteur", savedRecruiter);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("error", e.getMessage());
+        }
+
+        return response;
+    }
+
+    /**
+     * Endpoint pour mettre à jour un recruteur
+     */
+    @PostMapping("/recruteurs/{id}/update")
+    @ResponseBody
+    public Map<String, Object> updateRecruiter(@PathVariable Long id, @RequestBody Recruteur updatedRecruiter) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            Recruteur existingRecruiter = recruteurService.getRecruteurById(id);
+
+            if (existingRecruiter != null) {
+                // Mettre à jour les informations du recruteur
+                if (updatedRecruiter.getNom() != null) {
+                    existingRecruiter.setNom(updatedRecruiter.getNom());
+                }
+                if (updatedRecruiter.getPrenom() != null) {
+                    existingRecruiter.setPrenom(updatedRecruiter.getPrenom());
+                }
+                if (updatedRecruiter.getEmail() != null) {
+                    existingRecruiter.setEmail(updatedRecruiter.getEmail());
+                }
+                if (updatedRecruiter.getTelephone() != null) {
+                    existingRecruiter.setTelephone(updatedRecruiter.getTelephone());
+                }
+                if (updatedRecruiter.getPoste() != null) {
+                    existingRecruiter.setPoste(updatedRecruiter.getPoste());
+                }
+                if (updatedRecruiter.getStatus() != null) {
+                    existingRecruiter.setStatus(updatedRecruiter.getStatus());
+                }
+
+                // Mettre à jour l'entreprise associée
+                existingRecruiter.setCompany(updatedRecruiter.getCompany());
+
+                // Sauvegarder le recruteur mis à jour
+                Recruteur savedRecruiter = recruteurService.saveRecruteur(existingRecruiter);
+
+                response.put("success", true);
+                response.put("recruteur", savedRecruiter);
+            } else {
+                response.put("success", false);
+                response.put("error", "Recruteur non trouvé");
+            }
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("error", e.getMessage());
+        }
+
+        return response;
+    }
+
+    /**
+     * Endpoint pour supprimer un recruteur
+     */
+    @DeleteMapping("/recruteurs/delete/{id}")
+    @ResponseBody
+    public Map<String, Object> deleteRecruiter(@PathVariable Long id) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            recruteurService.deleteRecruteur(id);
+            response.put("success", true);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("error", e.getMessage());
+        }
+
+        return response;
+    }
+
+    /**
+     * Endpoint pour supprimer plusieurs recruteurs
+     */
+    @PostMapping("/recruteurs/batch-delete")
+    @ResponseBody
+    public Map<String, Object> batchDeleteRecruiters(@RequestBody Map<String, List<Long>> request) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            List<Long> ids = request.get("ids");
+            if (ids != null && !ids.isEmpty()) {
+                for (Long id : ids) {
+                    try {
+                        recruteurService.deleteRecruteur(id);
+                    } catch (Exception e) {
+                        // Log error but continue
+                        System.err.println("Erreur lors de la suppression du recruteur ID " + id + ": " + e.getMessage());
+                    }
+                }
+                response.put("success", true);
+            } else {
+                response.put("success", false);
+                response.put("error", "Aucun ID fourni");
+            }
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("error", e.getMessage());
+        }
+
+        return response;
+    }
+
+    /**
+     * Endpoint pour changer le statut d'un recruteur
+     */
+    @PostMapping("/recruteurs/{id}/toggle-status")
+    @ResponseBody
+    public Map<String, Object> toggleRecruiterStatus(@PathVariable Long id, @RequestBody Map<String, String> request) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            String newStatus = request.get("status");
+            if (newStatus == null || newStatus.isEmpty()) {
+                response.put("success", false);
+                response.put("error", "Statut non fourni");
+                return response;
+            }
+
+            Recruteur recruteur = recruteurService.getRecruteurById(id);
+            if (recruteur == null) {
+                response.put("success", false);
+                response.put("error", "Recruteur non trouvé");
+                return response;
+            }
+
+            recruteur.setStatus(newStatus);
+            recruteurService.saveRecruteur(recruteur);
+
+            response.put("success", true);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("error", e.getMessage());
+        }
+
+        return response;
+    }
+
+    /**
+     * Endpoint pour exporter les recruteurs en CSV
+     */
+    @GetMapping("/recruteurs/export")
+    public void exportRecruiters(HttpServletResponse response,
+                                 @RequestParam(required = false) String search,
+                                 @RequestParam(required = false) String status,
+                                 @RequestParam(required = false) Long company) throws IOException {
+
+        response.setContentType("text/csv");
+        response.setHeader("Content-Disposition", "attachment; filename=\"recruteurs.csv\"");
+
+        // Récupérer tous les recruteurs
+        List<Recruteur> recruteurs = recruteurService.getAllRecruteurs();
+
+        // Appliquer les filtres si nécessaire
+        if (search != null || status != null || company != null) {
+            recruteurs = filterRecruiters(recruteurs, search, status, company);
+        }
+
+        // Définir les en-têtes CSV
+        String[] headers = {
+                "ID", "Nom", "Prénom", "Email", "Téléphone", "Entreprise", "Poste", "Statut", "Date d'inscription", "Nombre d'offres"
+        };
+
+        try (CSVPrinter csvPrinter = new CSVPrinter(response.getWriter(), CSVFormat.DEFAULT.withHeader(headers))) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+            for (Recruteur recruteur : recruteurs) {
+                csvPrinter.printRecord(
+                        recruteur.getIdRecruteur(),
+                        recruteur.getNom() != null ? recruteur.getNom() : "",
+                        recruteur.getPrenom() != null ? recruteur.getPrenom() : "",
+                        recruteur.getEmail() != null ? recruteur.getEmail() : "",
+                        recruteur.getTelephone() != null ? recruteur.getTelephone() : "",
+                        recruteur.getCompany() != null ? recruteur.getCompany().getNomEntreprise() : "Sans entreprise",
+                        recruteur.getPoste() != null ? recruteur.getPoste() : "",
+                        recruteur.getStatus() != null ? recruteur.getStatus() : "Non défini",
+                        recruteur.getDateInscription() != null ? recruteur.getDateInscription().format(formatter) : "",
+                        recruteur.getOffres() != null ? recruteur.getOffres().size() : 0
+                );
+            }
+        }
+    }
+
 
 
 

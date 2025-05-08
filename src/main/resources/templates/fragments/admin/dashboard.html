@@ -1,175 +1,84 @@
-<div th:fragment="dashboard" xmlns:th="http://www.thymeleaf.org">
-    <!-- Stats Row -->
-    <div class="row">
-        <div class="col-md-3">
-            <div class="stats-card">
-                <div class="stats-icon stats-icon-primary">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="stats-info">
-                    <h3 class="stats-value">3,846</h3>
-                    <p class="stats-label">Utilisateurs totaux</p>
-                    <div class="stats-change positive">
-                        <i class="fas fa-arrow-up me-1"></i> 12.3% ce mois
-                    </div>
-                </div>
+<!-- Admin Dashboard Fragment -->
+<div th:fragment="dashboard">
+    <!-- Dashboard header with welcome message and date -->
+    <div class="dashboard-header mb-4">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <h3 class="mb-1">Bienvenue dans le panneau d'administration</h3>
+                <p class="text-muted">Vue d'ensemble de la plateforme Fursati</p>
             </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stats-card">
-                <div class="stats-icon stats-icon-success">
-                    <i class="fas fa-briefcase"></i>
-                </div>
-                <div class="stats-info">
-                    <h3 class="stats-value">1,254</h3>
-                    <p class="stats-label">Offres d'emploi actives</p>
-                    <div class="stats-change positive">
-                        <i class="fas fa-arrow-up me-1"></i> 5.7% ce mois
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stats-card">
-                <div class="stats-icon stats-icon-warning">
-                    <i class="fas fa-file-alt"></i>
-                </div>
-                <div class="stats-info">
-                    <h3 class="stats-value">5,721</h3>
-                    <p class="stats-label">Candidatures totales</p>
-                    <div class="stats-change positive">
-                        <i class="fas fa-arrow-up me-1"></i> 8.2% ce mois
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stats-card">
-                <div class="stats-icon stats-icon-info">
-                    <i class="fas fa-building"></i>
-                </div>
-                <div class="stats-info">
-                    <h3 class="stats-value">418</h3>
-                    <p class="stats-label">Entreprises vérifiées</p>
-                    <div class="stats-change positive">
-                        <i class="fas fa-arrow-up me-1"></i> 3.6% ce mois
-                    </div>
-                </div>
+            <div class="current-date d-flex align-items-center">
+                <i class="fas fa-calendar-alt me-2"></i>
+                <span th:text="${#dates.format(#dates.createNow(), 'dd MMMM yyyy')}">Date actuelle</span>
             </div>
         </div>
     </div>
 
-    <!-- Main Dashboard Content -->
-    <div class="row mt-4">
-        <!-- Activity Chart -->
-        <div class="col-lg-8">
-            <div class="app-card">
-                <div class="app-card-header">
-                    <h5 class="app-card-title">Activité de la plateforme</h5>
-                    <div>
-                        <select class="form-select form-select-sm">
-                            <option>Les 7 derniers jours</option>
-                            <option>Les 30 derniers jours</option>
-                            <option>Les 90 derniers jours</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="app-card-body">
-                    <div style="height: 300px; background-color: #f8f9fa; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
-                        <span class="text-muted">Graphique d'activité</span>
+    <!-- Stats overview cards -->
+    <div class="row g-3 mb-4">
+        <!-- Candidats inscrits -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card stats-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Candidats</h6>
+                            <h3 class="mb-0" th:text="${totalCandidats}">0</h3>
+                        </div>
+                        <div class="stats-card-icon bg-primary-light">
+                            <i class="fas fa-users text-primary"></i>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Quick Stats -->
-        <div class="col-lg-4">
-            <div class="app-card">
-                <div class="app-card-header">
-                    <h5 class="app-card-title">Statistiques rapides</h5>
-                    <div>
-                        <select class="form-select form-select-sm">
-                            <option>Ce mois</option>
-                            <option>Mois dernier</option>
-                            <option>Cette année</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="app-card-body p-0">
-                    <div class="list-group list-group-flush">
-                        <div class="list-group-item d-flex justify-content-between align-items-center p-3">
-                            <div>
-                                <i class="fas fa-user-plus text-primary me-2"></i>
-                                Nouveaux utilisateurs
-                            </div>
-                            <div class="fw-bold">247</div>
+        <!-- Entreprises -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card stats-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Entreprises</h6>
+                            <h3 class="mb-0" th:text="${totalEntreprises}">0</h3>
                         </div>
-                        <div class="list-group-item d-flex justify-content-between align-items-center p-3">
-                            <div>
-                                <i class="fas fa-briefcase text-success me-2"></i>
-                                Nouvelles offres
-                            </div>
-                            <div class="fw-bold">86</div>
-                        </div>
-                        <div class="list-group-item d-flex justify-content-between align-items-center p-3">
-                            <div>
-                                <i class="fas fa-file-alt text-warning me-2"></i>
-                                Candidatures
-                            </div>
-                            <div class="fw-bold">435</div>
-                        </div>
-                        <div class="list-group-item d-flex justify-content-between align-items-center p-3">
-                            <div>
-                                <i class="fas fa-building text-info me-2"></i>
-                                Nouvelles entreprises
-                            </div>
-                            <div class="fw-bold">32</div>
-                        </div>
-                        <div class="list-group-item d-flex justify-content-between align-items-center p-3">
-                            <div>
-                                <i class="fas fa-flag text-danger me-2"></i>
-                                Signalements en attente
-                            </div>
-                            <div class="fw-bold">12</div>
+                        <div class="stats-card-icon bg-success-light">
+                            <i class="fas fa-building text-success"></i>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- System Status -->
-            <div class="app-card mt-4">
-                <div class="app-card-header">
-                    <h5 class="app-card-title">État du système</h5>
+        <!-- Recruteurs -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card stats-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Recruteurs</h6>
+                            <h3 class="mb-0" th:text="${totalRecruteurs}">0</h3>
+                        </div>
+                        <div class="stats-card-icon bg-info-light">
+                            <i class="fas fa-user-tie text-info"></i>
+                        </div>
+                    </div>
                 </div>
-                <div class="app-card-body p-0">
-                    <div class="list-group list-group-flush">
-                        <div class="list-group-item d-flex justify-content-between align-items-center p-3">
-                            <div>
-                                <i class="fas fa-server text-success me-2"></i>
-                                Serveur principal
-                            </div>
-                            <div class="badge bg-success">En ligne</div>
+            </div>
+        </div>
+
+        <!-- Offres d'emploi -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card stats-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Offres d'emploi</h6>
+                            <h3 class="mb-0" th:text="${totalOffres}">0</h3>
+                            <small class="text-muted" th:text="${offresActives} + ' actives'">0 actives</small>
                         </div>
-                        <div class="list-group-item d-flex justify-content-between align-items-center p-3">
-                            <div>
-                                <i class="fas fa-database text-success me-2"></i>
-                                Base de données
-                            </div>
-                            <div class="badge bg-success">En ligne</div>
-                        </div>
-                        <div class="list-group-item d-flex justify-content-between align-items-center p-3">
-                            <div>
-                                <i class="fas fa-envelope text-success me-2"></i>
-                                Service d'e-mail
-                            </div>
-                            <div class="badge bg-success">En ligne</div>
-                        </div>
-                        <div class="list-group-item d-flex justify-content-between align-items-center p-3">
-                            <div>
-                                <i class="fas fa-credit-card text-success me-2"></i>
-                                Service de paiement
-                            </div>
-                            <div class="badge bg-success">En ligne</div>
+                        <div class="stats-card-icon bg-warning-light">
+                            <i class="fas fa-briefcase text-warning"></i>
                         </div>
                     </div>
                 </div>
@@ -177,140 +86,252 @@
         </div>
     </div>
 
-    <!-- Activity & Approvals -->
-    <div class="row mt-4">
-        <!-- Recent Activity -->
-        <div class="col-lg-7">
-            <div class="app-card">
-                <div class="app-card-header">
-                    <h5 class="app-card-title">Activité récente</h5>
-                    <a href="#" class="btn btn-sm btn-outline-primary">Voir tout</a>
+    <!-- Main Content Area -->
+    <div class="row g-4">
+        <!-- Left Column (Wider) -->
+        <div class="col-xl-8 col-lg-7">
+            <!-- Applications par statut -->
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Candidatures par statut</h5>
                 </div>
-                <div class="app-card-body p-0">
-                    <div class="list-group list-group-flush">
-                        <div class="list-group-item p-3">
-                            <div class="d-flex w-100 justify-content-between mb-1">
-                                <h6 class="mb-0">Nouvelle entreprise inscrite</h6>
-                                <small class="text-muted">Il y a 23 minutes</small>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col">
+                            <div class="app-status-item">
+                                <div class="status-icon bg-warning">
+                                    <i class="fas fa-hourglass-start"></i>
+                                </div>
+                                <h4 class="mt-3" th:text="${demandesPending}">0</h4>
+                                <p class="text-muted">En attente</p>
                             </div>
-                            <p class="mb-1">Techno Solutions SARL (Casablanca) s'est inscrite.</p>
-                            <small class="text-muted">Action requise: Vérification du profil</small>
                         </div>
-                        <div class="list-group-item p-3">
-                            <div class="d-flex w-100 justify-content-between mb-1">
-                                <h6 class="mb-0">Signalement d'offre d'emploi</h6>
-                                <small class="text-muted">Il y a 1 heure</small>
+                        <div class="col">
+                            <div class="app-status-item">
+                                <div class="status-icon bg-primary">
+                                    <i class="fas fa-search"></i>
+                                </div>
+                                <h4 class="mt-3" th:text="${demandesReviewed}">0</h4>
+                                <p class="text-muted">En cours</p>
                             </div>
-                            <p class="mb-1">L'offre "Développeur Full Stack" a été signalée pour contenu inapproprié.</p>
-                            <small class="text-muted">Action requise: Révision de l'offre</small>
                         </div>
-                        <div class="list-group-item p-3">
-                            <div class="d-flex w-100 justify-content-between mb-1">
-                                <h6 class="mb-0">Nouvel utilisateur Premium</h6>
-                                <small class="text-muted">Il y a 3 heures</small>
+                        <div class="col">
+                            <div class="app-status-item">
+                                <div class="status-icon bg-info">
+                                    <i class="fas fa-comments"></i>
+                                </div>
+                                <h4 class="mt-3" th:text="${demandesInterview}">0</h4>
+                                <p class="text-muted">Entretien</p>
                             </div>
-                            <p class="mb-1">Mohamed Alami a souscrit au plan Premium.</p>
-                            <small class="text-muted">Action: Aucune action requise</small>
                         </div>
-                        <div class="list-group-item p-3">
-                            <div class="d-flex w-100 justify-content-between mb-1">
-                                <h6 class="mb-0">Pic d'utilisation détecté</h6>
-                                <small class="text-muted">Il y a 5 heures</small>
+                        <div class="col">
+                            <div class="app-status-item">
+                                <div class="status-icon bg-success">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <h4 class="mt-3" th:text="${demandesAccepted}">0</h4>
+                                <p class="text-muted">Acceptées</p>
                             </div>
-                            <p class="mb-1">Augmentation de 150% du trafic dans la section "Informatique".</p>
-                            <small class="text-muted">Action: Surveiller les performances</small>
+                        </div>
+                        <div class="col">
+                            <div class="app-status-item">
+                                <div class="status-icon bg-danger">
+                                    <i class="fas fa-times"></i>
+                                </div>
+                                <h4 class="mt-3" th:text="${demandesRejected}">0</h4>
+                                <p class="text-muted">Rejetées</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="app-card-footer">
-                    <a href="#" class="btn btn-sm btn-primary w-100">Charger plus d'activités</a>
+            </div>
+
+            <!-- Recent Applications -->
+            <div class="card mb-4">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Candidatures récentes</h5>
+                    <a th:href="@{/admin/applications}" class="btn btn-sm btn-outline-primary">Voir tout</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover m-0">
+                            <thead>
+                            <tr>
+                                <th>Candidat</th>
+                                <th>Poste</th>
+                                <th>Entreprise</th>
+                                <th>Date</th>
+                                <th>Statut</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="demande : ${recentDemandes}" th:if="${recentDemandes != null && !#lists.isEmpty(recentDemandes)}">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar me-2 bg-primary"
+                                             th:if="${demande.candidat != null}"
+                                             th:text="${demande.candidat.firstName != null ? #strings.substring(demande.candidat.firstName,0,1) : 'C'}">
+                                        </div>
+                                        <div th:if="${demande.candidat != null}" th:text="${demande.candidat.firstName + ' ' + demande.candidat.lastName}">
+                                            Nom du candidat
+                                        </div>
+                                        <div th:unless="${demande.candidat != null}">Candidat inconnu</div>
+                                    </div>
+                                </td>
+                                <td th:text="${demande.offre != null ? demande.offre.title : 'N/A'}">Poste</td>
+                                <td th:text="${demande.offre != null ? demande.offre.companyName : 'N/A'}">Entreprise</td>
+                                <td th:text="${demande.dateDemande != null ? #dates.format(demande.dateDemande, 'dd/MM/yyyy') : 'N/A'}">Date</td>
+                                <td>
+                                        <span class="badge"
+                                              th:classappend="${demande.etat == 'PENDING' ? 'bg-warning' :
+                                                             demande.etat == 'REVIEWED' ? 'bg-info' :
+                                                             demande.etat == 'INTERVIEW' ? 'bg-primary' :
+                                                             demande.etat == 'SHORTLISTED' ? 'bg-success' :
+                                                             'bg-danger'}"
+                                              th:text="${demande.etat == 'PENDING' ? 'En attente' :
+                                                      demande.etat == 'REVIEWED' ? 'En cours' :
+                                                      demande.etat == 'INTERVIEW' ? 'Entretien' :
+                                                      demande.etat == 'SHORTLISTED' ? 'Accepté' :
+                                                      'Rejeté'}">
+                                        </span>
+                                </td>
+                            </tr>
+                            <tr th:if="${recentDemandes == null || #lists.isEmpty(recentDemandes)}">
+                                <td colspan="5" class="text-center">Aucune candidature récente</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Pending Approvals -->
-        <div class="col-lg-5">
-            <div class="app-card">
-                <div class="app-card-header">
-                    <h5 class="app-card-title">Approbations en attente</h5>
-                    <a href="#" class="btn btn-sm btn-outline-primary">Voir tout</a>
+        <!-- Right Column (Narrower) -->
+        <div class="col-xl-4 col-lg-5">
+            <!-- Recent Job Listings -->
+            <div class="card mb-4">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Offres récentes</h5>
+                    <a th:href="@{/admin/jobs}" class="btn btn-sm btn-outline-primary">Voir tout</a>
                 </div>
-                <div class="app-card-body p-0">
+                <div class="card-body p-0">
                     <div class="list-group list-group-flush">
-                        <div class="list-group-item p-3">
-                            <div class="d-flex align-items-center">
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-1">Vérification d'entreprise</h6>
-                                    <p class="mb-1 small">Global Tech SARL - Casablanca</p>
-                                    <small class="text-muted">Soumis il y a 2 jours</small>
-                                </div>
-                                <div class="d-flex">
-                                    <button class="btn btn-sm btn-success me-2">
-                                        <i class="fas fa-check"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-danger">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                            </div>
+                        <div th:if="${recentOffres == null || #lists.isEmpty(recentOffres)}" class="text-center py-4">
+                            <p class="text-muted">Aucune offre récente</p>
                         </div>
-                        <div class="list-group-item p-3">
-                            <div class="d-flex align-items-center">
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-1">Offre d'emploi à vérifier</h6>
-                                    <p class="mb-1 small">"Directeur Financier" - Maroc Télécoms</p>
-                                    <small class="text-muted">Soumis il y a 1 jour</small>
+                        <a th:href="@{/admin/jobs/{id}/data(id=${offre.id})}" class="list-group-item list-group-item-action"
+                           th:each="offre : ${recentOffres}" th:if="${recentOffres != null && !#lists.isEmpty(recentOffres)}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1" th:text="${offre.title}">Titre de l'offre</h6>
+                                    <p class="text-muted mb-0">
+                                        <i class="fas fa-building me-1"></i>
+                                        <span th:text="${offre.companyName}">Entreprise</span>
+                                        <span class="mx-1">•</span>
+                                        <i class="fas fa-map-marker-alt me-1"></i>
+                                        <span th:text="${offre.location}">Lieu</span>
+                                    </p>
                                 </div>
-                                <div class="d-flex">
-                                    <button class="btn btn-sm btn-success me-2">
-                                        <i class="fas fa-check"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-danger">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
+                                <span class="badge"
+                                      th:classappend="${offre.status == 'ACTIVE' ? 'bg-success' :
+                                                     offre.status == 'DRAFT' ? 'bg-secondary' :
+                                                     offre.status == 'EXPIRED' ? 'bg-danger' :
+                                                     'bg-warning'}"
+                                      th:text="${offre.status}">
+                                    Status
+                                </span>
                             </div>
-                        </div>
-                        <div class="list-group-item p-3">
-                            <div class="d-flex align-items-center">
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-1">Demande de remboursement</h6>
-                                    <p class="mb-1 small">Utilisateur #24601 - Plan Premium</p>
-                                    <small class="text-muted">Soumis il y a 3 heures</small>
-                                </div>
-                                <div class="d-flex">
-                                    <button class="btn btn-sm btn-success me-2">
-                                        <i class="fas fa-check"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-danger">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="list-group-item p-3">
-                            <div class="d-flex align-items-center">
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-1">Signalement d'utilisateur</h6>
-                                    <p class="mb-1 small">Utilisateur #18542 - Comportement inapproprié</p>
-                                    <small class="text-muted">Soumis il y a 6 heures</small>
-                                </div>
-                                <div class="d-flex">
-                                    <button class="btn btn-sm btn-success me-2">
-                                        <i class="fas fa-check"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-danger">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                        </a>
                     </div>
                 </div>
-                <div class="app-card-footer">
-                    <a href="#" class="btn btn-sm btn-primary w-100">Voir toutes les approbations</a>
+            </div>
+
+            <!-- Recent Candidates -->
+            <div class="card">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Candidats récents</h5>
+                    <a th:href="@{/admin/candidats}" class="btn btn-sm btn-outline-primary">Voir tout</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <div th:if="${recentCandidats == null || #lists.isEmpty(recentCandidats)}" class="text-center py-4">
+                            <p class="text-muted">Aucun candidat récent</p>
+                        </div>
+                        <a th:href="@{/admin/candidats/{id}/data(id=${candidat.id})}" class="list-group-item list-group-item-action"
+                           th:each="candidat : ${recentCandidats}" th:if="${recentCandidats != null && !#lists.isEmpty(recentCandidats)}">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar me-3 bg-primary"
+                                     th:text="${candidat.firstName != null ? #strings.substring(candidat.firstName,0,1) : 'C'}">
+                                </div>
+                                <div>
+                                    <h6 class="mb-1" th:text="${candidat.firstName + ' ' + candidat.lastName}">Nom du candidat</h6>
+                                    <p class="text-muted small mb-0">
+                                        <i class="fas fa-envelope me-1"></i>
+                                        <span th:text="${candidat.email}">Email</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- CSS spécifique au dashboard -->
+    <style>
+        /* Stats cards */
+        .stats-card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .stats-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .stats-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+        .bg-primary-light { background-color: rgba(13, 110, 253, 0.1); }
+        .bg-success-light { background-color: rgba(25, 135, 84, 0.1); }
+        .bg-info-light { background-color: rgba(13, 202, 240, 0.1); }
+        .bg-warning-light { background-color: rgba(255, 193, 7, 0.1); }
+
+        /* Status icons for application status card */
+        .app-status-item {
+            padding: 10px;
+        }
+        .status-icon {
+            margin: 0 auto;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        /* Avatar for candidates */
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--bs-primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+    </style>
 </div>

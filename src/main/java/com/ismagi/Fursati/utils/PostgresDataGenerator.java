@@ -222,6 +222,149 @@ public class PostgresDataGenerator {
     /**
      * Generates and inserts admin records
      */
+
+    /**
+     * Generates and inserts recruiter records
+     */
+    /**
+     * Generates and inserts recruiter records with company associations
+     */
+    /**
+     * Generates and inserts recruiter records with company associations
+     */
+// Modify the generateRecruiters method to include password generation
+    private List<Long> generateRecruiters(int count, List<Long> companyIds) {
+        List<Long> recruiterIds = new ArrayList<>();
+
+        for (int i = 0; i < count; i++) {
+            // Generate recruiter personal info
+            String firstName = getRandomItem(firstNames);
+            String lastName = getRandomItem(lastNames);
+            String email = limitLength(generateEmail(firstName, lastName), MAX_VARCHAR_LENGTH);
+            String phone = generateMoroccanPhoneNumber();
+            String address = limitLength(generateAddress(), MAX_VARCHAR_LENGTH);
+
+            // Generate a consistent, simple password for testing
+            // For real recruiters we'll use email as password to make testing easier
+            String password = limitLength(email, MAX_VARCHAR_LENGTH);
+
+            // By default, make recruiters active
+            String status = "ACTIVE";
+            LocalDate dateInscription = LocalDate.now().minusDays(random.nextInt(365));
+
+            // Generate job title
+            String poste = getRandomItem(Arrays.asList(
+                    "Responsable RH", "Chargé de recrutement", "Directeur des RH",
+                    "Consultant RH", "Talent Acquisition Manager", "Recruteur"
+            ));
+
+            // Get company ID - either pick one from the list or null if none available
+            Long companyId = null;
+            if (companyIds != null && !companyIds.isEmpty()) {
+                // Assign recruiter to a random company from the list
+                companyId = companyIds.get(i % companyIds.size());
+            }
+
+            String sql = "INSERT INTO recruteur (nom, prenom, email, adresse, telephone, status, date_inscription, poste, company_id, password) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id_recruteur";
+
+            Long recruiterId = jdbcTemplate.queryForObject(sql, Long.class,
+                    limitLength(lastName, MAX_VARCHAR_LENGTH),
+                    limitLength(firstName, MAX_VARCHAR_LENGTH),
+                    email,
+                    address,
+                    phone,
+                    status,
+                    dateInscription,
+                    poste,
+                    companyId,
+                    password);  // Added password parameter
+
+            if (recruiterId != null) {
+                recruiterIds.add(recruiterId);
+                // Log the created recruiter and password for testing
+                System.out.println("Created recruiter: " + email + " with password: " + password);
+            }
+        }
+
+        System.out.println("Generated " + recruiterIds.size() + " recruiters associated with companies");
+        return recruiterIds;
+    }
+
+    // Modify the generateCandidates method to include password generation
+    private List<Long> generateCandidates(int count) {
+        List<Long> candidateIds = new ArrayList<>();
+
+        for (int i = 0; i < count; i++) {
+            boolean isMale = random.nextBoolean();
+            String firstName = getRandomItem(isMale ?
+                    firstNames.subList(0, firstNames.size() / 2) :
+                    firstNames.subList(firstNames.size() / 2, firstNames.size()));
+            String lastName = getRandomItem(lastNames);
+            String email = generateEmail(firstName, lastName);
+            String phone = generateMoroccanPhoneNumber();
+
+            // Generate a consistent, simple password for testing
+            // For real candidates we'll use email as password to make testing easier
+            String password = limitLength(email, MAX_VARCHAR_LENGTH);
+
+            // Birthdate (22-45 years old)
+            int age = 22 + random.nextInt(24); // 22-45 years old (calculated but not stored)
+            LocalDate birthdate = LocalDate.now().minusYears(age).minusDays(random.nextInt(365));
+
+            String address = "Rue " + (1 + random.nextInt(100)) + ", " + getRandomItem(moroccanCities);
+            String profilePic = "https://example.com/profiles/" + (1 + random.nextInt(100)) + ".jpg";
+            String summary = limitLength(generateProfessionalSummary(firstName), MAX_VARCHAR_LENGTH);
+
+            // Set default status
+            String status = "active";
+
+            // Updated SQL to include password field
+            String sql = "INSERT INTO candidat (first_name, last_name, email, phone, birthdate, " +
+                    "address, profile_picture, summary, password, status) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id";
+
+            Long candidateId = jdbcTemplate.queryForObject(sql, Long.class,
+                    limitLength(firstName, MAX_VARCHAR_LENGTH),
+                    limitLength(lastName, MAX_VARCHAR_LENGTH),
+                    limitLength(email, MAX_VARCHAR_LENGTH),
+                    limitLength(phone, MAX_VARCHAR_LENGTH),
+                    birthdate,
+                    limitLength(address, MAX_VARCHAR_LENGTH),
+                    limitLength(profilePic, MAX_VARCHAR_LENGTH),
+                    limitLength(summary, MAX_VARCHAR_LENGTH),
+                    password,
+                    status);  // Added password and status parameters
+
+            if (candidateId != null) {
+                candidateIds.add(candidateId);
+                // Log the created candidate and password for testing
+                System.out.println("Created candidate: " + email + " with password: " + password);
+
+                // Generate experiences
+                generateExperiencesForCandidate(candidateId);
+
+                // Generate education
+                generateEducationForCandidate(candidateId);
+
+                // Generate skills
+                generateSkillsForCandidate(candidateId);
+
+                // Generate languages
+                generateLanguagesForCandidate(candidateId);
+
+                // Generate professional summary
+                jdbcTemplate.update(
+                        "INSERT INTO professional_summary (summary, candidat_id) VALUES (?, ?)",
+                        limitLength(summary, MAX_VARCHAR_LENGTH), candidateId);
+            }
+        }
+
+        System.out.println("Generated " + candidateIds.size() + " candidates with their profiles");
+        return candidateIds;
+    }
+
+    // Also update the generateAdmins method to log the credentials for testing
     private List<Integer> generateAdmins(int count) {
         List<Integer> adminIds = new ArrayList<>();
 
@@ -232,6 +375,9 @@ public class PostgresDataGenerator {
             String phone = generateMoroccanPhoneNumber();
             int age = 25 + random.nextInt(30); // 25-55 years old
 
+            // Use email as password for consistent testing
+            String password = limitLength(email, MAX_VARCHAR_LENGTH);
+
             String sql = "INSERT INTO admin (nom, prenom, age, email, login, password, telephone) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING admin_id";
 
@@ -241,63 +387,22 @@ public class PostgresDataGenerator {
                     age,
                     limitLength(email, MAX_VARCHAR_LENGTH),
                     limitLength(firstName.toLowerCase() + "." + lastName.toLowerCase(), MAX_VARCHAR_LENGTH),
-                    limitLength(generatePassword(8), MAX_VARCHAR_LENGTH),
+                    password,
                     limitLength(phone, MAX_VARCHAR_LENGTH));
 
             if (adminId != null) {
                 adminIds.add(adminId);
+                // Log the created admin and password for testing
+                System.out.println("Created admin: " + email + " with password: " + password);
             }
         }
 
         System.out.println("Generated " + adminIds.size() + " admins");
         return adminIds;
     }
-
     /**
-     * Generates and inserts recruiter records
+     * Generates and inserts job offers
      */
-    /**
-     * Generates and inserts recruiter records with company associations
-     */
-    private List<Long> generateRecruiters(int count, List<Long> companyIds) {
-        List<Long> recruiterIds = new ArrayList<>();
-
-        // If no companies are provided, create a default list with nulls
-        if (companyIds == null || companyIds.isEmpty()) {
-            for (int i = 0; i < count; i++) {
-                companyIds.add(null);
-            }
-        }
-
-        // Distribute recruiters among available companies
-        for (int i = 0; i < count; i++) {
-            String company = getRandomItem(moroccanCompanies);
-            String sector = getRandomItem(industries);
-
-            // Get company ID - either pick one from the list or null if none available
-            Long companyId = null;
-            if (!companyIds.isEmpty()) {
-                // Assign recruiter to a random company from the list
-                companyId = companyIds.get(i % companyIds.size());
-            }
-
-            String sql = "INSERT INTO recruteur (nom_entreprise, secteur, offres_publiees, company_id) " +
-                    "VALUES (?, ?, '0', ?) RETURNING id_recruteur";
-
-            Long recruiterId = jdbcTemplate.queryForObject(sql, Long.class,
-                    limitLength(company, MAX_VARCHAR_LENGTH),
-                    limitLength(sector, MAX_VARCHAR_LENGTH),
-                    companyId);
-
-            if (recruiterId != null) {
-                recruiterIds.add(recruiterId);
-            }
-        }
-
-        System.out.println("Generated " + recruiterIds.size() + " recruiters associated with companies");
-        return recruiterIds;
-    }
-
     /**
      * Generates and inserts job offers
      */
@@ -306,12 +411,31 @@ public class PostgresDataGenerator {
 
         for (Long recruiterId : recruiterIds) {
             // Get recruiter details
-            Map<String, Object> recruiter = jdbcTemplate.queryForMap(
-                    "SELECT nom_entreprise, secteur FROM recruteur WHERE id_recruteur = ?",
+            Map<String, Object> recruiterMap = jdbcTemplate.queryForMap(
+                    "SELECT id_recruteur, nom, prenom FROM recruteur WHERE id_recruteur = ?",
                     recruiterId);
 
-            String companyName = (String) recruiter.get("nom_entreprise");
-            String industry = (String) recruiter.get("secteur");
+            // Get company details if recruiter is associated with a company
+            Long companyId = jdbcTemplate.queryForObject(
+                    "SELECT company_id FROM recruteur WHERE id_recruteur = ?",
+                    Long.class, recruiterId);
+
+            String companyName = "Entreprise inconnue";
+            String industry = "Secteur non spécifié";
+
+            if (companyId != null) {
+                try {
+                    Map<String, Object> companyMap = jdbcTemplate.queryForMap(
+                            "SELECT company_name, sector FROM companies WHERE id = ?",
+                            companyId);
+
+                    companyName = (String) companyMap.get("company_name");
+                    industry = (String) companyMap.get("sector");
+                } catch (Exception e) {
+                    // If company doesn't exist, use default values
+                    System.out.println("Warning: Company with ID " + companyId + " not found. Using default values.");
+                }
+            }
 
             for (int i = 0; i < offersPerRecruiter; i++) {
                 String title = getRandomItem(jobTitles);
@@ -386,81 +510,21 @@ public class PostgresDataGenerator {
                 }
             }
 
-            // Update offres_publiees count
+            // Update recruteur with the count of offers
             jdbcTemplate.update(
                     "UPDATE recruteur SET offres_publiees = ? WHERE id_recruteur = ?",
-                    String.valueOf(offersPerRecruiter), recruiterId);
+                    offersPerRecruiter, recruiterId);
         }
 
         System.out.println("Generated " + offerIds.size() + " job offers");
         return offerIds;
     }
-
     // Additional methods implementation...
 
     /**
      * Generates candidate records with related entities
      */
-    private List<Long> generateCandidates(int count) {
-        List<Long> candidateIds = new ArrayList<>();
-
-        for (int i = 0; i < count; i++) {
-            boolean isMale = random.nextBoolean();
-            String firstName = getRandomItem(isMale ?
-                    firstNames.subList(0, firstNames.size() / 2) :
-                    firstNames.subList(firstNames.size() / 2, firstNames.size()));
-            String lastName = getRandomItem(lastNames);
-            String email = generateEmail(firstName, lastName);
-            String phone = generateMoroccanPhoneNumber();
-
-            // Birthdate (22-45 years old)
-            int age = 22 + random.nextInt(24); // 22-45 years old (calculated but not stored)
-            LocalDate birthdate = LocalDate.now().minusYears(age).minusDays(random.nextInt(365));
-
-            String address = "Rue " + (1 + random.nextInt(100)) + ", " + getRandomItem(moroccanCities);
-            String profilePic = "https://example.com/profiles/" + (1 + random.nextInt(100)) + ".jpg";
-            String summary = limitLength(generateProfessionalSummary(firstName), MAX_VARCHAR_LENGTH);
-
-            // Updated SQL to match the actual database schema (without age field)
-            String sql = "INSERT INTO candidat (first_name, last_name, email, phone, birthdate, " +
-                    "address, profile_picture, summary) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id";
-
-            Long candidateId = jdbcTemplate.queryForObject(sql, Long.class,
-                    limitLength(firstName, MAX_VARCHAR_LENGTH),
-                    limitLength(lastName, MAX_VARCHAR_LENGTH),
-                    limitLength(email, MAX_VARCHAR_LENGTH),
-                    limitLength(phone, MAX_VARCHAR_LENGTH),
-                    birthdate,
-                    limitLength(address, MAX_VARCHAR_LENGTH),
-                    limitLength(profilePic, MAX_VARCHAR_LENGTH),
-                    limitLength(summary, MAX_VARCHAR_LENGTH));
-
-            if (candidateId != null) {
-                candidateIds.add(candidateId);
-
-                // Generate experiences
-                generateExperiencesForCandidate(candidateId);
-
-                // Generate education
-                generateEducationForCandidate(candidateId);
-
-                // Generate skills
-                generateSkillsForCandidate(candidateId);
-
-                // Generate languages
-                generateLanguagesForCandidate(candidateId);
-
-                // Generate professional summary
-                jdbcTemplate.update(
-                        "INSERT INTO professional_summary (summary, candidat_id) VALUES (?, ?)",
-                        limitLength(summary, MAX_VARCHAR_LENGTH), candidateId);
-            }
-        }
-
-        System.out.println("Generated " + candidateIds.size() + " candidates with their profiles");
-        return candidateIds;
-    }
+// Modify the generateCandidates method to include password generation
 
     /**
      * Helper method to limit string length for VARCHAR fields

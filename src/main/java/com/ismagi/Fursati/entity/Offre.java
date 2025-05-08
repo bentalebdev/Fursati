@@ -1,5 +1,6 @@
 package com.ismagi.Fursati.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -35,8 +36,11 @@ public class Offre {
     private Long views = 0L; // Default views count
 
     // Relation avec Recruteur - le recruteur possède la référence à Company
+    // Offre.java
+// Ajoutez cette annotation pour la relation avec le recruteur
     @ManyToOne
     @JoinColumn(name = "recruteur_id")
+    @JsonBackReference("recruteur-offres") // Utiliser le même label que dans Recruteur
     private Recruteur recruteur;
 
     @ElementCollection

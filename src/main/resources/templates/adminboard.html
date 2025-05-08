@@ -666,7 +666,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#logout">
+                <a class="nav-link" href="/logout">
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Déconnexion</span>
                 </a>
@@ -1643,6 +1643,12 @@
             <div class="content-panel active">
                 <h2 class="mb-4">Gestion des candidatures</h2>
                 <div th:replace="~{fragments/admin/applications :: applications}"></div>
+            </div>
+        </th:block>
+        <th:block th:if="${activeTab == 'recruiters'}">
+            <div class="content-panel active">
+                <h2 class="mb-4">Gestion des candidatures</h2>
+                <div th:replace="~{fragments/admin/recruiters :: recruiters}"></div>
             </div>
         </th:block>
     </div>
