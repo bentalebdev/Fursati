@@ -16,57 +16,75 @@
             <h5 class="app-card-title">Filtres</h5>
         </div>
         <div class="app-card-body">
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Statut</label>
-                    <select class="form-select">
-                        <option value="">Tous les statuts</option>
-                        <option value="PENDING">En attente</option>
-                        <option value="INTERVIEW">Entretien</option>
-                        <option value="SHORTLISTED">Présélectionné</option>
-                        <option value="REJECTED">Rejeté</option>
-                        <option value="REVIEWED">Examiné</option>
-                    </select>
+            <form id="applicationFilterForm" method="get" action="/admin/applications">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Statut</label>
+                        <select class="form-select" name="status" id="statusFilter">
+                            <option value="">Tous les statuts</option>
+                            <option value="PENDING" th:selected="${status == 'PENDING'}">En attente</option>
+                            <option value="INTERVIEW" th:selected="${status == 'INTERVIEW'}">Entretien</option>
+                            <option value="SHORTLISTED" th:selected="${status == 'SHORTLISTED'}">Présélectionné</option>
+                            <option value="REJECTED" th:selected="${status == 'REJECTED'}">Rejeté</option>
+                            <option value="REVIEWED" th:selected="${status == 'REVIEWED'}">Examiné</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Entreprise</label>
+                        <select class="form-select" name="companyId" id="companyFilter">
+                            <option value="">Toutes les entreprises</option>
+                            <option th:each="company : ${uniqueCompanies}"
+                                    th:if="${company != null}"
+                                    th:value="${company.id}"
+                                    th:text="${company.nomEntreprise}"
+                                    th:selected="${companyId != null && companyId == company.id}">Entreprise</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Date</label>
+                        <select class="form-select" name="dateRange" id="dateRangeFilter">
+                            <option value="">Toutes les dates</option>
+                            <option value="week" th:selected="${dateRange == 'week'}">Cette semaine</option>
+                            <option value="month" th:selected="${dateRange == 'month'}">Ce mois</option>
+                            <option value="quarter" th:selected="${dateRange == 'quarter'}">Ce trimestre</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Entreprise</label>
-                    <select class="form-select">
-                        <option value="">Toutes les entreprises</option>
-                        <option th:each="company : ${uniqueCompanies}"
-                                th:if="${company != null}"
-                                th:value="${company.id}"
-                                th:text="${company.nomEntreprise}">Entreprise</option>
-                    </select>
+                <div class="row">
+                    <div class="col-md-8 mb-3">
+                        <label class="form-label">Recherche</label>
+                        <input type="text" class="form-control" name="search" id="searchFilter"
+                               placeholder="Nom du candidat, poste..." th:value="${search}">
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end justify-content-end mb-3">
+                        <button type="submit" class="btn btn-primary me-2">
+                            <i class="fas fa-filter me-1"></i> Filtrer
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="resetFilters">
+                            <i class="fas fa-times me-1"></i> Réinitialiser
+                        </button>
+                    </div>
                 </div>
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Date</label>
-                    <select class="form-select">
-                        <option value="">Toutes les dates</option>
-                        <option value="week">Cette semaine</option>
-                        <option value="month">Ce mois</option>
-                        <option value="quarter">Ce trimestre</option>
-                    </select>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-8 mb-3">
-                    <label class="form-label">Recherche</label>
-                    <input type="text" class="form-control" placeholder="Nom du candidat, poste...">
-                </div>
-                <div class="col-md-4 d-flex align-items-end justify-content-end mb-3">
-                    <button class="btn btn-primary">
-                        <i class="fas fa-filter me-1"></i> Filtrer
-                    </button>
-                </div>
-            </div>
+            </form>
         </div>
     </div>
 
     <div class="app-card">
         <div class="app-card-header">
             <h5 class="app-card-title">Candidatures</h5>
-            <div>
-                <button class="btn btn-sm btn-outline-secondary me-2">
+            <div class="d-flex">
+                <div class="dropdown me-2">
+                    <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" id="bulkActionsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-cog me-1"></i> Actions groupées
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="bulkActionsDropdown">
+                        <li><a class="dropdown-item bulk-status-update" href="#" data-status="PENDING">Marquer en attente</a></li>
+                        <li><a class="dropdown-item bulk-status-update" href="#" data-status="REVIEWED">Marquer comme examiné</a></li>
+                        <li><a class="dropdown-item bulk-status-update" href="#" data-status="SHORTLISTED">Présélectionner</a></li>
+                        <li><a class="dropdown-item bulk-status-update" href="#" data-status="REJECTED">Rejeter</a></li>
+                    </ul>
+                </div>
+                <button class="btn btn-sm btn-outline-secondary" id="exportApplications">
                     <i class="fas fa-download me-1"></i> Exporter
                 </button>
             </div>
@@ -76,6 +94,11 @@
                 <table class="table table-hover mb-0">
                     <thead>
                     <tr>
+                        <th width="40">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="selectAllApplications">
+                            </div>
+                        </th>
                         <th>Candidat</th>
                         <th>Poste</th>
                         <th>Entreprise</th>
@@ -86,6 +109,11 @@
                     </thead>
                     <tbody>
                     <tr th:each="demande : ${applications}">
+                        <td>
+                            <div class="form-check">
+                                <input class="form-check-input application-checkbox" type="checkbox" th:value="${demande.idDemande}">
+                            </div>
+                        </td>
                         <td>
                             <div class="d-flex align-items-center">
                                 <div class="avatar avatar-sm me-2 bg-primary rounded"
@@ -121,31 +149,41 @@
                                             <i class="fas fa-file-alt me-1"></i> Voir CV
                                         </a>
                                     </li>
-                                    <li><a class="dropdown-item" href="#"><i class="fas fa-envelope me-1"></i> Contacter</a></li>
+                                    <li><a class="dropdown-item contact-candidate" href="#" th:data-id="${demande.idDemande}" th:data-email="${demande.candidat != null ? demande.candidat.email : ''}"><i class="fas fa-envelope me-1"></i> Contacter</a></li>
+                                    <li th:if="${demande.etat == 'INTERVIEW' || demande.etat == 'SHORTLISTED'}">
+                                        <a class="dropdown-item schedule-interview" href="#" th:data-id="${demande.idDemande}">
+                                            <i class="fas fa-calendar-alt me-1"></i> Gérer l'entretien
+                                        </a>
+                                    </li>
                                     <li><hr class="dropdown-divider"></li>
                                     <!-- Status update options -->
                                     <li th:if="${demande.etat != 'PENDING'}">
-                                        <a class="dropdown-item text-secondary" th:href="@{/admin/applications/{id}/update-status(id=${demande.idDemande},status='PENDING')}">
+                                        <a class="dropdown-item text-secondary status-update" href="#"
+                                           th:data-id="${demande.idDemande}" data-status="PENDING">
                                             <i class="fas fa-clock me-1"></i> Marquer en attente
                                         </a>
                                     </li>
                                     <li th:if="${demande.etat != 'INTERVIEW'}">
-                                        <a class="dropdown-item text-primary" th:href="@{/admin/applications/{id}/update-status(id=${demande.idDemande},status='INTERVIEW')}">
+                                        <a class="dropdown-item text-primary status-update" href="#"
+                                           th:data-id="${demande.idDemande}" data-status="INTERVIEW">
                                             <i class="fas fa-users me-1"></i> Fixer un entretien
                                         </a>
                                     </li>
                                     <li th:if="${demande.etat != 'SHORTLISTED'}">
-                                        <a class="dropdown-item text-info" th:href="@{/admin/applications/{id}/update-status(id=${demande.idDemande},status='SHORTLISTED')}">
+                                        <a class="dropdown-item text-info status-update" href="#"
+                                           th:data-id="${demande.idDemande}" data-status="SHORTLISTED">
                                             <i class="fas fa-star me-1"></i> Présélectionner
                                         </a>
                                     </li>
                                     <li th:if="${demande.etat != 'REVIEWED'}">
-                                        <a class="dropdown-item text-warning" th:href="@{/admin/applications/{id}/update-status(id=${demande.idDemande},status='REVIEWED')}">
+                                        <a class="dropdown-item text-warning status-update" href="#"
+                                           th:data-id="${demande.idDemande}" data-status="REVIEWED">
                                             <i class="fas fa-search me-1"></i> Marquer comme examiné
                                         </a>
                                     </li>
                                     <li th:if="${demande.etat != 'REJECTED'}">
-                                        <a class="dropdown-item text-danger" th:href="@{/admin/applications/{id}/update-status(id=${demande.idDemande},status='REJECTED')}">
+                                        <a class="dropdown-item text-danger status-update" href="#"
+                                           th:data-id="${demande.idDemande}" data-status="REJECTED">
                                             <i class="fas fa-times-circle me-1"></i> Rejeter
                                         </a>
                                     </li>
@@ -154,7 +192,7 @@
                         </td>
                     </tr>
                     <tr th:if="${applications.empty}">
-                        <td colspan="6" class="text-center py-4">Aucune candidature trouvée</td>
+                        <td colspan="7" class="text-center py-4">Aucune candidature trouvée</td>
                     </tr>
                     </tbody>
                 </table>
@@ -170,11 +208,15 @@
                 </div>
                 <nav th:if="${applications.size() > 5}">
                     <ul class="pagination pagination-sm mb-0">
-                        <li class="page-item disabled"><a class="page-link" href="#">Précédent</a></li>
-                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item"><a class="page-link" href="#">Suivant</a></li>
+                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
+                            <a class="page-link" th:href="@{/admin/applications(page=${currentPage - 1}, size=${pageSize}, search=${search}, status=${status}, companyId=${companyId}, dateRange=${dateRange})}">Précédent</a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${currentPage == i} ? 'active' : ''">
+                            <a class="page-link" th:href="@{/admin/applications(page=${i}, size=${pageSize}, search=${search}, status=${status}, companyId=${companyId}, dateRange=${dateRange})}" th:text="${i + 1}"></a>
+                        </li>
+                        <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled' : ''">
+                            <a class="page-link" th:href="@{/admin/applications(page=${currentPage + 1}, size=${pageSize}, search=${search}, status=${status}, companyId=${companyId}, dateRange=${dateRange})}">Suivant</a>
+                        </li>
                     </ul>
                 </nav>
             </div>
@@ -189,7 +231,7 @@
                     <i class="fas fa-file-alt"></i>
                 </div>
                 <div class="stats-info">
-                    <h3 class="stats-value" th:text="${applications.size()}">120</h3>
+                    <h3 class="stats-value" th:text="${totalCount}">120</h3>
                     <p class="stats-label">Candidatures totales</p>
                 </div>
             </div>
@@ -228,4 +270,534 @@
             </div>
         </div>
     </div>
+
+    <!-- Modals for actions -->
+    <!-- Interview Scheduling Modal -->
+    <div class="modal fade" id="interviewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Planifier un entretien</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="interviewForm">
+                        <input type="hidden" id="interviewApplicationId" name="id">
+                        <div class="mb-3">
+                            <label for="interviewDate" class="form-label">Date</label>
+                            <input type="date" class="form-control" id="interviewDate" name="date" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="interviewTime" class="form-label">Heure</label>
+                            <input type="time" class="form-control" id="interviewTime" name="time" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="interviewType" class="form-label">Type d'entretien</label>
+                            <select class="form-select" id="interviewType" name="type" required>
+                                <option value="VIDEO">Visioconférence</option>
+                                <option value="PHONE">Téléphonique</option>
+                                <option value="IN_PERSON">En personne</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="interviewLocation" class="form-label">Lieu / Lien</label>
+                            <input type="text" class="form-control" id="interviewLocation" name="location">
+                        </div>
+                        <div class="mb-3">
+                            <label for="interviewNotes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="interviewNotes" name="notes" rows="3"></textarea>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="sendNotification" name="sendEmail" checked>
+                            <label class="form-check-label" for="sendNotification">
+                                Envoyer une notification au candidat
+                            </label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" id="saveInterviewBtn">Enregistrer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Candidate Modal -->
+    <div class="modal fade" id="contactModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Contacter le candidat</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="contactForm">
+                        <input type="hidden" id="contactApplicationId" name="id">
+                        <div class="mb-3">
+                            <label for="contactEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="contactEmail" name="email" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="contactSubject" class="form-label">Sujet</label>
+                            <input type="text" class="form-control" id="contactSubject" name="subject" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="contactMessage" class="form-label">Message</label>
+                            <textarea class="form-control" id="contactMessage" name="message" rows="5" required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" id="sendEmailBtn">Envoyer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Change Confirmation Modal -->
+    <div class="modal fade" id="statusChangeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmer le changement de statut</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="statusChangeForm">
+                        <input type="hidden" id="statusChangeApplicationId" name="id">
+                        <input type="hidden" id="newStatus" name="status">
+
+                        <p id="statusChangeConfirmText">Êtes-vous sûr de vouloir changer le statut de cette candidature ?</p>
+
+                        <div class="mb-3">
+                            <label for="statusReason" class="form-label">Raison (optionnel)</label>
+                            <textarea class="form-control" id="statusReason" name="reason" rows="2"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="statusComment" class="form-label">Commentaire (optionnel)</label>
+                            <textarea class="form-control" id="statusComment" name="comment" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="statusSendNotification" name="sendEmail" checked>
+                            <label class="form-check-label" for="statusSendNotification">
+                                Notifier le candidat par email
+                            </label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" id="confirmStatusChangeBtn">Confirmer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Status Change Modal -->
+    <div class="modal fade" id="bulkStatusModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Mise à jour groupée de statut</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="bulkStatusForm">
+                        <input type="hidden" id="bulkStatus" name="status">
+
+                        <p>Vous allez modifier le statut de <span id="selectedApplicationsCount">0</span> candidatures.</p>
+
+                        <div class="mb-3">
+                            <label for="bulkStatusReason" class="form-label">Raison (optionnel)</label>
+                            <textarea class="form-control" id="bulkStatusReason" name="reason" rows="2"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="bulkStatusComment" class="form-label">Commentaire (optionnel)</label>
+                            <textarea class="form-control" id="bulkStatusComment" name="comment" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="bulkSendNotification" name="sendEmail" checked>
+                            <label class="form-check-label" for="bulkSendNotification">
+                                Notifier les candidats par email
+                            </label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" id="confirmBulkStatusBtn">Confirmer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript to handle client-side interactions -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Filter form handling
+            const filterForm = document.getElementById('applicationFilterForm');
+            const resetFiltersBtn = document.getElementById('resetFilters');
+
+            if (resetFiltersBtn) {
+                resetFiltersBtn.addEventListener('click', function() {
+                    // Clear all form fields
+                    document.getElementById('statusFilter').value = '';
+                    document.getElementById('companyFilter').value = '';
+                    document.getElementById('dateRangeFilter').value = '';
+                    document.getElementById('searchFilter').value = '';
+
+                    // Submit the form
+                    filterForm.submit();
+                });
+            }
+
+            // Export functionality
+            const exportBtn = document.getElementById('exportApplications');
+            if (exportBtn) {
+                exportBtn.addEventListener('click', function() {
+                    // Get current filter parameters
+                    const params = new URLSearchParams(window.location.search);
+                    // Create export URL with same filters
+                    const exportUrl = `/admin/applications/export?${params.toString()}`;
+                    // Trigger download
+                    window.location.href = exportUrl;
+                });
+            }
+
+            // Checkboxes functionality
+            const selectAllCheckbox = document.getElementById('selectAllApplications');
+            const applicationCheckboxes = document.querySelectorAll('.application-checkbox');
+
+            if (selectAllCheckbox) {
+                selectAllCheckbox.addEventListener('change', function() {
+                    applicationCheckboxes.forEach(checkbox => {
+                        checkbox.checked = selectAllCheckbox.checked;
+                    });
+                    updateSelectedCount();
+                });
+            }
+
+            applicationCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', updateSelectedCount);
+            });
+
+            function updateSelectedCount() {
+                const selectedCount = document.querySelectorAll('.application-checkbox:checked').length;
+                const countElement = document.getElementById('selectedApplicationsCount');
+                if (countElement) {
+                    countElement.textContent = selectedCount;
+                }
+            }
+
+            // Individual status update
+            const statusUpdateBtns = document.querySelectorAll('.status-update');
+            const statusChangeModal = new bootstrap.Modal(document.getElementById('statusChangeModal'));
+
+            statusUpdateBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const applicationId = this.getAttribute('data-id');
+                    const status = this.getAttribute('data-status');
+
+                    document.getElementById('statusChangeApplicationId').value = applicationId;
+                    document.getElementById('newStatus').value = status;
+
+                    // Update confirmation text based on status
+                    let statusText = "changer le statut";
+                    switch(status) {
+                        case 'PENDING': statusText = "marquer comme en attente"; break;
+                        case 'INTERVIEW': statusText = "fixer un entretien"; break;
+                        case 'SHORTLISTED': statusText = "présélectionner"; break;
+                        case 'REVIEWED': statusText = "marquer comme examiné"; break;
+                        case 'REJECTED': statusText = "rejeter"; break;
+                    }
+
+                    document.getElementById('statusChangeConfirmText').textContent =
+                        `Êtes-vous sûr de vouloir ${statusText} cette candidature ?`;
+
+                    statusChangeModal.show();
+                });
+            });
+
+            // Confirm status change
+            const confirmStatusChangeBtn = document.getElementById('confirmStatusChangeBtn');
+            if (confirmStatusChangeBtn) {
+                confirmStatusChangeBtn.addEventListener('click', function() {
+                    const applicationId = document.getElementById('statusChangeApplicationId').value;
+                    const newStatus = document.getElementById('newStatus').value;
+                    const reason = document.getElementById('statusReason').value;
+                    const comment = document.getElementById('statusComment').value;
+                    const sendEmail = document.getElementById('statusSendNotification').checked;
+
+                    // Send data to server
+                    fetch(`/admin/applications/${applicationId}/status`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            status: newStatus,
+                            reason: reason,
+                            comment: comment,
+                            sendEmail: sendEmail
+                        })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                window.location.reload();
+                            } else {
+                                alert('Erreur lors de la mise à jour du statut: ' + data.error);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Une erreur est survenue lors de la mise à jour du statut');
+                        });
+
+                    statusChangeModal.hide();
+                });
+            }
+
+            // Bulk status update
+            const bulkStatusBtns = document.querySelectorAll('.bulk-status-update');
+            const bulkStatusModal = new bootstrap.Modal(document.getElementById('bulkStatusModal'));
+
+            bulkStatusBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const status = this.getAttribute('data-status');
+
+                    // Check if any applications are selected
+                    const selectedIds = getSelectedApplicationIds();
+                    if (selectedIds.length === 0) {
+                        alert('Veuillez sélectionner au moins une candidature');
+                        return;
+                    }
+
+                    document.getElementById('bulkStatus').value = status;
+                    document.getElementById('selectedApplicationsCount').textContent = selectedIds.length;
+
+                    bulkStatusModal.show();
+                });
+            });
+
+            // Confirm bulk status change
+            const confirmBulkStatusBtn = document.getElementById('confirmBulkStatusBtn');
+            if (confirmBulkStatusBtn) {
+                confirmBulkStatusBtn.addEventListener('click', function() {
+                    const status = document.getElementById('bulkStatus').value;
+                    const reason = document.getElementById('bulkStatusReason').value;
+                    const comment = document.getElementById('bulkStatusComment').value;
+                    const sendEmail = document.getElementById('bulkSendNotification').checked;
+                    const selectedIds = getSelectedApplicationIds();
+
+                    // Send data to server
+                    fetch('/admin/applications/bulk-status', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            ids: selectedIds,
+                            status: status,
+                            reason: reason,
+                            comment: comment,
+                            sendEmail: sendEmail
+                        })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                window.location.reload();
+                            } else {
+                                alert('Erreur lors de la mise à jour groupée: ' + data.error);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Une erreur est survenue lors de la mise à jour groupée');
+                        });
+
+                    bulkStatusModal.hide();
+                });
+            }
+
+            // Helper function to get selected application IDs
+            function getSelectedApplicationIds() {
+                return Array.from(document.querySelectorAll('.application-checkbox:checked'))
+                    .map(checkbox => checkbox.value);
+            }
+
+            // Contact candidate
+            const contactBtns = document.querySelectorAll('.contact-candidate');
+            const contactModal = new bootstrap.Modal(document.getElementById('contactModal'));
+
+            contactBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const applicationId = this.getAttribute('data-id');
+                    const email = this.getAttribute('data-email');
+
+                    if (!email) {
+                        alert('Email du candidat non disponible');
+                        return;
+                    }
+
+                    document.getElementById('contactApplicationId').value = applicationId;
+                    document.getElementById('contactEmail').value = email;
+
+                    // Set default subject based on application
+                    const row = this.closest('tr');
+                    const jobTitle = row.querySelector('td:nth-child(3)').textContent;
+                    document.getElementById('contactSubject').value = `Votre candidature pour le poste de ${jobTitle}`;
+
+                    contactModal.show();
+                });
+            });
+
+            // Send email
+            const sendEmailBtn = document.getElementById('sendEmailBtn');
+            if (sendEmailBtn) {
+                sendEmailBtn.addEventListener('click', function() {
+                    const form = document.getElementById('contactForm');
+                    if (!form.checkValidity()) {
+                        form.reportValidity();
+                        return;
+                    }
+
+                    const applicationId = document.getElementById('contactApplicationId').value;
+                    const email = document.getElementById('contactEmail').value;
+                    const subject = document.getElementById('contactSubject').value;
+                    const message = document.getElementById('contactMessage').value;
+
+                    // Send data to server
+                    fetch(`/admin/applications/${applicationId}/contact`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            email: email,
+                            subject: subject,
+                            message: message
+                        })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert('Email envoyé avec succès!');
+                                contactModal.hide();
+                            } else {
+                                alert('Erreur lors de l\'envoi de l\'email: ' + data.error);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Une erreur est survenue lors de l\'envoi de l\'email');
+                        });
+                });
+            }
+
+            // Interview scheduling
+            const interviewBtns = document.querySelectorAll('.schedule-interview');
+            const interviewModal = new bootstrap.Modal(document.getElementById('interviewModal'));
+
+            interviewBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const applicationId = this.getAttribute('data-id');
+
+                    document.getElementById('interviewApplicationId').value = applicationId;
+
+                    // Check if there's already an interview scheduled
+                    fetch(`/admin/applications/${applicationId}/interview`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Pre-fill form with existing data
+                                document.getElementById('interviewDate').value = data.date || '';
+                                document.getElementById('interviewTime').value = data.time || '';
+                                document.getElementById('interviewType').value = data.type || 'VIDEO';
+                                document.getElementById('interviewLocation').value = data.location || '';
+                                document.getElementById('interviewNotes').value = data.notes || '';
+                            } else {
+                                // Clear form for new interview
+                                document.getElementById('interviewForm').reset();
+
+                                // Set default date to tomorrow
+                                const tomorrow = new Date();
+                                tomorrow.setDate(tomorrow.getDate() + 1);
+                                const tomorrowStr = tomorrow.toISOString().split('T')[0];
+                                document.getElementById('interviewDate').value = tomorrowStr;
+                            }
+
+                            interviewModal.show();
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            // Just show the modal with empty form
+                            document.getElementById('interviewForm').reset();
+                            interviewModal.show();
+                        });
+                });
+            });
+
+            // Save interview
+            const saveInterviewBtn = document.getElementById('saveInterviewBtn');
+            if (saveInterviewBtn) {
+                saveInterviewBtn.addEventListener('click', function() {
+                    const form = document.getElementById('interviewForm');
+                    if (!form.checkValidity()) {
+                        form.reportValidity();
+                        return;
+                    }
+
+                    const applicationId = document.getElementById('interviewApplicationId').value;
+                    const date = document.getElementById('interviewDate').value;
+                    const time = document.getElementById('interviewTime').value;
+                    const type = document.getElementById('interviewType').value;
+                    const location = document.getElementById('interviewLocation').value;
+                    const notes = document.getElementById('interviewNotes').value;
+                    const sendNotification = document.getElementById('sendNotification').checked;
+
+                    // Send data to server
+                    fetch(`/admin/applications/${applicationId}/interview`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            date: date,
+                            time: time,
+                            type: type,
+                            location: location,
+                            notes: notes,
+                            sendEmail: sendNotification
+                        })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                window.location.reload();
+                            } else {
+                                alert('Erreur lors de la planification de l\'entretien: ' + data.error);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Une erreur est survenue lors de la planification de l\'entretien');
+                        });
+
+                    interviewModal.hide();
+                });
+            }
+        });
+    </script>
 </div>

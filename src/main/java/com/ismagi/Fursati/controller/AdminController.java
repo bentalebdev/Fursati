@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
@@ -738,32 +739,47 @@ public class AdminController {
 
         return "adminboard";
     }
+    /**
+     * Méthodes pour la gestion des demandes (candidatures)
+     */
+
     @GetMapping("/applications")
-    public String showAdminApplications(Model model) {
+    public String showAdminApplications(Model model,
+                                        @RequestParam(required = false) String search,
+                                        @RequestParam(required = false) String status,
+                                        @RequestParam(required = false) Long companyId,
+                                        @RequestParam(required = false) String dateRange,
+                                        @RequestParam(required = false, defaultValue = "0") int page,
+                                        @RequestParam(required = false, defaultValue = "10") int size) {
+
+        // Récupérer toutes les demandes
         List<Demande> demandes = demandeService.getAllDemandes();
 
-        // Set the applications list
-        model.addAttribute("applications", demandes);
+        // Appliquer les filtres
+        demandes = filterApplications(demandes, search, status, companyId, dateRange);
 
-        // Calculate and add counts for each status based on English values in database
+        // Calculer les statistiques
         long pendingCount = demandes.stream().filter(d -> "PENDING".equals(d.getEtat())).count();
         long interviewCount = demandes.stream().filter(d -> "INTERVIEW".equals(d.getEtat())).count();
         long shortlistedCount = demandes.stream().filter(d -> "SHORTLISTED".equals(d.getEtat())).count();
         long rejectedCount = demandes.stream().filter(d -> "REJECTED".equals(d.getEtat())).count();
         long reviewedCount = demandes.stream().filter(d -> "REVIEWED".equals(d.getEtat())).count();
 
-        // Add the counts to the model
-        model.addAttribute("pendingCount", pendingCount);
-        model.addAttribute("inProgressCount", interviewCount + reviewedCount); // Combine interview and reviewed for "In Progress"
-        model.addAttribute("selectedCount", shortlistedCount); // SHORTLISTED is mapped to "Sélectionnés"
-        model.addAttribute("rejectedCount", rejectedCount);
-        model.addAttribute("reviewedCount", reviewedCount);
-        model.addAttribute("interviewCount", interviewCount);
+        // Pagination (simple)
+        int totalApplications = demandes.size();
+        int totalPages = (int) Math.ceil((double) totalApplications / size);
 
-        // Add total count for convenience
-        model.addAttribute("totalCount", demandes.size());
+        // S'assurer que la page est dans les limites
+        if (page < 0) page = 0;
+        if (page >= totalPages && totalPages > 0) page = totalPages - 1;
 
-        // Extract unique companies for the filter (in a safe way)
+        // Sous-ensemble des demandes pour la page actuelle
+        int start = page * size;
+        int end = Math.min(start + size, totalApplications);
+
+        List<Demande> pagedDemandes = start < totalApplications ? demandes.subList(start, end) : new ArrayList<>();
+
+        // Extraire les entreprises uniques pour le filtre
         Set<Company> uniqueCompanies = new HashSet<>();
         for (Demande demande : demandes) {
             if (demande.getOffre() != null &&
@@ -772,12 +788,307 @@ public class AdminController {
                 uniqueCompanies.add(demande.getOffre().getRecruteur().getCompany());
             }
         }
-        model.addAttribute("uniqueCompanies", uniqueCompanies);
 
-        // Set the active tab
+        // Ajouter les données au modèle
+        model.addAttribute("applications", pagedDemandes);
+        model.addAttribute("uniqueCompanies", uniqueCompanies);
+        model.addAttribute("totalCount", totalApplications);
+        model.addAttribute("inProgressCount", interviewCount + reviewedCount);
+        model.addAttribute("selectedCount", shortlistedCount);
+        model.addAttribute("rejectedCount", rejectedCount);
+        model.addAttribute("reviewedCount", reviewedCount);
+        model.addAttribute("interviewCount", interviewCount);
+        model.addAttribute("pendingCount", pendingCount);
+
+        // Ajouter les informations de pagination
+        model.addAttribute("currentPage", page);
+        model.addAttribute("pageSize", size);
+        model.addAttribute("totalPages", totalPages);
+
+        // Ajouter les paramètres de filtre pour la pagination
+        model.addAttribute("search", search);
+        model.addAttribute("status", status);
+        model.addAttribute("companyId", companyId);
+        model.addAttribute("dateRange", dateRange);
+
+        // Définir l'onglet actif
         model.addAttribute("activeTab", "applications");
 
         return "adminboard";
+    }
+
+    /**
+     * Méthode pour mettre à jour le statut d'une candidature (API REST)
+     */
+    @PutMapping("/applications/{id}/status")
+    @ResponseBody
+    public Map<String, Object> updateApplicationStatus(@PathVariable Long id,
+                                                       @RequestBody DemandeController.StatusUpdateRequest request) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            Demande demande = demandeService.updateDemandeStatus(id, request.getStatus());
+
+            // Si besoin d'envoyer un email
+            if (request.isSendEmail() && demande.getCandidat() != null &&
+                    demande.getCandidat().getEmail() != null && !demande.getCandidat().getEmail().isEmpty()) {
+
+                // Ici, on simulerait l'envoi d'un email
+                // Pour un projet réel, intégrer un service d'email
+                System.out.println("Simuler l'envoi d'un email à " + demande.getCandidat().getEmail() +
+                        " concernant le changement de statut de la candidature " + id +
+                        " vers " + request.getStatus());
+            }
+
+            response.put("success", true);
+
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("error", e.getMessage());
+        }
+
+        return response;
+    }
+
+    /**
+     * Méthode pour mettre à jour le statut de plusieurs candidatures en masse
+     */
+    @PutMapping("/applications/bulk-status")
+    @ResponseBody
+    public Map<String, Object> bulkUpdateStatus(@RequestBody DemandeController.BulkStatusUpdateRequest request) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            int updatedCount = 0;
+            List<Long> ids = request.getIds();
+
+            if (ids == null || ids.isEmpty()) {
+                response.put("success", false);
+                response.put("error", "Aucune candidature sélectionnée");
+                return response;
+            }
+
+            for (Long id : ids) {
+                try {
+                    Demande demande = demandeService.updateDemandeStatus(id, request.getStatus());
+                    updatedCount++;
+
+                    // Si besoin d'envoyer un email
+                    if (request.isSendEmail() && demande.getCandidat() != null &&
+                            demande.getCandidat().getEmail() != null && !demande.getCandidat().getEmail().isEmpty()) {
+
+                        // Ici, on simulerait l'envoi d'un email
+                        System.out.println("Simuler l'envoi d'un email à " + demande.getCandidat().getEmail() +
+                                " concernant le changement de statut de la candidature " + id +
+                                " vers " + request.getStatus());
+                    }
+                } catch (Exception e) {
+                    // Continuer avec les autres candidatures même si une échoue
+                    System.err.println("Erreur lors de la mise à jour de la candidature " + id + ": " + e.getMessage());
+                }
+            }
+
+            response.put("success", true);
+            response.put("updatedCount", updatedCount);
+
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("error", e.getMessage());
+        }
+
+        return response;
+    }
+
+    /**
+     * Méthode pour contacter un candidat
+     */
+    @PostMapping("/applications/{id}/contact")
+    @ResponseBody
+    public Map<String, Object> contactCandidate(@PathVariable Long id, @RequestBody Map<String, String> request) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            String email = request.get("email");
+            String subject = request.get("subject");
+            String message = request.get("message");
+
+            if (email == null || email.isEmpty() || subject == null || subject.isEmpty() ||
+                    message == null || message.isEmpty()) {
+                response.put("success", false);
+                response.put("error", "Email, sujet et message sont requis");
+                return response;
+            }
+
+            // Ici, on simulerait l'envoi d'un email
+            // Pour un projet réel, intégrer un service d'email
+            System.out.println("Simuler l'envoi d'un email à " + email +
+                    " avec le sujet: " + subject +
+                    " et le message: " + message);
+
+            response.put("success", true);
+
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("error", e.getMessage());
+        }
+
+        return response;
+    }
+
+    /**
+     * Méthode pour récupérer les détails d'un entretien
+     */
+
+
+    /**
+     * Méthode pour exporter les candidatures en CSV
+     */
+    @GetMapping("/applications/export")
+    public void exportApplications(HttpServletResponse response,
+                                   @RequestParam(required = false) String search,
+                                   @RequestParam(required = false) String status,
+                                   @RequestParam(required = false) Long companyId,
+                                   @RequestParam(required = false) String dateRange) throws IOException {
+
+        response.setContentType("text/csv");
+        response.setHeader("Content-Disposition", "attachment; filename=\"candidatures.csv\"");
+
+        // Récupérer toutes les candidatures
+        List<Demande> demandes = demandeService.getAllDemandes();
+
+        // Appliquer les filtres
+        demandes = filterApplications(demandes, search, status, companyId, dateRange);
+
+        // Définir les en-têtes CSV
+        String[] headers = {
+                "ID", "Candidat", "Email", "Poste", "Entreprise", "Date de candidature", "Statut"
+        };
+
+        try (CSVPrinter csvPrinter = new CSVPrinter(response.getWriter(), CSVFormat.DEFAULT.withHeader(headers))) {
+            for (Demande demande : demandes) {
+                String candidatName = demande.getCandidat() != null ?
+                        demande.getCandidat().getFirstName() + " " + demande.getCandidat().getLastName() : "N/A";
+
+                String candidatEmail = demande.getCandidat() != null ?
+                        demande.getCandidat().getEmail() : "N/A";
+
+                String poste = demande.getOffre() != null ?
+                        demande.getOffre().getTitle() : "N/A";
+
+                String entreprise = demande.getOffre() != null && demande.getOffre().getCompanyName() != null ?
+                        demande.getOffre().getCompanyName() : "N/A";
+
+                String dateDemande = demande.getDateDemande() != null ?
+                        new SimpleDateFormat("dd/MM/yyyy").format(demande.getDateDemande()) : "N/A";
+
+                // Traduire le statut en français
+                String statut;
+                switch(demande.getEtat()) {
+                    case "PENDING": statut = "En attente"; break;
+                    case "INTERVIEW": statut = "Entretien"; break;
+                    case "SHORTLISTED": statut = "Présélectionné"; break;
+                    case "REJECTED": statut = "Rejeté"; break;
+                    case "REVIEWED": statut = "Examiné"; break;
+                    default: statut = demande.getEtat();
+                }
+
+                csvPrinter.printRecord(
+                        demande.getIdDemande(),
+                        candidatName,
+                        candidatEmail,
+                        poste,
+                        entreprise,
+                        dateDemande,
+                        statut
+                );
+            }
+        }
+    }
+
+    /**
+     * Méthode utilitaire pour filtrer les candidatures
+     */
+    private List<Demande> filterApplications(List<Demande> demandes, String search, String status,
+                                             Long companyId, String dateRange) {
+
+        List<Demande> filteredDemandes = new ArrayList<>(demandes);
+
+        // Filtre par recherche (nom du candidat, poste)
+        if (search != null && !search.trim().isEmpty()) {
+            String searchLower = search.toLowerCase();
+            filteredDemandes = filteredDemandes.stream()
+                    .filter(d -> {
+                        // Recherche sur le nom du candidat
+                        boolean matchCandidat = d.getCandidat() != null &&
+                                ((d.getCandidat().getFirstName() != null &&
+                                        d.getCandidat().getFirstName().toLowerCase().contains(searchLower)) ||
+                                        (d.getCandidat().getLastName() != null &&
+                                                d.getCandidat().getLastName().toLowerCase().contains(searchLower)));
+
+                        // Recherche sur le titre du poste
+                        boolean matchPoste = d.getOffre() != null &&
+                                d.getOffre().getTitle() != null &&
+                                d.getOffre().getTitle().toLowerCase().contains(searchLower);
+
+                        return matchCandidat || matchPoste;
+                    })
+                    .collect(Collectors.toList());
+        }
+
+        // Filtre par statut
+        if (status != null && !status.trim().isEmpty()) {
+            filteredDemandes = filteredDemandes.stream()
+                    .filter(d -> d.getEtat() != null && d.getEtat().equals(status))
+                    .collect(Collectors.toList());
+        }
+
+        // Filtre par entreprise
+        if (companyId != null) {
+            filteredDemandes = filteredDemandes.stream()
+                    .filter(d -> d.getOffre() != null &&
+                            d.getOffre().getRecruteur() != null &&
+                            d.getOffre().getRecruteur().getCompany() != null &&
+                            d.getOffre().getRecruteur().getCompany().getId().equals(companyId))
+                    .collect(Collectors.toList());
+        }
+
+        // Filtre par date
+        if (dateRange != null && !dateRange.trim().isEmpty()) {
+            Date now = new Date();
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(now);
+
+            Date startDate;
+
+            switch (dateRange) {
+                case "week":
+                    // Cette semaine (7 derniers jours)
+                    cal.add(Calendar.DAY_OF_MONTH, -7);
+                    startDate = cal.getTime();
+                    break;
+                case "month":
+                    // Ce mois (30 derniers jours)
+                    cal.add(Calendar.DAY_OF_MONTH, -30);
+                    startDate = cal.getTime();
+                    break;
+                case "quarter":
+                    // Ce trimestre (90 derniers jours)
+                    cal.add(Calendar.DAY_OF_MONTH, -90);
+                    startDate = cal.getTime();
+                    break;
+                default:
+                    startDate = null;
+            }
+
+            if (startDate != null) {
+                final Date finalStartDate = startDate;
+                filteredDemandes = filteredDemandes.stream()
+                        .filter(d -> d.getDateDemande() != null && d.getDateDemande().after(finalStartDate))
+                        .collect(Collectors.toList());
+            }
+        }
+
+        return filteredDemandes;
     }
 
     @GetMapping("/applications/{id}/update-status")
@@ -982,7 +1293,6 @@ public class AdminController {
             }
         }
     }
-
 
 
 
