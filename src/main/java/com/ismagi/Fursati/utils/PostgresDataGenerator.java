@@ -682,11 +682,12 @@ public class PostgresDataGenerator {
             String twitterUrl = "https://twitter.com/" + companyName.toLowerCase().replaceAll("\\s+", "");
             String facebookUrl = "https://www.facebook.com/" + companyName.toLowerCase().replaceAll("\\s+", "");
             String instagramUrl = "https://www.instagram.com/" + companyName.toLowerCase().replaceAll("\\s+", "");
+            boolean isVerified = random.nextBoolean(); // Randomly set verification status
 
             String sql = "INSERT INTO companies (company_name, sector, website, contact_email, description, " +
                     "founding_year, company_size, address, city, country, postal_code, phone, " +
-                    "business_registration_number, logo_url, linkedin_url, twitter_url, facebook_url, instagram_url) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id";
+                    "business_registration_number, logo_url, linkedin_url, twitter_url, facebook_url, instagram_url, is_verified) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id";
 
             Long companyId = jdbcTemplate.queryForObject(sql, Long.class,
                     limitLength(companyName, MAX_VARCHAR_LENGTH),
@@ -706,7 +707,8 @@ public class PostgresDataGenerator {
                     limitLength(linkedinUrl, MAX_VARCHAR_LENGTH),
                     limitLength(twitterUrl, MAX_VARCHAR_LENGTH),
                     limitLength(facebookUrl, MAX_VARCHAR_LENGTH),
-                    limitLength(instagramUrl, MAX_VARCHAR_LENGTH));
+                    limitLength(instagramUrl, MAX_VARCHAR_LENGTH),
+                    isVerified);
 
             if (companyId != null) {
                 companyIds.add(companyId);
@@ -716,6 +718,46 @@ public class PostgresDataGenerator {
         System.out.println("Generated " + companyIds.size() + " companies");
         return companyIds;
     }
+
+    /**
+     * Update existing companies to set default values for the isVerified field
+     * This method should be called before adding NOT NULL constraint
+     */
+    @Transactional
+    public void updateExistingCompanies() {
+        try {
+            // Check if companies table exists
+            boolean tableExists = jdbcTemplate.queryForObject(
+                    "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'companies')",
+                    Boolean.class);
+
+            if (!tableExists) {
+                System.out.println("Companies table does not exist yet, no need to update existing records.");
+                return;
+            }
+
+            // Check if is_verified column exists
+            boolean columnExists = jdbcTemplate.queryForObject(
+                    "SELECT EXISTS (SELECT FROM information_schema.columns WHERE table_name = 'companies' AND column_name = 'is_verified')",
+                    Boolean.class);
+
+            if (!columnExists) {
+                System.out.println("Column is_verified does not exist yet, will be added by Hibernate.");
+                return;
+            }
+
+            // Update all existing records where is_verified is null
+            int updatedCount = jdbcTemplate.update(
+                    "UPDATE companies SET is_verified = false WHERE is_verified IS NULL"
+            );
+
+            System.out.println("Updated " + updatedCount + " existing company records to set default verification status");
+        } catch (Exception e) {
+            System.err.println("Failed to update existing companies: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     @Transactional
     public void generateTestData(int adminCount, int recruiterCount, int candidateCount,
                                  int offersPerRecruiter, int companyCount, boolean clearExistingData) {

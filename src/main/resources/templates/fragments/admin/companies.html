@@ -4,59 +4,53 @@
       <h5 class="app-card-title">Filtres</h5>
     </div>
     <div class="app-card-body">
-      <div class="row">
-        <div class="col-md-3 mb-3">
-          <label class="form-label">Statut de vérification</label>
-          <select class="form-select">
-            <option value="">Tous les statuts</option>
-            <option value="verified">Vérifiée</option>
-            <option value="pending">En attente</option>
-            <option value="rejected">Rejetée</option>
-          </select>
+      <form id="companyFilterForm" method="get" action="/admin/companies">
+        <div class="row">
+          <div class="col-md-3 mb-3">
+            <label class="form-label">Statut de vérification</label>
+            <select class="form-select" name="verificationStatus" id="verificationStatus">
+              <option value="">Tous les statuts</option>
+              <option value="true">Vérifiée</option>
+              <option value="false">Non vérifiée</option>
+            </select>
+          </div>
+          <div class="col-md-3 mb-3">
+            <label class="form-label">Secteur d'activité</label>
+            <select class="form-select" name="sector" id="sector">
+              <option value="">Tous les secteurs</option>
+              <option th:each="sector : ${sectors}" th:value="${sector}" th:text="${sector}"></option>
+            </select>
+          </div>
+          <div class="col-md-3 mb-3">
+            <label class="form-label">Ville</label>
+            <select class="form-select" name="city" id="city">
+              <option value="">Toutes les villes</option>
+              <option th:each="city : ${cities}" th:value="${city}" th:text="${city}"></option>
+            </select>
+          </div>
+          <div class="col-md-3 mb-3">
+            <label class="form-label">Taille</label>
+            <select class="form-select" name="companySize" id="companySize">
+              <option value="">Toutes les tailles</option>
+              <option value="1-50">1-50 employés</option>
+              <option value="51-200">51-200 employés</option>
+              <option value="201-500">201-500 employés</option>
+              <option value="501-1000">501-1000 employés</option>
+              <option value="1000+">1000+ employés</option>
+            </select>
+          </div>
         </div>
-        <div class="col-md-3 mb-3">
-          <label class="form-label">Secteur d'activité</label>
-          <select class="form-select">
-            <option value="">Tous les secteurs</option>
-            <option value="it">Informatique & Technologie</option>
-            <option value="finance">Finance & Banque</option>
-            <option value="healthcare">Santé</option>
-            <option value="tourism">Tourisme & Hôtellerie</option>
-          </select>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Recherche</label>
+            <input type="text" class="form-control" name="search" id="search" placeholder="Nom de l'entreprise, numéro RC...">
+          </div>
+          <div class="col-md-6 d-flex align-items-end justify-content-end mb-3">
+            <button type="submit" class="btn btn-primary me-2">Appliquer les filtres</button>
+            <button type="reset" class="btn btn-outline-secondary" id="resetFilters">Réinitialiser</button>
+          </div>
         </div>
-        <div class="col-md-3 mb-3">
-          <label class="form-label">Ville</label>
-          <select class="form-select">
-            <option value="">Toutes les villes</option>
-            <option value="Casablanca">Casablanca</option>
-            <option value="Rabat">Rabat</option>
-            <option value="Marrakech">Marrakech</option>
-            <option value="Tanger">Tanger</option>
-            <option value="Fès">Fès</option>
-          </select>
-        </div>
-        <div class="col-md-3 mb-3">
-          <label class="form-label">Taille</label>
-          <select class="form-select">
-            <option value="">Toutes les tailles</option>
-            <option value="1-10">1-10 employés</option>
-            <option value="11-50">11-50 employés</option>
-            <option value="51-200">51-200 employés</option>
-            <option value="201-500">201-500 employés</option>
-            <option value="501+">501+ employés</option>
-          </select>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label class="form-label">Recherche</label>
-          <input type="text" class="form-control" placeholder="Nom de l'entreprise, numéro RC...">
-        </div>
-        <div class="col-md-6 d-flex align-items-end justify-content-end mb-3">
-          <button class="btn btn-primary me-2">Appliquer les filtres</button>
-          <button class="btn btn-outline-secondary">Réinitialiser</button>
-        </div>
-      </div>
+      </form>
     </div>
   </div>
 
@@ -64,20 +58,20 @@
     <div class="app-card-header">
       <h5 class="app-card-title">Entreprises</h5>
       <div>
-        <button class="btn btn-sm btn-success me-2">
+        <button class="btn btn-sm btn-success me-2" data-bs-toggle="modal" data-bs-target="#addCompanyModal">
           <i class="fas fa-plus me-1"></i> Ajouter
         </button>
-        <button class="btn btn-sm btn-outline-secondary me-2">
+        <button class="btn btn-sm btn-outline-secondary me-2" id="exportCompanies">
           <i class="fas fa-download me-1"></i> Exporter
         </button>
-        <button class="btn btn-sm btn-outline-danger">
+        <button class="btn btn-sm btn-outline-danger" id="deleteSelectedCompanies" disabled>
           <i class="fas fa-trash me-1"></i> Supprimer
         </button>
       </div>
     </div>
     <div class="app-card-body p-0">
       <div class="table-responsive">
-        <table class="table table-hover mb-0">
+        <table class="table table-hover mb-0" id="companiesTable">
           <thead>
           <tr>
             <th width="40">
@@ -99,7 +93,7 @@
           <tr th:each="company : ${companies}">
             <td>
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" th:value="${company.id}">
+                <input class="form-check-input company-checkbox" type="checkbox" th:value="${company.id}">
               </div>
             </td>
             <td>
@@ -117,11 +111,11 @@
             <td th:text="${company.ville}">Ville</td>
             <td th:text="${company.tailleEntreprise}">Taille</td>
             <td>
-              <!-- Placeholder for verification status - you might need to add this field to your entity -->
-              <span class="badge bg-success">Vérifiée</span>
+              <!-- Display verification status based on isVerified field -->
+              <span th:if="${company.isVerified}" class="badge bg-success">Vérifiée</span>
+              <span th:unless="${company.isVerified}" class="badge bg-warning">Non vérifiée</span>
             </td>
             <td>
-              <!-- Placeholder for offer count - you might need to add this functionality -->
               <span th:text="${company.recruteurs != null ? company.recruteurs.size() + ' recruteurs' : '0 recruteurs'}">Recruteurs</span>
             </td>
             <td>
@@ -131,9 +125,14 @@
                 </button>
                 <ul class="dropdown-menu">
                   <li><a class="dropdown-item" th:href="@{/admin/companies/details/{id}(id=${company.id})}">Voir détails</a></li>
-                  <li><a class="dropdown-item" href="#">Voir offres</a></li>
-                  <li><a class="dropdown-item" th:href="@{/admin/companies/edit/{id}(id=${company.id})}">Modifier</a></li>
-                  <li><a class="dropdown-item text-danger" th:href="@{/admin/companies/delete/{id}(id=${company.id})}">Supprimer</a></li>
+                  <li><a class="dropdown-item" th:href="@{/admin/jobs?companyId={id}(id=${company.id})}">Voir offres</a></li>
+                  <li><a class="dropdown-item edit-company" href="#" th:data-id="${company.id}">Modifier</a></li>
+                  <li><a class="dropdown-item toggle-verification" href="#" th:data-id="${company.id}" th:data-status="${!company.isVerified}">
+                    <span th:if="${company.isVerified}">Retirer vérification</span>
+                    <span th:unless="${company.isVerified}">Vérifier l'entreprise</span>
+                  </a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item text-danger delete-company" href="#" th:data-id="${company.id}">Supprimer</a></li>
                 </ul>
               </div>
             </td>
@@ -150,16 +149,661 @@
     </div>
     <div class="app-card-footer p-3">
       <div class="d-flex justify-content-between align-items-center">
-        <div>Affichage de <span th:text="${companies.size() > 0 ? 1 : 0}"></span> à <span th:text="${companies.size()}"></span> sur <span th:text="${companies.size()}"></span> entrées</div>
-        <!-- Pagination would go here - this is a simplified version -->
-        <nav>
+        <div>Affichage de <span th:text="${companies.size() > 0 ? 1 : 0}"></span> à <span th:text="${companies.size()}"></span> sur <span th:text="${totalCompanies != null ? totalCompanies : companies.size()}"></span> entrées</div>
+        <!-- Pagination would go here - for demonstration -->
+        <nav th:if="${totalPages != null && totalPages > 1}">
           <ul class="pagination pagination-sm mb-0">
-            <li class="page-item disabled"><a class="page-link" href="#">Précédent</a></li>
-            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-            <li class="page-item"><a class="page-link" href="#">Suivant</a></li>
+            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
+              <a class="page-link" th:href="@{/admin/companies(page=${currentPage - 1}, size=${pageSize}, search=${search}, verificationStatus=${verificationStatus}, sector=${sector}, city=${city}, companySize=${companySize})}">Précédent</a>
+            </li>
+            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${currentPage == i} ? 'active' : ''">
+              <a class="page-link" th:href="@{/admin/companies(page=${i}, size=${pageSize}, search=${search}, verificationStatus=${verificationStatus}, sector=${sector}, city=${city}, companySize=${companySize})}" th:text="${i + 1}"></a>
+            </li>
+            <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled' : ''">
+              <a class="page-link" th:href="@{/admin/companies(page=${currentPage + 1}, size=${pageSize}, search=${search}, verificationStatus=${verificationStatus}, sector=${sector}, city=${city}, companySize=${companySize})}">Suivant</a>
+            </li>
           </ul>
         </nav>
       </div>
     </div>
   </div>
+
+  <!-- Add Company Modal -->
+  <div class="modal fade" id="addCompanyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Ajouter une entreprise</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="addCompanyForm" class="needs-validation" novalidate>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="addCompanyName" class="form-label">Nom de l'entreprise*</label>
+                <input type="text" class="form-control" id="addCompanyName" name="nomEntreprise" required>
+                <div class="invalid-feedback">Veuillez saisir le nom de l'entreprise</div>
+              </div>
+              <div class="col-md-6">
+                <label for="addCompanySector" class="form-label">Secteur d'activité*</label>
+                <select class="form-select" id="addCompanySector" name="secteur" required>
+                  <option value="">Sélectionner un secteur</option>
+                  <option value="Technologies de l'Information">Technologies de l'Information</option>
+                  <option value="Finance & Banque">Finance & Banque</option>
+                  <option value="Santé">Santé</option>
+                  <option value="Commerce">Commerce</option>
+                  <option value="Industrie">Industrie</option>
+                  <option value="Services">Services</option>
+                  <option value="Télécom">Télécom</option>
+                  <option value="Énergie">Énergie</option>
+                  <option value="Transport">Transport</option>
+                  <option value="Éducation">Éducation</option>
+                  <option value="Agroalimentaire">Agroalimentaire</option>
+                  <option value="Autres">Autres</option>
+                </select>
+                <div class="invalid-feedback">Veuillez sélectionner un secteur d'activité</div>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="addCompanyWebsite" class="form-label">Site web</label>
+                <input type="url" class="form-control" id="addCompanyWebsite" name="siteWeb" placeholder="https://www.example.com">
+                <div class="invalid-feedback">Veuillez saisir une URL valide</div>
+              </div>
+              <div class="col-md-6">
+                <label for="addCompanyEmail" class="form-label">Email de contact</label>
+                <input type="email" class="form-control" id="addCompanyEmail" name="emailContact" placeholder="contact@example.com">
+                <div class="invalid-feedback">Veuillez saisir une adresse email valide</div>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="addCompanySize" class="form-label">Taille de l'entreprise</label>
+                <select class="form-select" id="addCompanySize" name="tailleEntreprise">
+                  <option value="">Sélectionner une taille</option>
+                  <option value="1-50">1-50 employés</option>
+                  <option value="51-200">51-200 employés</option>
+                  <option value="201-500">201-500 employés</option>
+                  <option value="501-1000">501-1000 employés</option>
+                  <option value="1000+">1000+ employés</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="addCompanyYear" class="form-label">Année de création</label>
+                <input type="number" class="form-control" id="addCompanyYear" name="anneeCreation" min="1900" max="2025">
+                <div class="invalid-feedback">Veuillez saisir une année valide</div>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="addCompanyAddress" class="form-label">Adresse</label>
+                <input type="text" class="form-control" id="addCompanyAddress" name="adresse">
+              </div>
+              <div class="col-md-6">
+                <label for="addCompanyCity" class="form-label">Ville</label>
+                <input type="text" class="form-control" id="addCompanyCity" name="ville">
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-4">
+                <label for="addCompanyCountry" class="form-label">Pays</label>
+                <input type="text" class="form-control" id="addCompanyCountry" name="pays" value="Maroc">
+              </div>
+              <div class="col-md-4">
+                <label for="addCompanyPostalCode" class="form-label">Code postal</label>
+                <input type="text" class="form-control" id="addCompanyPostalCode" name="codePostal">
+              </div>
+              <div class="col-md-4">
+                <label for="addCompanyPhone" class="form-label">Téléphone</label>
+                <input type="tel" class="form-control" id="addCompanyPhone" name="telephone">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="addCompanyDescription" class="form-label">Description</label>
+              <textarea class="form-control" id="addCompanyDescription" name="description" rows="4"></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Vérification</label>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="addCompanyVerified" name="isVerified">
+                <label class="form-check-label" for="addCompanyVerified">
+                  Entreprise vérifiée
+                </label>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-primary" id="addCompanySubmit">Ajouter</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Company Modal -->
+  <div class="modal fade" id="editCompanyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Modifier l'entreprise</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editCompanyForm" class="needs-validation" novalidate>
+            <input type="hidden" id="editCompanyId" name="id">
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="editCompanyName" class="form-label">Nom de l'entreprise*</label>
+                <input type="text" class="form-control" id="editCompanyName" name="nomEntreprise" required>
+                <div class="invalid-feedback">Veuillez saisir le nom de l'entreprise</div>
+              </div>
+              <div class="col-md-6">
+                <label for="editCompanySector" class="form-label">Secteur d'activité*</label>
+                <select class="form-select" id="editCompanySector" name="secteur" required>
+                  <option value="">Sélectionner un secteur</option>
+                  <option value="Technologies de l'Information">Technologies de l'Information</option>
+                  <option value="Finance & Banque">Finance & Banque</option>
+                  <option value="Santé">Santé</option>
+                  <option value="Commerce">Commerce</option>
+                  <option value="Industrie">Industrie</option>
+                  <option value="Services">Services</option>
+                  <option value="Télécom">Télécom</option>
+                  <option value="Énergie">Énergie</option>
+                  <option value="Transport">Transport</option>
+                  <option value="Éducation">Éducation</option>
+                  <option value="Agroalimentaire">Agroalimentaire</option>
+                  <option value="Autres">Autres</option>
+                </select>
+                <div class="invalid-feedback">Veuillez sélectionner un secteur d'activité</div>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="editCompanyWebsite" class="form-label">Site web</label>
+                <input type="url" class="form-control" id="editCompanyWebsite" name="siteWeb" placeholder="https://www.example.com">
+                <div class="invalid-feedback">Veuillez saisir une URL valide</div>
+              </div>
+              <div class="col-md-6">
+                <label for="editCompanyEmail" class="form-label">Email de contact</label>
+                <input type="email" class="form-control" id="editCompanyEmail" name="emailContact" placeholder="contact@example.com">
+                <div class="invalid-feedback">Veuillez saisir une adresse email valide</div>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="editCompanySize" class="form-label">Taille de l'entreprise</label>
+                <select class="form-select" id="editCompanySize" name="tailleEntreprise">
+                  <option value="">Sélectionner une taille</option>
+                  <option value="1-50">1-50 employés</option>
+                  <option value="51-200">51-200 employés</option>
+                  <option value="201-500">201-500 employés</option>
+                  <option value="501-1000">501-1000 employés</option>
+                  <option value="1000+">1000+ employés</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="editCompanyYear" class="form-label">Année de création</label>
+                <input type="number" class="form-control" id="editCompanyYear" name="anneeCreation" min="1900" max="2025">
+                <div class="invalid-feedback">Veuillez saisir une année valide</div>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="editCompanyAddress" class="form-label">Adresse</label>
+                <input type="text" class="form-control" id="editCompanyAddress" name="adresse">
+              </div>
+              <div class="col-md-6">
+                <label for="editCompanyCity" class="form-label">Ville</label>
+                <input type="text" class="form-control" id="editCompanyCity" name="ville">
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-4">
+                <label for="editCompanyCountry" class="form-label">Pays</label>
+                <input type="text" class="form-control" id="editCompanyCountry" name="pays">
+              </div>
+              <div class="col-md-4">
+                <label for="editCompanyPostalCode" class="form-label">Code postal</label>
+                <input type="text" class="form-control" id="editCompanyPostalCode" name="codePostal">
+              </div>
+              <div class="col-md-4">
+                <label for="editCompanyPhone" class="form-label">Téléphone</label>
+                <input type="tel" class="form-control" id="editCompanyPhone" name="telephone">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="editCompanyDescription" class="form-label">Description</label>
+              <textarea class="form-control" id="editCompanyDescription" name="description" rows="4"></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Vérification</label>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="editCompanyVerified" name="isVerified">
+                <label class="form-check-label" for="editCompanyVerified">
+                  Entreprise vérifiée
+                </label>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-primary" id="editCompanySubmit">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Confirmation de suppression</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Êtes-vous sûr de vouloir supprimer cette entreprise ? Cette action est irréversible.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-danger" id="confirmDelete">Supprimer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Batch Delete Confirmation Modal -->
+  <div class="modal fade" id="batchDeleteConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Confirmation de suppression multiple</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Êtes-vous sûr de vouloir supprimer <span id="selectedCompanyCount">0</span> entreprises ? Cette action est irréversible.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-danger" id="confirmBatchDelete">Supprimer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript to handle client-side interactions -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Select all companies checkbox
+      const selectAllCheckbox = document.getElementById('selectAllCompanies');
+      const companyCheckboxes = document.querySelectorAll('.company-checkbox');
+      const deleteSelectedBtn = document.getElementById('deleteSelectedCompanies');
+
+      // Filter form
+      const filterForm = document.getElementById('companyFilterForm');
+      const resetButton = document.getElementById('resetFilters');
+
+      // Export button
+      const exportBtn = document.getElementById('exportCompanies');
+
+      // Modals
+      const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+      const batchDeleteModal = new bootstrap.Modal(document.getElementById('batchDeleteConfirmModal'));
+      const addCompanyModal = new bootstrap.Modal(document.getElementById('addCompanyModal'));
+      const editCompanyModal = new bootstrap.Modal(document.getElementById('editCompanyModal'));
+
+      // Initialize with current filter values from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('verificationStatus')) {
+        document.getElementById('verificationStatus').value = urlParams.get('verificationStatus');
+      }
+      if (urlParams.has('sector')) {
+        document.getElementById('sector').value = urlParams.get('sector');
+      }
+      if (urlParams.has('city')) {
+        document.getElementById('city').value = urlParams.get('city');
+      }
+      if (urlParams.has('companySize')) {
+        document.getElementById('companySize').value = urlParams.get('companySize');
+      }
+      if (urlParams.has('search')) {
+        document.getElementById('search').value = urlParams.get('search');
+      }
+
+      // Add company form validation and submission
+      const addCompanyForm = document.getElementById('addCompanyForm');
+      const addCompanySubmit = document.getElementById('addCompanySubmit');
+
+      if (addCompanySubmit) {
+        addCompanySubmit.addEventListener('click', function() {
+          if (!addCompanyForm.checkValidity()) {
+            addCompanyForm.classList.add('was-validated');
+            return;
+          }
+
+          // Collect form data
+          const formData = new FormData(addCompanyForm);
+          const companyData = {};
+          formData.forEach((value, key) => {
+            if (key === 'isVerified') {
+              companyData[key] = true;
+            } else {
+              companyData[key] = value;
+            }
+          });
+
+          // Handle checkbox state when unchecked (not included in formData)
+          if (!formData.has('isVerified')) {
+            companyData['isVerified'] = false;
+          }
+
+          // Send data to server
+          fetch('/admin/companies/add', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(companyData)
+          })
+                  .then(response => response.json())
+                  .then(data => {
+                    if (data.success) {
+                      // Reset form and close modal
+                      addCompanyForm.reset();
+                      addCompanyForm.classList.remove('was-validated');
+                      addCompanyModal.hide();
+
+                      // Reload page to show new company
+                      window.location.reload();
+                    } else {
+                      alert('Erreur lors de l\'ajout de l\'entreprise: ' + data.error);
+                    }
+                  })
+                  .catch(error => {
+                    console.error('Error:', error);
+                    alert('Une erreur est survenue lors de l\'ajout de l\'entreprise');
+                  });
+        });
+      }
+
+      // Edit company functionality
+      const editButtons = document.querySelectorAll('.edit-company');
+      const editCompanyForm = document.getElementById('editCompanyForm');
+      const editCompanySubmit = document.getElementById('editCompanySubmit');
+
+      // Load company data when edit button is clicked
+      editButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+          e.preventDefault();
+          const companyId = this.getAttribute('data-id');
+
+          // Fetch company data
+          fetch(`/admin/companies/${companyId}/data`)
+                  .then(response => response.json())
+                  .then(company => {
+                    // Populate form with company data
+                    document.getElementById('editCompanyId').value = company.id;
+                    document.getElementById('editCompanyName').value = company.nomEntreprise || '';
+                    document.getElementById('editCompanySector').value = company.secteur || '';
+                    document.getElementById('editCompanyWebsite').value = company.siteWeb || '';
+                    document.getElementById('editCompanyEmail').value = company.emailContact || '';
+                    document.getElementById('editCompanySize').value = company.tailleEntreprise || '';
+                    document.getElementById('editCompanyYear').value = company.anneeCreation || '';
+                    document.getElementById('editCompanyAddress').value = company.adresse || '';
+                    document.getElementById('editCompanyCity').value = company.ville || '';
+                    document.getElementById('editCompanyCountry').value = company.pays || '';
+                    document.getElementById('editCompanyPostalCode').value = company.codePostal || '';
+                    document.getElementById('editCompanyPhone').value = company.telephone || '';
+                    document.getElementById('editCompanyDescription').value = company.description || '';
+                    document.getElementById('editCompanyVerified').checked = company.isVerified || false;
+
+                    // Show modal
+                    editCompanyModal.show();
+                  })
+                  .catch(error => {
+                    console.error('Error:', error);
+                    alert('Erreur lors de la récupération des données de l\'entreprise');
+                  });
+        });
+      });
+
+      // Submit edit form
+      if (editCompanySubmit) {
+        editCompanySubmit.addEventListener('click', function() {
+          if (!editCompanyForm.checkValidity()) {
+            editCompanyForm.classList.add('was-validated');
+            return;
+          }
+
+          // Collect form data
+          const formData = new FormData(editCompanyForm);
+          const companyData = {};
+          formData.forEach((value, key) => {
+            if (key === 'isVerified') {
+              companyData[key] = true;
+            } else {
+              companyData[key] = value;
+            }
+          });
+
+          // Handle checkbox state when unchecked (not included in formData)
+          if (!formData.has('isVerified')) {
+            companyData['isVerified'] = false;
+          }
+
+          const companyId = document.getElementById('editCompanyId').value;
+
+          // Send data to server
+          fetch(`/admin/companies/${companyId}/update`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(companyData)
+          })
+                  .then(response => response.json())
+                  .then(data => {
+                    if (data.success) {
+                      // Reset form and close modal
+                      editCompanyForm.classList.remove('was-validated');
+                      editCompanyModal.hide();
+
+                      // Reload page to show updated company
+                      window.location.reload();
+                    } else {
+                      alert('Erreur lors de la modification de l\'entreprise: ' + data.error);
+                    }
+                  })
+                  .catch(error => {
+                    console.error('Error:', error);
+                    alert('Une erreur est survenue lors de la modification de l\'entreprise');
+                  });
+        });
+      }
+
+      // Select all companies
+      if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+          companyCheckboxes.forEach(checkbox => {
+            checkbox.checked = selectAllCheckbox.checked;
+          });
+          updateDeleteButtonState();
+        });
+      }
+
+      // Update delete button state
+      companyCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateDeleteButtonState);
+      });
+
+      function updateDeleteButtonState() {
+        const checkedBoxes = document.querySelectorAll('.company-checkbox:checked');
+        if (deleteSelectedBtn) {
+          deleteSelectedBtn.disabled = checkedBoxes.length === 0;
+        }
+
+        // Update the count for the batch delete modal
+        const selectedCountElement = document.getElementById('selectedCompanyCount');
+        if (selectedCountElement) {
+          selectedCountElement.textContent = checkedBoxes.length;
+        }
+      }
+
+      // Reset filters
+      if (resetButton) {
+        resetButton.addEventListener('click', function(e) {
+          e.preventDefault();
+          document.getElementById('verificationStatus').value = '';
+          document.getElementById('sector').value = '';
+          document.getElementById('city').value = '';
+          document.getElementById('companySize').value = '';
+          document.getElementById('search').value = '';
+          filterForm.submit();
+        });
+      }
+
+      // Delete single company
+      const deleteButtons = document.querySelectorAll('.delete-company');
+      let companyToDelete = null;
+
+      deleteButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+          e.preventDefault();
+          companyToDelete = this.getAttribute('data-id');
+          deleteModal.show();
+        });
+      });
+
+      // Confirm delete
+      const confirmDeleteButton = document.getElementById('confirmDelete');
+      if (confirmDeleteButton) {
+        confirmDeleteButton.addEventListener('click', function() {
+          if (companyToDelete) {
+            // Send delete request to server
+            fetch(`/admin/companies/delete/${companyToDelete}`, {
+              method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            })
+                    .then(response => response.json())
+                    .then(data => {
+                      if (data.success) {
+                        // Reload page to reflect changes
+                        window.location.reload();
+                      } else {
+                        alert('Erreur lors de la suppression: ' + data.error);
+                      }
+                    })
+                    .catch(error => {
+                      console.error('Error:', error);
+                      alert('Une erreur est survenue lors de la suppression');
+                    });
+
+            deleteModal.hide();
+          }
+        });
+      }
+
+      // Delete multiple companies
+      if (deleteSelectedBtn) {
+        deleteSelectedBtn.addEventListener('click', function() {
+          const selectedIds = Array.from(document.querySelectorAll('.company-checkbox:checked'))
+                  .map(checkbox => checkbox.value);
+
+          if (selectedIds.length > 0) {
+            batchDeleteModal.show();
+          }
+        });
+      }
+
+      const confirmBatchDeleteButton = document.getElementById('confirmBatchDelete');
+      if (confirmBatchDeleteButton) {
+        confirmBatchDeleteButton.addEventListener('click', function() {
+          const selectedIds = Array.from(document.querySelectorAll('.company-checkbox:checked'))
+                  .map(checkbox => checkbox.value);
+
+          // Send batch delete request
+          fetch('/admin/companies/batch-delete', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ ids: selectedIds })
+          })
+                  .then(response => response.json())
+                  .then(data => {
+                    if (data.success) {
+                      window.location.reload();
+                    } else {
+                      alert('Erreur lors de la suppression multiple: ' + data.error);
+                    }
+                  })
+                  .catch(error => {
+                    console.error('Error:', error);
+                    alert('Une erreur est survenue lors de la suppression multiple');
+                  });
+
+          batchDeleteModal.hide();
+        });
+      }
+
+      // Toggle company verification status
+      const verificationToggleButtons = document.querySelectorAll('.toggle-verification');
+
+      verificationToggleButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+          e.preventDefault();
+          const companyId = this.getAttribute('data-id');
+          const newStatus = this.getAttribute('data-status') === 'true';
+
+          fetch(`/admin/companies/${companyId}/toggle-verification`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ isVerified: newStatus })
+          })
+                  .then(response => response.json())
+                  .then(data => {
+                    if (data.success) {
+                      window.location.reload();
+                    } else {
+                      alert('Erreur lors de la mise à jour du statut: ' + data.error);
+                    }
+                  })
+                  .catch(error => {
+                    console.error('Error:', error);
+                    alert('Une erreur est survenue lors de la mise à jour du statut');
+                  });
+        });
+      });
+
+      // Export Companies as CSV
+      if (exportBtn) {
+        exportBtn.addEventListener('click', function() {
+          // Get current filter parameters
+          const params = new URLSearchParams(window.location.search);
+          // Create export URL with same filters
+          const exportUrl = `/admin/companies/export?${params.toString()}`;
+          // Trigger download
+          window.location.href = exportUrl;
+        });
+      }
+
+      // Form validation styles for Bootstrap
+      const forms = document.querySelectorAll('.needs-validation');
+      Array.from(forms).forEach(form => {
+        form.addEventListener('submit', event => {
+          if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+          form.classList.add('was-validated');
+        }, false);
+      });
+    });
+  </script>
 </div>

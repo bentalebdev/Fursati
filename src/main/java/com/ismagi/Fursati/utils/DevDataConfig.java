@@ -1,6 +1,5 @@
 package com.ismagi.Fursati.utils;
 
-import com.ismagi.Fursati.utils.PostgresDataGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +32,16 @@ public class DevDataConfig {
     public CommandLineRunner generateDevData() {
         return args -> {
             logger.info("Development mode detected: Starting test data generation...");
+
+            // First, update existing company records to set default values for is_verified
+            // This helps prevent issues with adding NOT NULL constraints
+            try {
+                logger.info("Updating existing company records to ensure is_verified field is not null");
+                dataGenerator.updateExistingCompanies();
+            } catch (Exception e) {
+                logger.warn("Could not update existing company records: {}", e.getMessage());
+                // Continue with the rest of the initialization
+            }
 
             // Default values for test data generation
             int adminCount = getPropertyIntValue("fursati.dev.testdata.admin-count", 3);
@@ -109,4 +118,5 @@ public class DevDataConfig {
         }
         return defaultValue;
     }
+
 }

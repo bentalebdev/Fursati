@@ -52,12 +52,290 @@ public class AdminController {
         return "adminboard";
     }
 
+    /*
+     * COMPANY MANAGEMENT METHODS
+     */
+
     @GetMapping("/companies")
-    public String showAdminCompanies(Model model) {
-        List<Company> companyList=companyService.getCompanies();
+    public String showAdminCompanies(Model model,
+                                     @RequestParam(required = false) String search,
+                                     @RequestParam(required = false) String verificationStatus,
+                                     @RequestParam(required = false) String sector,
+                                     @RequestParam(required = false) String city,
+                                     @RequestParam(required = false) String companySize) {
+
+        // Get available sectors and cities for filters
+        List<String> sectors = companyService.getAllSectors();
+        List<String> cities = companyService.getAllCities();
+
+        // Get filtered companies
+        List<Company> companyList;
+
+        // Apply filters if any are present
+        if (search != null || verificationStatus != null || sector != null ||
+                city != null || companySize != null) {
+
+            // Convert verification status string to Boolean if present
+            Boolean isVerified = null;
+            if (verificationStatus != null && !verificationStatus.isEmpty()) {
+                isVerified = Boolean.valueOf(verificationStatus);
+            }
+
+            companyList = companyService.getFilteredCompanies(search, isVerified, sector, city, companySize);
+        } else {
+            companyList = companyService.getCompanies();
+        }
+
+        // Add data to the model
         model.addAttribute("companies", companyList);
+        model.addAttribute("sectors", sectors);
+        model.addAttribute("cities", cities);
         model.addAttribute("activeTab", "companies");
+
+        // Add filter parameters to support pagination
+        model.addAttribute("search", search);
+        model.addAttribute("verificationStatus", verificationStatus);
+        model.addAttribute("sector", sector);
+        model.addAttribute("city", city);
+        model.addAttribute("companySize", companySize);
+
         return "adminboard";
+    }
+
+    @PostMapping("/companies/{id}/toggle-verification")
+    @ResponseBody
+    public Map<String, Object> toggleCompanyVerification(@PathVariable Long id,
+                                                         @RequestBody Map<String, Object> request) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            boolean newStatus = (boolean) request.get("isVerified");
+            Company updatedCompany = companyService.toggleVerificationStatus(id, newStatus);
+
+            if (updatedCompany != null) {
+                response.put("success", true);
+                response.put("company", updatedCompany);
+            } else {
+                response.put("success", false);
+                response.put("error", "Company not found");
+            }
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("error", e.getMessage());
+        }
+
+        return response;
+    }
+
+    @DeleteMapping("/companies/delete/{id}")
+    @ResponseBody
+    public Map<String, Object> deleteCompany(@PathVariable Long id) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            boolean success = companyService.deleteCompany(id);
+            response.put("success", success);
+            if (!success) {
+                response.put("error", "Failed to delete company. It may be referenced by other entities.");
+            }
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("error", e.getMessage());
+        }
+
+        return response;
+    }
+
+    @PostMapping("/companies/batch-delete")
+    @ResponseBody
+    public Map<String, Object> batchDeleteCompanies(@RequestBody Map<String, List<Long>> request) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            List<Long> ids = request.get("ids");
+            if (ids != null && !ids.isEmpty()) {
+                boolean success = companyService.deleteCompanies(ids);
+                response.put("success", success);
+                if (!success) {
+                    response.put("error", "Failed to delete some companies. They may be referenced by other entities.");
+                }
+            } else {
+                response.put("success", false);
+                response.put("error", "No company IDs provided");
+            }
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("error", e.getMessage());
+        }
+
+        return response;
+    }
+
+    @GetMapping("/companies/export")
+    public void exportCompanies(HttpServletResponse response,
+                                @RequestParam(required = false) String search,
+                                @RequestParam(required = false) String verificationStatus,
+                                @RequestParam(required = false) String sector,
+                                @RequestParam(required = false) String city,
+                                @RequestParam(required = false) String companySize) throws IOException {
+
+        response.setContentType("text/csv");
+        response.setHeader("Content-Disposition", "attachment; filename=\"companies.csv\"");
+
+        // Get filtered companies
+        List<Company> companies;
+
+        // Apply filters if any are present
+        if (search != null || verificationStatus != null || sector != null ||
+                city != null || companySize != null) {
+
+            // Convert verification status string to Boolean if present
+            Boolean isVerified = null;
+            if (verificationStatus != null && !verificationStatus.isEmpty()) {
+                isVerified = Boolean.valueOf(verificationStatus);
+            }
+
+            companies = companyService.getFilteredCompanies(search, isVerified, sector, city, companySize);
+        } else {
+            companies = companyService.getCompanies();
+        }
+
+        // Define CSV headers
+        String[] headers = {
+                "ID", "Nom", "Secteur", "Site Web", "Email", "Téléphone", "Ville", "Pays",
+                "Taille", "Année Création", "Vérifiée", "Nombre de Recruteurs"
+        };
+
+        try (CSVPrinter csvPrinter = new CSVPrinter(response.getWriter(), CSVFormat.DEFAULT.withHeader(headers))) {
+            for (Company company : companies) {
+                csvPrinter.printRecord(
+                        company.getId(),
+                        company.getNomEntreprise(),
+                        company.getSecteur(),
+                        company.getSiteWeb(),
+                        company.getEmailContact(),
+                        company.getTelephone(),
+                        company.getVille(),
+                        company.getPays(),
+                        company.getTailleEntreprise(),
+                        company.getAnneeCreation(),
+                        company.getIsVerified() != null && company.getIsVerified() ? "Oui" : "Non",
+                        company.getRecruteurs() != null ? company.getRecruteurs().size() : 0
+                );
+            }
+        }
+    }
+    /**
+     * Get company data by ID for editing
+     */
+    @GetMapping("/companies/{id}/data")
+    @ResponseBody
+    public Company getCompanyData(@PathVariable Long id) {
+        Optional<Company> company = companyService.findById(id);
+        return company.orElse(null);
+    }
+
+    /**
+     * Add a new company
+     */
+    @PostMapping("/companies/add")
+    @ResponseBody
+    public Map<String, Object> addCompany(@RequestBody Company company) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            // Set default values if needed
+            if (company.getIsVerified() == null) {
+                company.setIsVerified(false);
+            }
+            if (company.getPays() == null || company.getPays().isEmpty()) {
+                company.setPays("Maroc");
+            }
+
+            // Save the company
+            Company savedCompany = companyService.save(company);
+
+            response.put("success", true);
+            response.put("company", savedCompany);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("error", e.getMessage());
+        }
+
+        return response;
+    }
+
+    /**
+     * Update an existing company
+     */
+    @PostMapping("/companies/{id}/update")
+    @ResponseBody
+    public Map<String, Object> updateCompany(@PathVariable Long id, @RequestBody Company updatedCompany) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            // Find existing company
+            Optional<Company> existingCompanyOpt = companyService.findById(id);
+
+            if (existingCompanyOpt.isPresent()) {
+                Company existingCompany = existingCompanyOpt.get();
+
+                // Update fields
+                if (updatedCompany.getNomEntreprise() != null) {
+                    existingCompany.setNomEntreprise(updatedCompany.getNomEntreprise());
+                }
+                if (updatedCompany.getSecteur() != null) {
+                    existingCompany.setSecteur(updatedCompany.getSecteur());
+                }
+                if (updatedCompany.getSiteWeb() != null) {
+                    existingCompany.setSiteWeb(updatedCompany.getSiteWeb());
+                }
+                if (updatedCompany.getEmailContact() != null) {
+                    existingCompany.setEmailContact(updatedCompany.getEmailContact());
+                }
+                if (updatedCompany.getDescription() != null) {
+                    existingCompany.setDescription(updatedCompany.getDescription());
+                }
+                if (updatedCompany.getAnneeCreation() != null) {
+                    existingCompany.setAnneeCreation(updatedCompany.getAnneeCreation());
+                }
+                if (updatedCompany.getTailleEntreprise() != null) {
+                    existingCompany.setTailleEntreprise(updatedCompany.getTailleEntreprise());
+                }
+                if (updatedCompany.getAdresse() != null) {
+                    existingCompany.setAdresse(updatedCompany.getAdresse());
+                }
+                if (updatedCompany.getVille() != null) {
+                    existingCompany.setVille(updatedCompany.getVille());
+                }
+                if (updatedCompany.getPays() != null) {
+                    existingCompany.setPays(updatedCompany.getPays());
+                }
+                if (updatedCompany.getCodePostal() != null) {
+                    existingCompany.setCodePostal(updatedCompany.getCodePostal());
+                }
+                if (updatedCompany.getTelephone() != null) {
+                    existingCompany.setTelephone(updatedCompany.getTelephone());
+                }
+                if (updatedCompany.getIsVerified() != null) {
+                    existingCompany.setIsVerified(updatedCompany.getIsVerified());
+                }
+
+                // Save updated company
+                Company savedCompany = companyService.save(existingCompany);
+
+                response.put("success", true);
+                response.put("company", savedCompany);
+            } else {
+                response.put("success", false);
+                response.put("error", "Entreprise non trouvée");
+            }
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("error", e.getMessage());
+        }
+
+        return response;
     }
     @GetMapping("/jobs")
     public String showAdminJobs(Model model) {

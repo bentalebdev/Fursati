@@ -77,6 +77,9 @@ public class Company {
     @ToString.Exclude // Add this annotation to exclude from toString()
     private List<Recruteur> recruteurs;
 
+    // Update the field in Company.java to allow nulls initially
+    @Column(name = "is_verified")
+    private Boolean isVerified = false; // Provide a default value to prevent null
     public Company() {}
 
 }

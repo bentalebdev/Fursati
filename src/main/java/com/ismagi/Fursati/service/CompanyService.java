@@ -7,14 +7,139 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CompanyService {
     @Autowired
     private CompanyRepository companyRepository;
 
+    public Optional<Company> findById(Long id) {
+        return  companyRepository.findById(id);
+    }
+    public Company save(Company company) {
+        return companyRepository.save(company);
+    }
+
     public Company getComapnyByRecruteurId(Long RecruitId) {
         return companyRepository.getCompanyByRecruitId(RecruitId);
+    }
+
+    /**
+     * Get all companies
+     */
+    public List<Company> getCompanies() {
+        return companyRepository.findAll();
+    }
+
+    /**
+     * Get filtered companies based on search criteria
+     */
+    /**
+     * Get filtered companies based on search criteria using more efficient database queries
+     */
+    public List<Company> getFilteredCompanies(String search, Boolean isVerified,
+                                              String sector, String city, String companySize) {
+        List<Company> filteredCompanies;
+
+        // If no filters applied, return all companies
+        if ((search == null || search.trim().isEmpty()) &&
+                isVerified == null &&
+                (sector == null || sector.trim().isEmpty()) &&
+                (city == null || city.trim().isEmpty()) &&
+                (companySize == null || companySize.trim().isEmpty())) {
+            return companyRepository.findAll();
+        }
+
+        // Start with all companies or filtered subset
+        if (search != null && !search.trim().isEmpty()) {
+            // If search term is present, start with search results
+            filteredCompanies = companyRepository.searchCompanies(search.trim());
+        } else {
+            // Otherwise start with all companies
+            filteredCompanies = companyRepository.findAll();
+        }
+
+        // Apply additional filters in memory (could be optimized with a custom repository method if needed)
+        // Filter by verification status
+        if (isVerified != null) {
+            filteredCompanies = filteredCompanies.stream()
+                    .filter(c -> c.getIsVerified() != null && c.getIsVerified().equals(isVerified))
+                    .collect(Collectors.toList());
+        }
+
+        // Filter by sector
+        if (sector != null && !sector.trim().isEmpty()) {
+            filteredCompanies = filteredCompanies.stream()
+                    .filter(c -> c.getSecteur() != null && c.getSecteur().equals(sector))
+                    .collect(Collectors.toList());
+        }
+
+        // Filter by city
+        if (city != null && !city.trim().isEmpty()) {
+            filteredCompanies = filteredCompanies.stream()
+                    .filter(c -> c.getVille() != null && c.getVille().equals(city))
+                    .collect(Collectors.toList());
+        }
+
+        // Filter by company size
+        if (companySize != null && !companySize.trim().isEmpty()) {
+            filteredCompanies = filteredCompanies.stream()
+                    .filter(c -> c.getTailleEntreprise() != null && c.getTailleEntreprise().equals(companySize))
+                    .collect(Collectors.toList());
+        }
+
+        return filteredCompanies;
+    }
+
+    /**
+     * Get a list of all distinct sectors
+     */
+    public List<String> getAllSectors() {
+        return companyRepository.findDistinctSectors();
+    }
+
+    /**
+     * Get a list of all distinct cities
+     */
+    public List<String> getAllCities() {
+        return companyRepository.findDistinctCities();
+    }
+    /**
+     * Toggle company verification status
+     */
+    public Company toggleVerificationStatus(Long companyId, boolean newStatus) {
+        Optional<Company> companyOpt = companyRepository.findById(companyId);
+        if (companyOpt.isPresent()) {
+            Company company = companyOpt.get();
+            company.setIsVerified(newStatus);
+            return companyRepository.save(company);
+        }
+        return null;
+    }
+
+    /**
+     * Delete a company by ID
+     */
+    public boolean deleteCompany(Long companyId) {
+        try {
+            companyRepository.deleteById(companyId);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Delete multiple companies by IDs
+     */
+    public boolean deleteCompanies(List<Long> companyIds) {
+        try {
+            companyIds.forEach(companyRepository::deleteById);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     /**
@@ -86,6 +211,9 @@ public class CompanyService {
             }
             if (updatedCompany.getLogoUrl() != null) {
                 company.setLogoUrl(updatedCompany.getLogoUrl());
+            }
+            if (updatedCompany.getIsVerified() != null) {
+                company.setIsVerified(updatedCompany.getIsVerified());
             }
 
             return companyRepository.save(company);
@@ -162,6 +290,9 @@ public class CompanyService {
             if (updatedCompany.getLogoUrl() != null) {
                 existingCompany.setLogoUrl(updatedCompany.getLogoUrl());
             }
+            if (updatedCompany.getIsVerified() != null) {
+                existingCompany.setIsVerified(updatedCompany.getIsVerified());
+            }
 
             return companyRepository.save(existingCompany);
         }
@@ -185,9 +316,5 @@ public class CompanyService {
         }
 
         return null;
-    }
-
-    public List<Company> getCompanies() {
-        return companyRepository.findAll();
     }
 }
