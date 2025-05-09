@@ -287,15 +287,15 @@
             </div>
             <p class="text-muted mb-2" th:text="${exp.company}">TechSolutions SARL · Casablanca, Maroc</p>
             <p class="text-muted small mb-2">
-              <span th:text="${#dates.format(exp.startDate, 'MMMM yyyy')}">Janvier 2021</span> -
+              <span th:text="${exp.startDate != null ? #temporals.format(exp.startDate, 'MMMM yyyy') : ''}">Janvier 2021</span> -
               <span th:if="${exp.currentJob}">Présent</span>
-              <span th:unless="${exp.currentJob}" th:text="${#dates.format(exp.endDate, 'MMMM yyyy')}">Décembre 2020</span>
+              <span th:unless="${exp.currentJob}" th:text="${exp.endDate != null ? #temporals.format(exp.endDate, 'MMMM yyyy') : ''}">Décembre 2020</span>
               <span th:if="${exp.startDate != null && exp.endDate != null && !exp.currentJob}">
-                · <span th:text="${#dates.year(exp.endDate) - #dates.year(exp.startDate)} + ' ans'"></span>
-              </span>
+    · <span th:text="${#temporals.year(exp.endDate) - #temporals.year(exp.startDate)} + ' ans'"></span>
+  </span>
               <span th:if="${exp.startDate != null && exp.currentJob}">
-                · <span th:text="${#dates.year(#dates.createNow()) - #dates.year(exp.startDate)} + ' ans'"></span>
-              </span>
+    · <span th:text="${#temporals.year(#temporals.createNow()) - #temporals.year(exp.startDate)} + ' ans'"></span>
+  </span>
             </p>
             <p th:text="${exp.description}">Développement et maintenance d'applications web...</p>
           </div>
@@ -451,8 +451,8 @@
       id: /*[[${exp.id}]]*/ '',
       jobTitle: /*[[${exp.jobTitle}]]*/ '',
       company: /*[[${exp.company}]]*/ '',
-      startDate: /*[[${#dates.format(exp.startDate, 'yyyy-MM')}]]*/ '',
-      endDate: /*[[${exp.endDate != null ? #dates.format(exp.endDate, 'yyyy-MM') : ''}]]*/ '',
+      startDate: /*[[${exp.startDate != null ? #temporals.format(exp.startDate, 'yyyy-MM') : ''}]]*/ '',
+      endDate: /*[[${exp.endDate != null ? #temporals.format(exp.endDate, 'yyyy-MM') : ''}]]*/ '',
       currentJob: /*[[${exp.currentJob}]]*/ false,
       description: /*[[${exp.description}]]*/ ''
     };

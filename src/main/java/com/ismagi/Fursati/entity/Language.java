@@ -3,7 +3,6 @@ package com.ismagi.Fursati.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
-
 @Entity
 @Data
 public class Language {
@@ -12,7 +11,8 @@ public class Language {
     private Long id;
 
     private String name;
-    private String level; // "Débutant", "Intermédiaire", "Avancé", "Courant", "Maternelle"
+    private String level; // Keep original field name
+    private Integer proficiencyLevel; // Add this new field
 
     @ManyToOne
     @JoinColumn(name = "candidat_id")

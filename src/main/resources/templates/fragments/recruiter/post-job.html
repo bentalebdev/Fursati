@@ -184,7 +184,10 @@
             </button>
           </div>
         </div>
-
+        <!-- In post-job.html, inside the form -->
+        <input type="hidden" name="recruteur.idRecruteur" th:value="${session.userId}">
+        <!-- Add this near the beginning of your form, after the opening form tag -->
+        <input type="hidden" name="status" value="ACTIVE">
         <!-- Step 3: Qualifications requises -->
         <div class="form-step" id="step3">
           <h4 class="form-section-title">Qualifications requises</h4>

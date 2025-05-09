@@ -162,11 +162,11 @@
                         <small class="text-muted d-block mb-1">Langues:</small>
                         <div class="d-flex flex-wrap gap-1">
                             <th:block th:each="lang, status : ${candidat.languages}" th:if="${status.index < 3}">
-                                <span class="language-badge"
-                                      th:text="${lang.name}"
-                                      th:title="${lang.proficiency + ' (' + lang.proficiencyLevel + '/100)'}">
-                                    Langue
-                                </span>
+                               <span class="language-badge"
+                                     th:text="${lang.name}"
+                                     th:title="${lang.level + ' (' + lang.proficiencyLevel + '/100)'}">
+    Langue
+</span>
                             </th:block>
                             <span class="language-badge" th:if="${candidat.languages.size() > 3}"
                                   th:text="'+' + (${candidat.languages.size() - 3})">+2</span>

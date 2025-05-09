@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 @Controller
@@ -118,5 +120,72 @@ public class DemandeController {
 
         // For now, we'll return a dummy ID (replace this with actual authentication)
         return 1L;
+    }
+    @PutMapping("/{id}/status")
+    @ResponseBody
+    public Map<String, Object> updateDemandeStatus(@PathVariable Long id, @RequestBody Map<String, Object> request) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            String status = (String) request.get("status");
+            if (status == null) {
+                response.put("success", false);
+                response.put("error", "Status is required");
+                return response;
+            }
+
+            Demande demande = demandeService.getDemandeById(id);
+            if (demande == null) {
+                response.put("success", false);
+                response.put("error", "Demand not found");
+                return response;
+            }
+
+            // Update the status
+            demande.setEtat(status);
+            demandeService.saveDemande(demande);
+
+            response.put("success", true);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("error", e.getMessage());
+        }
+
+        return response;
+    }
+
+    @PutMapping("/bulk-status")
+    @ResponseBody
+    public Map<String, Object> bulkUpdateStatus(@RequestBody Map<String, Object> request) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            String status = (String) request.get("status");
+            List<Long> ids = (List<Long>) request.get("ids");
+
+            if (status == null || ids == null || ids.isEmpty()) {
+                response.put("success", false);
+                response.put("error", "Status and ids are required");
+                return response;
+            }
+
+            int updatedCount = 0;
+            for (Long id : ids) {
+                Demande demande = demandeService.getDemandeById(id);
+                if (demande != null) {
+                    demande.setEtat(status);
+                    demandeService.saveDemande(demande);
+                    updatedCount++;
+                }
+            }
+
+            response.put("success", true);
+            response.put("updatedCount", updatedCount);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("error", e.getMessage());
+        }
+
+        return response;
     }
 }
