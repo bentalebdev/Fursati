@@ -1,31 +1,21 @@
 package com.ismagi.Fursati.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "skills")
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Skill {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     private String name;
+    private String proficiency;
 
-    @Column
-    private String description;
-
-    // If this skill is related to other entities, add relationships here
-    // For example:
-    /*
-    @ManyToMany(mappedBy = "skills")
-    private Set<CandidateProfile> candidateProfiles = new HashSet<>();
-    */
+    @ManyToOne
+    @JoinColumn(name = "candidat_id")
+    @JsonIgnoreProperties({"skills", "languages", "experiences", "educations"})
+    private Candidat candidat;
 }

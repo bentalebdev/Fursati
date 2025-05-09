@@ -1,0 +1,601 @@
+<div th:fragment="recruiters" xmlns:th="http://www.thymeleaf.org">
+  <!-- Recruiters Management Section -->
+  <div class="container-fluid px-4">
+    <h1 class="mt-4">Gestion des Recruteurs</h1>
+    <ol class="breadcrumb mb-4">
+      <li class="breadcrumb-item"><a href="/admin">Tableau de bord</a></li>
+      <li class="breadcrumb-item active">Recruteurs</li>
+    </ol>
+
+    <!-- Alerts for success/error messages -->
+    <div class="alert alert-success alert-dismissible fade show" role="alert" th:if="${successMessage}">
+      <i class="fas fa-check-circle me-2"></i>
+      <span th:text="${successMessage}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="alert alert-danger alert-dismissible fade show" role="alert" th:if="${errorMessage}">
+      <i class="fas fa-exclamation-circle me-2"></i>
+      <span th:text="${errorMessage}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="mb-4">
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRecruiterModal">
+        <i class="fas fa-plus me-1"></i> Ajouter un recruteur
+      </button>
+      <button type="button" class="btn btn-danger" id="batchDeleteBtn" disabled>
+        <i class="fas fa-trash me-1"></i> Supprimer la sélection
+      </button>
+      <button type="button" class="btn btn-outline-secondary" id="exportRecruitersBtn">
+        <i class="fas fa-file-export me-1"></i> Exporter en CSV
+      </button>
+    </div>
+
+    <!-- Filters section -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <i class="fas fa-filter me-1"></i>
+        Filtres
+      </div>
+      <div class="card-body">
+        <form id="recruitersFilterForm" method="get" class="row g-3">
+          <div class="col-md-4">
+            <label for="search" class="form-label">Recherche</label>
+            <input type="text" class="form-control" id="search" name="search"
+                   placeholder="Nom, email, téléphone..." th:value="${search}">
+          </div>
+          <div class="col-md-4">
+            <label for="companyFilter" class="form-label">Entreprise</label>
+            <select class="form-select" id="companyFilter" name="company">
+              <option value="">Toutes les entreprises</option>
+              <option th:each="company : ${companies}"
+                      th:value="${company.id}"
+                      th:text="${company.nomEntreprise}"
+                      th:selected="${company == selectedCompany}"></option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label for="statusFilter" class="form-label">Statut</label>
+            <select class="form-select" id="statusFilter" name="status">
+              <option value="">Tous les statuts</option>
+              <option value="ACTIVE" th:selected="${status == 'ACTIVE'}">Actif</option>
+              <option value="INACTIVE" th:selected="${status == 'INACTIVE'}">Inactif</option>
+              <option value="PENDING" th:selected="${status == 'PENDING'}">En attente</option>
+            </select>
+          </div>
+          <div class="col-12 text-end">
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-search me-1"></i> Filtrer
+            </button>
+            <button type="reset" class="btn btn-outline-secondary">
+              <i class="fas fa-redo me-1"></i> Réinitialiser
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Recruiters table -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <i class="fas fa-users me-1"></i>
+        Liste des recruteurs
+      </div>
+      <div class="card-body">
+        <table id="recruitersTable" class="table table-striped table-hover">
+          <thead>
+          <tr>
+            <th width="40px">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="selectAll">
+              </div>
+            </th>
+            <th>ID</th>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Téléphone</th>
+            <th>Entreprise</th>
+            <th>Offres publiées</th>
+            <th>Statut</th>
+            <th>Date d'inscription</th>
+            <th>Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="recruteur : ${recruteurs}">
+            <td>
+              <div class="form-check">
+                <input class="form-check-input recruiter-checkbox" type="checkbox"
+                       th:value="${recruteur.idRecruteur}">
+              </div>
+            </td>
+            <td th:text="${recruteur.idRecruteur}"></td>
+            <td th:text="${recruteur.nom != null ? recruteur.nom : '-'}"></td>
+            <td th:text="${recruteur.email != null ? recruteur.email : '-'}"></td>
+            <td th:text="${recruteur.telephone != null ? recruteur.telephone : '-'}"></td>
+            <td>
+              <span th:if="${recruteur.company != null}" th:text="${recruteur.company.nomEntreprise}"></span>
+              <span th:unless="${recruteur.company != null}" class="badge bg-warning">Sans entreprise</span>
+            </td>
+            <td>
+              <span th:if="${recruteur.offres != null}" th:text="${recruteur.offres.size()}"></span>
+              <span th:unless="${recruteur.offres != null}">0</span>
+            </td>
+            <td>
+              <span th:if="${recruteur.status == 'ACTIVE'}" class="badge bg-success">Actif</span>
+              <span th:if="${recruteur.status == 'INACTIVE'}" class="badge bg-danger">Inactif</span>
+              <span th:if="${recruteur.status == 'PENDING'}" class="badge bg-warning">En attente</span>
+              <span th:if="${recruteur.status == null}" class="badge bg-secondary">Non défini</span>
+            </td>
+            <td th:text="${recruteur.dateInscription != null ? #temporals.format(recruteur.dateInscription, 'dd/MM/yyyy') : '-'}"></td>
+            <td>
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-outline-primary edit-recruiter-btn"
+                        th:data-id="${recruteur.idRecruteur}"
+                        data-bs-toggle="modal" data-bs-target="#editRecruiterModal">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger delete-recruiter-btn"
+                        th:data-id="${recruteur.idRecruteur}"
+                        data-bs-toggle="modal" data-bs-target="#deleteRecruiterModal">
+                  <i class="fas fa-trash"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary toggle-status-btn"
+                        th:data-id="${recruteur.idRecruteur}"
+                        th:data-status="${recruteur.status}">
+                  <i class="fas fa-toggle-on"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr th:if="${recruteurs == null || recruteurs.empty}">
+            <td colspan="10" class="text-center">Aucun recruteur trouvé</td>
+          </tr>
+          </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <nav th:if="${totalPages > 1}">
+          <ul class="pagination justify-content-center">
+            <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+              <a class="page-link" th:href="@{/admin/recruiters(page=0, size=${pageSize}, search=${search}, company=${company}, status=${status})}">&laquo;</a>
+            </li>
+            <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+              <a class="page-link" th:href="@{/admin/recruiters(page=${currentPage - 1}, size=${pageSize}, search=${search}, company=${company}, status=${status})}">&lt;</a>
+            </li>
+            <li class="page-item" th:each="i: ${#numbers.sequence(0, totalPages - 1)}"
+                th:classappend="${i == currentPage ? 'active' : ''}">
+              <a class="page-link" th:href="@{/admin/recruiters(page=${i}, size=${pageSize}, search=${search}, company=${company}, status=${status})}"
+                 th:text="${i + 1}"></a>
+            </li>
+            <li class="page-item" th:classappend="${currentPage == totalPages - 1 ? 'disabled' : ''}">
+              <a class="page-link" th:href="@{/admin/recruiters(page=${currentPage + 1}, size=${pageSize}, search=${search}, company=${company}, status=${status})}">&gt;</a>
+            </li>
+            <li class="page-item" th:classappend="${currentPage == totalPages - 1 ? 'disabled' : ''}">
+              <a class="page-link" th:href="@{/admin/recruiters(page=${totalPages - 1}, size=${pageSize}, search=${search}, company=${company}, status=${status})}">&raquo;</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Recruiter Modal -->
+  <div class="modal fade" id="addRecruiterModal" tabindex="-1" aria-labelledby="addRecruiterModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addRecruiterModalLabel">Ajouter un recruteur</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="addRecruiterForm">
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="nom" class="form-label">Nom</label>
+                <input type="text" class="form-control" id="nom" name="nom" required>
+              </div>
+              <div class="col-md-6">
+                <label for="prenom" class="form-label">Prénom</label>
+                <input type="text" class="form-control" id="prenom" name="prenom" required>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+              </div>
+              <div class="col-md-6">
+                <label for="telephone" class="form-label">Téléphone</label>
+                <input type="tel" class="form-control" id="telephone" name="telephone">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="company" class="form-label">Entreprise</label>
+              <select class="form-select" id="company" name="company">
+                <option value="">Sélectionner une entreprise</option>
+                <option th:each="company : ${companies}"
+                        th:value="${company.id}"
+                        th:text="${company.nomEntreprise}"></option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="poste" class="form-label">Poste</label>
+              <input type="text" class="form-control" id="poste" name="poste">
+            </div>
+            <div class="mb-3">
+              <label for="status" class="form-label">Statut</label>
+              <select class="form-select" id="status" name="status" required>
+                <option value="ACTIVE">Actif</option>
+                <option value="INACTIVE">Inactif</option>
+                <option value="PENDING">En attente</option>
+              </select>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-primary" id="saveRecruiterBtn">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Recruiter Modal -->
+  <div class="modal fade" id="editRecruiterModal" tabindex="-1" aria-labelledby="editRecruiterModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editRecruiterModalLabel">Modifier un recruteur</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editRecruiterForm">
+            <input type="hidden" id="editRecruiterId" name="id">
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="editNom" class="form-label">Nom</label>
+                <input type="text" class="form-control" id="editNom" name="nom" required>
+              </div>
+              <div class="col-md-6">
+                <label for="editPrenom" class="form-label">Prénom</label>
+                <input type="text" class="form-control" id="editPrenom" name="prenom" required>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="editEmail" class="form-label">Email</label>
+                <input type="email" class="form-control" id="editEmail" name="email" required>
+              </div>
+              <div class="col-md-6">
+                <label for="editTelephone" class="form-label">Téléphone</label>
+                <input type="tel" class="form-control" id="editTelephone" name="telephone">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="editCompany" class="form-label">Entreprise</label>
+              <select class="form-select" id="editCompany" name="company">
+                <option value="">Sélectionner une entreprise</option>
+                <option th:each="company : ${companies}"
+                        th:value="${company.id}"
+                        th:text="${company.nomEntreprise}"></option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="editPoste" class="form-label">Poste</label>
+              <input type="text" class="form-control" id="editPoste" name="poste">
+            </div>
+            <div class="mb-3">
+              <label for="editStatus" class="form-label">Statut</label>
+              <select class="form-select" id="editStatus" name="status" required>
+                <option value="ACTIVE">Actif</option>
+                <option value="INACTIVE">Inactif</option>
+                <option value="PENDING">En attente</option>
+              </select>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-primary" id="updateRecruiterBtn">Mettre à jour</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Recruiter Modal -->
+  <div class="modal fade" id="deleteRecruiterModal" tabindex="-1" aria-labelledby="deleteRecruiterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteRecruiterModalLabel">Confirmer la suppression</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Êtes-vous sûr de vouloir supprimer ce recruteur ? Cette action est irréversible.</p>
+          <input type="hidden" id="deleteRecruiterId">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Supprimer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Batch Delete Modal -->
+  <div class="modal fade" id="batchDeleteModal" tabindex="-1" aria-labelledby="batchDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="batchDeleteModalLabel">Confirmer les suppressions</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Êtes-vous sûr de vouloir supprimer les recruteurs sélectionnés ? Cette action est irréversible.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="button" class="btn btn-danger" id="confirmBatchDeleteBtn">Supprimer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript for the recruiters page -->
+  <script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+      // Select all checkbox
+      const selectAllCheckbox = document.getElementById('selectAll');
+      if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+          const checkboxes = document.querySelectorAll('.recruiter-checkbox');
+          checkboxes.forEach(checkbox => {
+            checkbox.checked = selectAllCheckbox.checked;
+          });
+          updateBatchDeleteButton();
+        });
+      }
+
+      // Individual checkboxes
+      const checkboxes = document.querySelectorAll('.recruiter-checkbox');
+      checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateBatchDeleteButton);
+      });
+
+      // Update batch delete button state
+      function updateBatchDeleteButton() {
+        const batchDeleteBtn = document.getElementById('batchDeleteBtn');
+        const checkedBoxes = document.querySelectorAll('.recruiter-checkbox:checked');
+        batchDeleteBtn.disabled = checkedBoxes.length === 0;
+      }
+
+      // Batch delete button
+      const batchDeleteBtn = document.getElementById('batchDeleteBtn');
+      if (batchDeleteBtn) {
+        batchDeleteBtn.addEventListener('click', function() {
+          const batchDeleteModal = new bootstrap.Modal(document.getElementById('batchDeleteModal'));
+          batchDeleteModal.show();
+        });
+      }
+
+      // Confirm batch delete
+      const confirmBatchDeleteBtn = document.getElementById('confirmBatchDeleteBtn');
+      if (confirmBatchDeleteBtn) {
+        confirmBatchDeleteBtn.addEventListener('click', function() {
+          const checkedBoxes = document.querySelectorAll('.recruiter-checkbox:checked');
+          const ids = Array.from(checkedBoxes).map(cb => cb.value);
+
+          // AJAX request to delete the selected recruiters
+          fetch('/admin/recruteurs/batch-delete', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ids: ids})
+          })
+                  .then(response => response.json())
+                  .then(data => {
+                    if (data.success) {
+                      // Reload the page to show updated list
+                      window.location.reload();
+                    } else {
+                      alert('Erreur lors de la suppression: ' + data.error);
+                    }
+                  })
+                  .catch(error => {
+                    console.error('Error:', error);
+                    alert('Une erreur s\'est produite lors de la suppression');
+                  });
+        });
+      }
+
+      // Delete recruiter button
+      const deleteRecruiterBtns = document.querySelectorAll('.delete-recruiter-btn');
+      deleteRecruiterBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+          const id = this.getAttribute('data-id');
+          document.getElementById('deleteRecruiterId').value = id;
+        });
+      });
+
+      // Confirm delete recruiter
+      const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+      if (confirmDeleteBtn) {
+        confirmDeleteBtn.addEventListener('click', function() {
+          const id = document.getElementById('deleteRecruiterId').value;
+
+          fetch(`/admin/recruteurs/delete/${id}`, {
+            method: 'DELETE'
+          })
+                  .then(response => response.json())
+                  .then(data => {
+                    if (data.success) {
+                      window.location.reload();
+                    } else {
+                      alert('Erreur lors de la suppression: ' + data.error);
+                    }
+                  })
+                  .catch(error => {
+                    console.error('Error:', error);
+                    alert('Une erreur s\'est produite lors de la suppression');
+                  });
+        });
+      }
+
+      // Toggle status button
+      const toggleStatusBtns = document.querySelectorAll('.toggle-status-btn');
+      toggleStatusBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+          const id = this.getAttribute('data-id');
+          const currentStatus = this.getAttribute('data-status');
+          const newStatus = currentStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+
+          fetch(`/admin/recruteurs/${id}/toggle-status`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({status: newStatus})
+          })
+                  .then(response => response.json())
+                  .then(data => {
+                    if (data.success) {
+                      window.location.reload();
+                    } else {
+                      alert('Erreur lors de la mise à jour du statut: ' + data.error);
+                    }
+                  })
+                  .catch(error => {
+                    console.error('Error:', error);
+                    alert('Une erreur s\'est produite lors de la mise à jour du statut');
+                  });
+        });
+      });
+
+      // Edit recruiter button
+      const editRecruiterBtns = document.querySelectorAll('.edit-recruiter-btn');
+      editRecruiterBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+          const id = this.getAttribute('data-id');
+
+          // AJAX request to get recruiter data
+          fetch(`/admin/recruteurs/${id}/data`)
+                  .then(response => response.json())
+                  .then(data => {
+                    document.getElementById('editRecruiterId').value = data.idRecruteur;
+                    document.getElementById('editNom').value = data.nom || '';
+                    document.getElementById('editPrenom').value = data.prenom || '';
+                    document.getElementById('editEmail').value = data.email || '';
+                    document.getElementById('editTelephone').value = data.telephone || '';
+                    document.getElementById('editPoste').value = data.poste || '';
+                    document.getElementById('editStatus').value = data.status || 'ACTIVE';
+
+                    if (data.company) {
+                      document.getElementById('editCompany').value = data.company.id;
+                    } else {
+                      document.getElementById('editCompany').value = '';
+                    }
+                  })
+                  .catch(error => {
+                    console.error('Error:', error);
+                    alert('Une erreur s\'est produite lors de la récupération des données');
+                  });
+        });
+      });
+
+      // Save new recruiter
+      const saveRecruiterBtn = document.getElementById('saveRecruiterBtn');
+      if (saveRecruiterBtn) {
+        saveRecruiterBtn.addEventListener('click', function() {
+          const form = document.getElementById('addRecruiterForm');
+          const formData = new FormData(form);
+          const data = Object.fromEntries(formData.entries());
+
+          // Add company object if selected
+          if (data.company) {
+            data.company = {id: data.company};
+          } else {
+            data.company = null;
+          }
+
+          fetch('/admin/recruteurs/add', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+          })
+                  .then(response => response.json())
+                  .then(data => {
+                    if (data.success) {
+                      window.location.reload();
+                    } else {
+                      alert('Erreur lors de l\'ajout du recruteur: ' + data.error);
+                    }
+                  })
+                  .catch(error => {
+                    console.error('Error:', error);
+                    alert('Une erreur s\'est produite lors de l\'ajout du recruteur');
+                  });
+        });
+      }
+
+      // Update recruiter
+      const updateRecruiterBtn = document.getElementById('updateRecruiterBtn');
+      if (updateRecruiterBtn) {
+        updateRecruiterBtn.addEventListener('click', function() {
+          const form = document.getElementById('editRecruiterForm');
+          const formData = new FormData(form);
+          const data = Object.fromEntries(formData.entries());
+          const id = data.id;
+
+          // Add company object if selected
+          if (data.company) {
+            data.company = {id: data.company};
+          } else {
+            data.company = null;
+          }
+
+          fetch(`/admin/recruteurs/${id}/update`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+          })
+                  .then(response => response.json())
+                  .then(data => {
+                    if (data.success) {
+                      window.location.reload();
+                    } else {
+                      alert('Erreur lors de la mise à jour du recruteur: ' + data.error);
+                    }
+                  })
+                  .catch(error => {
+                    console.error('Error:', error);
+                    alert('Une erreur s\'est produite lors de la mise à jour du recruteur');
+                  });
+        });
+      }
+
+      // Export to CSV
+      const exportRecruitersBtn = document.getElementById('exportRecruitersBtn');
+      if (exportRecruitersBtn) {
+        exportRecruitersBtn.addEventListener('click', function() {
+          // Get current search parameters
+          const urlParams = new URLSearchParams(window.location.search);
+          const search = urlParams.get('search') || '';
+          const company = urlParams.get('company') || '';
+          const status = urlParams.get('status') || '';
+
+          // Build export URL with current filters
+          const exportUrl = `/admin/recruteurs/export?search=${search}&company=${company}&status=${status}`;
+          window.location.href = exportUrl;
+        });
+      }
+    });
+  </script>
+</div>

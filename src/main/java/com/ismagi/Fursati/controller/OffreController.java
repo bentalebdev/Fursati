@@ -40,7 +40,7 @@ public class OffreController {
         try {
             // Get recruiter
             System.out.println("DEBUG: Getting recruiter with ID 1");
-            Recruteur recruteur = recruteurService.getRecruteurById(Long.valueOf(1));
+            Recruteur recruteur = recruteurService.getRecruteurById(offre.getRecruteur().getIdRecruteur());
             if (recruteur == null) {
                 System.out.println("DEBUG: CRITICAL ERROR - Recruiter with ID 1 not found!");
                 throw new RuntimeException("Recruiter with ID 1 not found");
@@ -117,5 +117,31 @@ public class OffreController {
         return "fragments/recruiter/my-jobs :: my-jobs";
     }
 
+    /**
+     * Endpoint pour mettre à jour le statut d'une offre
+     */
+    @PutMapping("/api/offres/{id}/status")
+    @ResponseBody
+    public String updateOffreStatus(@PathVariable Long id, @RequestBody Offre request) {
+        try {
+            Offre offre = offreService.getOffreById(id);
+            if (offre == null) {
+                return "{\"success\": false, \"error\": \"Offre non trouvée\"}";
+            }
+
+            offre.setStatus(request.getStatus());
+
+            // Pour les offres activées, mettre à jour les dates
+            if ("ACTIVE".equals(request.getStatus())) {
+                offre.setPostedAt(java.time.LocalDateTime.now());
+                offre.setExpiresAt(java.time.LocalDateTime.now().plusDays(30));
+            }
+
+            offreService.saveOffre(offre);
+            return "{\"success\": true}";
+        } catch (Exception e) {
+            return "{\"success\": false, \"error\": \"" + e.getMessage() + "\"}";
+        }
+    }
     
 }

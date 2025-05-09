@@ -1,17 +1,43 @@
-
 <div th:fragment="dashboard">
-    <!-- Dashboard content -->
-    <div class="row">
-        <!-- Stats cards -->
+    <!-- Candidate welcome section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="me-4">
+                            <img th:if="${candidat != null && candidat.profilePicture != null}"
+                                 th:src="${candidat.profilePicture}"
+                                 alt="Profile Picture"
+                                 class="rounded-circle"
+                                 style="width: 80px; height: 80px; object-fit: cover;">
+                            <div th:unless="${candidat != null && candidat.profilePicture != null}"
+                                 class="rounded-circle bg-light d-flex align-items-center justify-content-center text-primary"
+                                 style="width: 80px; height: 80px; font-size: 2rem;">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <h2 class="mb-1">Bonjour, <span th:text="${candidat != null ? candidat.firstName : 'Candidat'}">Candidat</span> !</h2>
+                            <p class="mb-0 opacity-75">Voici le résumé de votre activité</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats cards with animation -->
+    <div class="row mb-4">
         <div class="col-md-3 mb-3">
-            <div class="card h-100">
+            <div class="card h-100 stats-card" data-aos="fade-up" data-aos-delay="100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="rounded-circle p-3 bg-primary bg-opacity-10 me-3">
                             <i class="fas fa-paper-plane text-primary"></i>
                         </div>
                         <div>
-                            <h3 class="mb-0 fw-bold">12</h3>
+                            <h3 class="mb-0 fw-bold counter-animation" id="applicationCounter" data-count="[[${applicationCount ?: 0}]]">0</h3>
                             <p class="text-muted mb-0">Candidatures</p>
                         </div>
                     </div>
@@ -20,14 +46,14 @@
         </div>
 
         <div class="col-md-3 mb-3">
-            <div class="card h-100">
+            <div class="card h-100 stats-card" data-aos="fade-up" data-aos-delay="200">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="rounded-circle p-3 bg-success bg-opacity-10 me-3">
                             <i class="fas fa-calendar-check text-success"></i>
                         </div>
                         <div>
-                            <h3 class="mb-0 fw-bold">3</h3>
+                            <h3 class="mb-0 fw-bold counter-animation" id="interviewCounter" data-count="[[${interviewCount ?: 0}]]">0</h3>
                             <p class="text-muted mb-0">Entretiens</p>
                         </div>
                     </div>
@@ -36,14 +62,14 @@
         </div>
 
         <div class="col-md-3 mb-3">
-            <div class="card h-100">
+            <div class="card h-100 stats-card" data-aos="fade-up" data-aos-delay="300">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="rounded-circle p-3 bg-info bg-opacity-10 me-3">
                             <i class="fas fa-bookmark text-info"></i>
                         </div>
                         <div>
-                            <h3 class="mb-0 fw-bold">8</h3>
+                            <h3 class="mb-0 fw-bold counter-animation" id="savedCounter" data-count="[[${savedOffersCount ?: 0}]]">0</h3>
                             <p class="text-muted mb-0">Offres sauvegardées</p>
                         </div>
                     </div>
@@ -52,14 +78,14 @@
         </div>
 
         <div class="col-md-3 mb-3">
-            <div class="card h-100">
+            <div class="card h-100 stats-card" data-aos="fade-up" data-aos-delay="400">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="rounded-circle p-3 bg-warning bg-opacity-10 me-3">
                             <i class="fas fa-eye text-warning"></i>
                         </div>
                         <div>
-                            <h3 class="mb-0 fw-bold">42</h3>
+                            <h3 class="mb-0 fw-bold counter-animation" id="viewsCounter" data-count="[[${profileViewsCount ?: 0}]]">0</h3>
                             <p class="text-muted mb-0">Vues du profil</p>
                         </div>
                     </div>
@@ -68,47 +94,103 @@
         </div>
     </div>
 
-    <!-- Example of dashboard content -->
-    <div class="row mt-4">
-        <div class="col-lg-8 mb-4">
+    <!-- Applications Progress Section -->
+    <div class="row mb-4">
+        <div class="col-lg-8 mb-4 mb-lg-0">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Suivi des candidatures</h5>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-outline-primary active" id="monthlyBtn">Mensuel</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="yearlyBtn">Annuel</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <canvas id="applicationsChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">Statut des candidatures</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="applicationStatusChart"></canvas>
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <p class="mb-0 fw-bold text-success">25%</p>
+                            <small class="text-muted">Acceptées</small>
+                        </div>
+                        <div class="col-4">
+                            <p class="mb-0 fw-bold text-warning">58%</p>
+                            <small class="text-muted">En attente</small>
+                        </div>
+                        <div class="col-4">
+                            <p class="mb-0 fw-bold text-danger">17%</p>
+                            <small class="text-muted">Refusées</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity and Upcoming Interviews -->
+    <div class="row mb-4">
+        <div class="col-lg-8 mb-4 mb-lg-0">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Activité récente</h5>
-                    <button class="btn btn-sm btn-light">Voir tout</button>
+                    <a href="/candidats/applications" class="btn btn-sm btn-primary">Voir tout</a>
                 </div>
                 <div class="card-body p-0">
                     <!-- Activity list -->
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item p-3">
+                    <ul class="list-group list-group-flush activity-list">
+                        <!-- No activities message -->
+                        <li class="list-group-item p-3 text-center" th:if="${recentActivities == null || recentActivities.isEmpty()}">
+                            <p class="mb-0 text-muted">Aucune activité récente</p>
+                        </li>
+
+                        <!-- Activities list -->
+                        <li class="list-group-item p-3 activity-item" th:each="activity, iterStat : ${recentActivities}" th:data-delay="${iterStat.index * 100}">
                             <div class="d-flex">
-                                <div class="bg-primary bg-opacity-10 p-2 rounded me-3">
+                                <!-- Application icon -->
+                                <div class="bg-primary bg-opacity-10 p-2 rounded me-3" th:if="${activity.type == 'application'}">
                                     <i class="fas fa-paper-plane text-primary"></i>
                                 </div>
-                                <div>
-                                    <p class="mb-0">Vous avez postulé à <strong>Développeur Full Stack</strong> chez <strong>TechMagic SARL</strong></p>
-                                    <small class="text-muted">Il y a 2 jours</small>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="list-group-item p-3">
-                            <div class="d-flex">
-                                <div class="bg-success bg-opacity-10 p-2 rounded me-3">
+                                <!-- Interview icon -->
+                                <div class="bg-success bg-opacity-10 p-2 rounded me-3" th:if="${activity.type == 'interview'}">
                                     <i class="fas fa-calendar-check text-success"></i>
                                 </div>
-                                <div>
-                                    <p class="mb-0">Entretien confirmé avec <strong>MarketPro</strong> pour le poste de <strong>Responsable Marketing</strong></p>
-                                    <small class="text-muted">Il y a 3 jours</small>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="list-group-item p-3">
-                            <div class="d-flex">
-                                <div class="bg-info bg-opacity-10 p-2 rounded me-3">
+                                <!-- Saved job icon -->
+                                <div class="bg-info bg-opacity-10 p-2 rounded me-3" th:if="${activity.type == 'saved'}">
                                     <i class="fas fa-bookmark text-info"></i>
                                 </div>
+
                                 <div>
-                                    <p class="mb-0">Vous avez enregistré <strong>Chef de projet Digital</strong> chez <strong>DigiTech</strong></p>
-                                    <small class="text-muted">Il y a 5 jours</small>
+                                    <!-- Application message -->
+                                    <p class="mb-0" th:if="${activity.type == 'application'}">
+                                        Vous avez postulé à <strong th:text="${activity.title}">Titre du poste</strong>
+                                        chez <strong th:text="${activity.company}">Entreprise</strong>
+                                    </p>
+                                    <!-- Interview message -->
+                                    <p class="mb-0" th:if="${activity.type == 'interview'}">
+                                        Entretien confirmé avec <strong th:text="${activity.company}">Entreprise</strong>
+                                        pour le poste de <strong th:text="${activity.title}">Titre du poste</strong>
+                                    </p>
+                                    <!-- Saved job message -->
+                                    <p class="mb-0" th:if="${activity.type == 'saved'}">
+                                        Vous avez enregistré <strong th:text="${activity.title}">Titre du poste</strong>
+                                        chez <strong th:text="${activity.company}">Entreprise</strong>
+                                    </p>
+
+                                    <small class="text-muted" th:text="'Il y a ' + ${activity.daysAgo} + ' jour' + (${activity.daysAgo > 1 ? 's' : ''})">
+                                        Il y a 3 jours
+                                    </small>
                                 </div>
                             </div>
                         </li>
@@ -117,35 +199,362 @@
             </div>
         </div>
 
-        <div class="col-lg-4 mb-4">
+        <div class="col-lg-4">
             <div class="card">
-                <div class="card-header">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Entretiens à venir</h5>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            Actions
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <li><a class="dropdown-item" href="#" id="syncCalendarBtn"><i class="fas fa-sync-alt me-2"></i>Synchroniser avec calendrier</a></li>
+                            <li><a class="dropdown-item" href="#" id="setReminderBtn"><i class="fas fa-bell me-2"></i>Configurer des rappels</a></li>
+                        </ul>
+                    </div>
                 </div>
                 <div class="card-body">
-                    <div class="mb-3 pb-3 border-bottom">
-                        <div class="d-flex justify-content-between mb-2">
-                            <strong>MarketPro</strong>
-                            <span class="badge bg-primary">22 Mars</span>
-                        </div>
-                        <p class="mb-0">Responsable Marketing</p>
+                    <!-- No interviews message -->
+                    <div class="text-center py-3" th:if="${upcomingInterviews == null || upcomingInterviews.isEmpty()}">
+                        <p class="text-muted mb-0">Aucun entretien programmé</p>
                     </div>
-                    <div class="mb-3 pb-3 border-bottom">
+
+                    <!-- Upcoming interviews list -->
+                    <div th:each="interview, iterStat : ${upcomingInterviews}"
+                         th:class="${!iterStat.last ? 'mb-3 pb-3 border-bottom interview-item' : 'interview-item'}"
+                         th:data-delay="${iterStat.index * 100}">
                         <div class="d-flex justify-content-between mb-2">
-                            <strong>DigiTech</strong>
-                            <span class="badge bg-primary">25 Mars</span>
+                            <strong th:text="${interview.company}">Entreprise</strong>
+                            <span class="badge bg-primary" th:text="${interview.date}">Date</span>
                         </div>
-                        <p class="mb-0">Développeur Front-end</p>
-                    </div>
-                    <div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <strong>Tech Solutions</strong>
-                            <span class="badge bg-primary">28 Mars</span>
+                        <p class="mb-0" th:text="${interview.title}">Titre du poste</p>
+                        <div class="mt-2">
+                            <button class="btn btn-sm btn-outline-primary prepare-btn">
+                                <i class="fas fa-clipboard-list"></i> Préparer
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary reminder-btn">
+                                <i class="fas fa-bell"></i> Rappel
+                            </button>
                         </div>
-                        <p class="mb-0">Chef de Projet</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Job Suggestions Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Offres recommandées pour vous</h5>
+                    <a href="/candidats/jobs" class="btn btn-sm btn-primary">Voir plus</a>
+                </div>
+                <div class="card-body">
+                    <div class="row job-suggestions">
+                        <!-- Job suggestion cards would come from an API call in a real implementation -->
+                        <div class="col-md-4 mb-3 job-card" data-aos="fade-up" data-aos-delay="100">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="rounded p-2 bg-light me-3">
+                                            <i class="fas fa-building text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">Développeur Front-end</h6>
+                                            <p class="text-muted small mb-0">DigiTech Solutions</p>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="d-flex align-items-center mb-1">
+                                            <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                                            <span class="small">Paris, France</span>
+                                        </div>
+                                        <div class="d-flex align-items-center mb-1">
+                                            <i class="fas fa-clock text-muted me-2"></i>
+                                            <span class="small">CDI - Temps plein</span>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-euro-sign text-muted me-2"></i>
+                                            <span class="small">45 000 - 55 000 € / an</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <a href="/candidats/jobs/details/1" class="btn btn-sm btn-primary w-100">Voir l'offre</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 mb-3 job-card" data-aos="fade-up" data-aos-delay="200">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="rounded p-2 bg-light me-3">
+                                            <i class="fas fa-building text-success"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">UX/UI Designer</h6>
+                                            <p class="text-muted small mb-0">CreativeWorld</p>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="d-flex align-items-center mb-1">
+                                            <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                                            <span class="small">Lyon, France</span>
+                                        </div>
+                                        <div class="d-flex align-items-center mb-1">
+                                            <i class="fas fa-clock text-muted me-2"></i>
+                                            <span class="small">CDI - Temps plein</span>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-euro-sign text-muted me-2"></i>
+                                            <span class="small">40 000 - 50 000 € / an</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <a href="/candidats/jobs/details/2" class="btn btn-sm btn-primary w-100">Voir l'offre</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 mb-3 job-card" data-aos="fade-up" data-aos-delay="300">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="rounded p-2 bg-light me-3">
+                                            <i class="fas fa-building text-info"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">Chef de Projet Digital</h6>
+                                            <p class="text-muted small mb-0">InnoTech Media</p>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="d-flex align-items-center mb-1">
+                                            <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                                            <span class="small">Nantes, France</span>
+                                        </div>
+                                        <div class="d-flex align-items-center mb-1">
+                                            <i class="fas fa-clock text-muted me-2"></i>
+                                            <span class="small">CDI - Temps plein</span>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-euro-sign text-muted me-2"></i>
+                                            <span class="small">50 000 - 60 000 € / an</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <a href="/candidats/jobs/details/3" class="btn btn-sm btn-primary w-100">Voir l'offre</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Counter animation for statistics
+            document.querySelectorAll('.counter-animation').forEach(counter => {
+                const target = parseInt(counter.getAttribute('data-count'));
+                let count = 0;
+                const duration = 1500; // animation duration in milliseconds
+                const frameDuration = 1000/60; // 60fps
+                const totalFrames = Math.round(duration / frameDuration);
+                const counterIncrement = target / totalFrames;
+
+                const timer = setInterval(() => {
+                    count += counterIncrement;
+                    if (count >= target) {
+                        counter.innerText = target;
+                        clearInterval(timer);
+                    } else {
+                        counter.innerText = Math.floor(count);
+                    }
+                }, frameDuration);
+            });
+
+            // Animate activity items
+            document.querySelectorAll('.activity-item').forEach(item => {
+                const delay = parseInt(item.getAttribute('data-delay')) || 0;
+                setTimeout(() => {
+                    item.classList.add('highlight-animation');
+                    setTimeout(() => {
+                        item.classList.remove('highlight-animation');
+                    }, 1000);
+                }, 500 + delay);
+            });
+
+            // Animate interview items
+            document.querySelectorAll('.interview-item').forEach(item => {
+                const delay = parseInt(item.getAttribute('data-delay')) || 0;
+                setTimeout(() => {
+                    item.classList.add('highlight-animation');
+                    setTimeout(() => {
+                        item.classList.remove('highlight-animation');
+                    }, 1000);
+                }, 800 + delay);
+            });
+
+            // Prepare buttons for interviews
+            document.querySelectorAll('.prepare-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    alert('La préparation à l\'entretien sera bientôt disponible !');
+                });
+            });
+
+            // Reminder buttons for interviews
+            document.querySelectorAll('.reminder-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    alert('Un rappel sera envoyé 24h avant l\'entretien');
+                    this.innerHTML = '<i class="fas fa-check"></i> Rappel activé';
+                    this.classList.remove('btn-outline-secondary');
+                    this.classList.add('btn-success');
+                    this.disabled = true;
+                });
+            });
+
+            // Calendar sync
+            document.getElementById('syncCalendarBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('Synchronisation avec le calendrier en cours...');
+            });
+
+            // Set reminder
+            document.getElementById('setReminderBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('Configuration des rappels en cours...');
+            });
+
+            // Charts initialization
+            try {
+                // Applications progress chart
+                const applicationsCtx = document.getElementById('applicationsChart').getContext('2d');
+                const monthlyData = [1, 3, 2, 4, 2, 3, 5, 2, 1, 3, 4, 12];
+                const yearlyData = [5, 8, 12, 15, 10, 8, 16, 20, 15, 17, 12, 12];
+
+                const applicationsChart = new Chart(applicationsCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'],
+                        datasets: [{
+                            label: 'Candidatures',
+                            data: yearlyData,
+                            backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                            borderColor: 'rgba(13, 110, 253, 1)',
+                            borderWidth: 2,
+                            pointBackgroundColor: 'rgba(13, 110, 253, 1)',
+                            tension: 0.3,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    precision: 0
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+
+                // Button for chart toggle
+                document.getElementById('monthlyBtn').addEventListener('click', function() {
+                    this.classList.add('active');
+                    document.getElementById('yearlyBtn').classList.remove('active');
+
+                    applicationsChart.data.datasets[0].data = monthlyData;
+                    applicationsChart.data.labels = ['1', '3', '6', '9', '12', '15', '18', '21', '24', '27', '30', '31'];
+                    applicationsChart.update();
+                });
+
+                document.getElementById('yearlyBtn').addEventListener('click', function() {
+                    this.classList.add('active');
+                    document.getElementById('monthlyBtn').classList.remove('active');
+
+                    applicationsChart.data.datasets[0].data = yearlyData;
+                    applicationsChart.data.labels = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+                    applicationsChart.update();
+                });
+
+                // Application status chart
+                const statusCtx = document.getElementById('applicationStatusChart').getContext('2d');
+                const statusChart = new Chart(statusCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Acceptées', 'En attente', 'Refusées'],
+                        datasets: [{
+                            data: [25, 58, 17],
+                            backgroundColor: [
+                                'rgba(25, 135, 84, 0.8)',
+                                'rgba(255, 193, 7, 0.8)',
+                                'rgba(220, 53, 69, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgba(25, 135, 84, 1)',
+                                'rgba(255, 193, 7, 1)',
+                                'rgba(220, 53, 69, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            } catch (e) {
+                console.error('Error initializing charts:', e);
+            }
+        });
+    </script>
+
+    <style>
+        /* Animation styles */
+        .highlight-animation {
+            animation: highlight 1s ease-in-out;
+        }
+
+        @keyframes highlight {
+            0% { background-color: transparent; }
+            50% { background-color: rgba(13, 110, 253, 0.1); }
+            100% { background-color: transparent; }
+        }
+
+        .stats-card {
+            transition: transform 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .job-card {
+            transition: transform 0.3s ease;
+        }
+
+        .job-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
 </div>

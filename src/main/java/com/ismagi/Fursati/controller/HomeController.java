@@ -2,11 +2,12 @@ package com.ismagi.Fursati.controller;
 
 import com.ismagi.Fursati.entity.Offre;
 import com.ismagi.Fursati.repository.OffreRepository;
+import com.ismagi.Fursati.service.AuthService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
@@ -20,16 +21,32 @@ public class HomeController {
         this.offreRepository = offreRepository;
     }
 
-
     @GetMapping("/")
-    public String home(@RequestParam(name = "tab", required = false, defaultValue = "home") String activeTab,
-                       Model model) {
-        // Ajouter l'onglet actif au modèle
-        model.addAttribute("activeTab", activeTab);
+    public String homePage(HttpSession session, Model model) {
+        // Vérifier si l'utilisateur est déjà authentifié
+        Boolean isAuthenticated = (Boolean) session.getAttribute("authenticated");
 
+        if (isAuthenticated != null && isAuthenticated) {
+            // Récupérer le type d'utilisateur depuis la session
+            AuthService.UserType userType = (AuthService.UserType) session.getAttribute("userType");
+
+            // Rediriger vers le dashboard correspondant
+            if (userType != null) {
+                switch (userType) {
+                    case ADMIN:
+                        return "redirect:/admin";
+                    case CANDIDAT:
+                        return "redirect:/candidats"; // Path corrigé (était /candidat)
+                    case RECRUTEUR:
+                        return "redirect:/recruteurs";
+                }
+            }
+        }
+
+        // Si non authentifié ou type inconnu, afficher la page d'accueil
+        model.addAttribute("activeTab", "home");
         return "home";
     }
-
 
     @GetMapping("/jobs")
     public String jobs(Model model) {
@@ -62,10 +79,10 @@ public class HomeController {
         model.addAttribute("activeTab", "about");
         return "home";
     }
+
     @GetMapping("/signup")
-    public String signup(Model model){
-        model.addAttribute("activeTab","signup");
+    public String signup(Model model) {
+        model.addAttribute("activeTab", "signup");
         return "home";
     }
-
 }

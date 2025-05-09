@@ -1,6 +1,7 @@
 // Company.java
 package com.ismagi.Fursati.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
@@ -73,10 +74,16 @@ public class Company {
     @Column(name = "company_values", length = 1000)
     private String valeurs;
 
+    // Company.java
+// Ajoutez cette annotation pour la liste des recruteurs
     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @ToString.Exclude // Add this annotation to exclude from toString()
+    @ToString.Exclude
+    @JsonManagedReference("company-recruteurs") // Utiliser le même label que dans Recruteur
     private List<Recruteur> recruteurs;
 
+    // Update the field in Company.java to allow nulls initially
+    @Column(name = "is_verified")
+    private Boolean isVerified = false; // Provide a default value to prevent null
     public Company() {}
 
 }

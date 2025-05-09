@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fursati | Détails de candidature</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link th:href="@{/css/adminboard.css}" rel="stylesheet">
+</head>
+<body>
+<!-- Include the sidebar fragment -->
+<div th:replace="~{fragments/admin/sidebar :: sidebar}"></div>
+
+<!-- Header/AppBar -->
+<div th:replace="~{fragments/admin/header :: header}"></div>
+
+<!-- Main content area -->
+<div class="main-content expanded" id="mainContent">
+  <div class="container-fluid main-content-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="mb-1">Détails de la candidature</h2>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Tableau de bord</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/admin/applications}">Candidatures</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Détails</li>
+          </ol>
+        </nav>
+      </div>
+      <div>
+        <a th:href="@{/admin/applications}" class="btn btn-outline-secondary me-2">
+          <i class="fas fa-arrow-left me-1"></i> Retour
+        </a>
+        <div class="btn-group">
+          <!-- Status update buttons based on current status -->
+          <th:block th:if="${demande.etat != 'Sélectionné'}">
+            <a class="btn btn-success"
+               th:href="@{/admin/applications/{id}/update-status(id=${demande.idDemande},status='Sélectionné')}">
+              <i class="fas fa-check-circle me-1"></i> Sélectionner
+            </a>
+          </th:block>
+          <th:block th:if="${demande.etat != 'Rejeté'}">
+            <a class="btn btn-danger ms-2"
+               th:href="@{/admin/applications/{id}/update-status(id=${demande.idDemande},status='Rejeté')}">
+              <i class="fas fa-times-circle me-1"></i> Rejeter
+            </a>
+          </th:block>
+          <th:block th:if="${demande.etat == 'Sélectionné' || demande.etat == 'Rejeté'}">
+            <a class="btn btn-warning ms-2"
+               th:href="@{/admin/applications/{id}/update-status(id=${demande.idDemande},status='En attente')}">
+              <i class="fas fa-undo me-1"></i> Réinitialiser
+            </a>
+          </th:block>
+        </div>
+      </div>
+    </div>
+
+    <!-- Application Status Card -->
+    <div class="app-card mb-4">
+      <div class="app-card-header">
+        <h5 class="app-card-title">Statut de la candidature</h5>
+        <span th:class="${'badge ' +
+                    (demande.etat == 'En attente' ? 'bg-secondary' : '') +
+                    (demande.etat == 'En cours' ? 'bg-warning text-dark' : '') +
+                    (demande.etat == 'Sélectionné' ? 'bg-success' : '') +
+                    (demande.etat == 'Rejeté' ? 'bg-danger' : '')}"
+              th:text="${demande.etat}">
+                    En cours d'évaluation
+                </span>
+      </div>
+      <div class="app-card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <table class="table table-borderless">
+              <tr>
+                <th style="width: 150px;">Date de candidature</th>
+                <td th:text="${#dates.format(demande.dateDemande, 'dd MMMM yyyy')}">15 Avril 2024</td>
+              </tr>
+              <tr>
+                <th>Référence</th>
+                <td th:text="${'APP-' + demande.idDemande}">APP-123</td>
+              </tr>
+            </table>
+          </div>
+          <div class="col-md-6">
+            <table class="table table-borderless">
+              <tr>
+                <th style="width: 150px;">Dernière mise à jour</th>
+                <td th:text="${#dates.format(demande.dateDemande, 'dd MMMM yyyy')}">18 Avril 2024</td>
+              </tr>
+              <tr>
+                <th>Traité par</th>
+                <td>Admin</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- Candidate Information Card -->
+      <div class="col-md-4 mb-4">
+        <div class="app-card">
+          <div class="app-card-header">
+            <h5 class="app-card-title">Candidat</h5>
+            <a th:href="@{/admin/candidats/{id}(id=${demande.candidat.idUser})}" class="btn btn-sm btn-outline-primary">
+              <i class="fas fa-user me-1"></i> Voir profil
+            </a>
+          </div>
+          <div class="app-card-body">
+            <div class="text-center mb-4">
+              <div class="avatar mx-auto mb-3" style="width: 80px; height: 80px; background-color: var(--primary-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 600;">
+                <span th:text="${#strings.substring(demande.candidat.nom, 0, 1) + #strings.substring(demande.candidat.prenom, 0, 1)}">HB</span>
+              </div>
+              <h5 class="mb-0" th:text="${demande.candidat.nom + ' ' + demande.candidat.prenom}">Hassan Benjelloun</h5>
+              <p class="text-muted" th:if="${demande.candidat.titre != null}" th:text="${demande.candidat.titre}">Développeur Full Stack</p>
+            </div>
+
+            <h6 class="fw-bold mb-3">Coordonnées</h6>
+            <ul class="list-unstyled">
+              <li class="mb-2">
+                <i class="fas fa-envelope text-muted me-2"></i>
+                <span th:text="${demande.candidat.email}">h.benjelloun@email.com</span>
+              </li>
+              <li class="mb-2">
+                <i class="fas fa-phone text-muted me-2"></i>
+                <span th:text="${demande.candidat.telephone}">+212 6XX-XXXX-XX</span>
+              </li>
+              <li class="mb-2" th:if="${demande.candidat.adresse != null}">
+                <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                <span th:text="${demande.candidat.adresse}">Casablanca, Maroc</span>
+              </li>
+            </ul>
+
+            <div class="d-grid gap-2 mt-4">
+              <a th:href="@{/admin/candidats/{id}/cv(id=${demande.candidat.idUser})}" class="btn btn-outline-primary">
+                <i class="fas fa-file-alt me-1"></i> Voir CV
+              </a>
+              <a href="#" class="btn btn-outline-secondary">
+                <i class="fas fa-envelope me-1"></i> Contacter
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Job Offer Information Card -->
+      <div class="col-md-8 mb-4">
+        <div class="app-card mb-4">
+          <div class="app-card-header">
+            <h5 class="app-card-title">Offre d'emploi</h5>
+            <a th:href="@{/admin/jobs/{id}(id=${demande.offre.idOffre})}" class="btn btn-sm btn-outline-primary">
+              <i class="fas fa-briefcase me-1"></i> Voir offre
+            </a>
+          </div>
+          <div class="app-card-body">
+            <div class="d-flex align-items-center mb-4">
+              <div class="me-3" style="width: 60px; height: 60px; background-color: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-building fa-2x text-primary"></i>
+              </div>
+              <div>
+                <h5 class="mb-1" th:text="${demande.offre.titre}">Développeur Full Stack</h5>
+                <p class="mb-0" th:text="${demande.offre.company.nomEntreprise}">Maroc Digital</p>
+              </div>
+            </div>
+
+            <div class="row mb-4">
+              <div class="col-md-6">
+                <p><strong>Type de contrat:</strong> <span th:text="${demande.offre.typeContrat}">CDI</span></p>
+                <p><strong>Localisation:</strong> <span th:text="${demande.offre.localisation}">Casablanca</span></p>
+              </div>
+              <div class="col-md-6">
+                <p><strong>Date de publication:</strong> <span th:text="${#dates.format(demande.offre.datePublication, 'dd/MM/yyyy')}">01/04/2024</span></p>
+                <p><strong>Salaire:</strong> <span th:text="${demande.offre.salaire != null ? demande.offre.salaire : 'Non précisé'}">12 000 - 15 000 MAD</span></p>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <h6 class="fw-bold mb-2">Description du poste</h6>
+              <p class="text-muted" th:text="${demande.offre.description}">Description du poste...</p>
+            </div>
+
+            <div class="mb-4" th:if="${demande.offre.competences != null && !demande.offre.competences.isEmpty()}">
+              <h6 class="fw-bold mb-2">Compétences requises</h6>
+              <div>
+                                <span th:each="competence : ${demande.offre.competences.split(',')}"
+                                      class="badge bg-light text-dark me-1 mb-1"
+                                      th:text="${competence}">JavaScript</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Candidate Motivation Card -->
+        <div class="app-card">
+          <div class="app-card-header">
+            <h5 class="app-card-title">Lettre de motivation</h5>
+          </div>
+          <div class="app-card-body">
+            <div class="p-3 bg-light rounded">
+              <p th:if="${demande.lettre != null}" th:text="${demande.lettre}">
+                Contenu de la lettre de motivation...
+              </p>
+              <p th:if="${demande.lettre == null}" class="text-muted fst-italic">
+                Aucune lettre de motivation fournie.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Evaluation Section -->
+    <div class="app-card mb-4">
+      <div class="app-card-header">
+        <h5 class="app-card-title">Évaluations</h5>
+        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addEvaluationModal">
+          <i class="fas fa-plus me-1"></i> Ajouter une évaluation
+        </button>
+      </div>
+      <div class="app-card-body p-0">
+        <!-- Sample evaluation - You would iterate through evaluations in your actual implementation -->
+        <div class="p-3 border-bottom">
+          <div class="d-flex justify-content-between mb-2">
+            <h6 class="mb-0">Évaluation technique</h6>
+            <small class="text-muted">18/04/2024</small>
+          </div>
+          <p class="text-muted mb-2">Par: Admin</p>
+          <div class="bg-light rounded p-3 mb-2">
+            <p class="mb-1">Le candidat possède de bonnes compétences techniques en développement web. Il a démontré une bonne maîtrise des frameworks JavaScript modernes ainsi qu'une compréhension solide des concepts de backend.</p>
+          </div>
+          <div class="d-flex align-items-center mb-1">
+            <span class="me-2 small">Compétences techniques</span>
+            <div class="progress flex-grow-1" style="height: 5px;">
+              <div class="progress-bar bg-success" role="progressbar" style="width: 85%;" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <span class="ms-2 small">8.5/10</span>
+          </div>
+        </div>
+
+        <!-- Empty state - show when no evaluations exist -->
+        <div class="text-center py-5" th:if="${evaluations == null || evaluations.isEmpty()}" style="display: none;">
+          <div class="mb-3">
+            <i class="fas fa-clipboard-list fa-3x text-muted"></i>
+          </div>
+          <h6 class="text-muted">Aucune évaluation disponible</h6>
+          <p class="text-muted small">Ajoutez une évaluation pour ce candidat.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notes Section -->
+    <div class="app-card mb-4">
+      <div class="app-card-header">
+        <h5 class="app-card-title">Notes & Commentaires</h5>
+        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addNoteModal">
+          <i class="fas fa-plus me-1"></i> Ajouter une note
+        </button>
+      </div>
+      <div class="app-card-body p-0">
+        <!-- Sample note - You would iterate through notes in your actual implementation -->
+        <div class="p-3 border-bottom">
+          <div class="d-flex justify-content-between mb-2">
+            <h6 class="mb-0">Note d'entretien</h6>
+            <small class="text-muted">19/04/2024</small>
+          </div>
+          <p class="text-muted mb-2">Par: Admin</p>
+          <div class="bg-light rounded p-3">
+            <p class="mb-0">Candidat prometteur avec une bonne expérience. À considérer pour l'entretien final avec le directeur technique.</p>
+          </div>
+        </div>
+
+        <!-- Empty state - show when no notes exist -->
+        <div class="text-center py-5" th:if="${notes == null || notes.isEmpty()}" style="display: none;">
+          <div class="mb-3">
+            <i class="fas fa-sticky-note fa-3x text-muted"></i>
+          </div>
+          <h6 class="text-muted">Aucune note disponible</h6>
+          <p class="text-muted small">Ajoutez des notes pour garder une trace des interactions avec ce candidat.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Evaluation Modal -->
+<div class="modal fade" id="addEvaluationModal" tabindex="-1" aria-labelledby="addEvaluationModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addEvaluationModalLabel">Ajouter une évaluation</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form th:action="@{/admin/applications/{id}/evaluation(id=${demande.idDemande})}" method="post">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="evaluationType" class="form-label">Type d'évaluation</label>
+            <select class="form-select" id="evaluationType" name="type" required>
+              <option value="">Sélectionner un type</option>
+              <option value="Technique">Évaluation technique</option>
+              <option value="Entretien">Entretien d'embauche</option>
+              <option value="Test">Test d'aptitude</option>
+              <option value="Référence">Vérification des références</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="evaluationContent" class="form-label">Commentaires</label>
+            <textarea class="form-control" id="evaluationContent" name="content" rows="5" required></textarea>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="technicalSkill" class="form-label">Compétences techniques (1-10)</label>
+              <input type="number" class="form-control" id="technicalSkill" name="technicalSkill" min="1" max="10" value="5">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="overallRating" class="form-label">Évaluation globale (1-10)</label>
+              <input type="number" class="form-control" id="overallRating" name="overallRating" min="1" max="10" value="5">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="submit" class="btn btn-primary">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Add Note Modal -->
+<div class="modal fade" id="addNoteModal" tabindex="-1" aria-labelledby="addNoteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addNoteModalLabel">Ajouter une note</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form th:action="@{/admin/applications/{id}/note(id=${demande.idDemande})}" method="post">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="noteTitle" class="form-label">Titre</label>
+            <input type="text" class="form-control" id="noteTitle" name="title" required>
+          </div>
+          <div class="mb-3">
+            <label for="noteContent" class="form-label">Contenu</label>
+            <textarea class="form-control" id="noteContent" name="content" rows="4" required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="submit" class="btn btn-primary">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Custom Script -->
+<script th:src="@{/js/adminboard.js}"></script>
+</body>
+</html>
