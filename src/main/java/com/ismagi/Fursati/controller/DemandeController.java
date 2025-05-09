@@ -41,7 +41,7 @@ public class DemandeController {
             Offre offre = offreService.getOffreById(offreId);
             if (offre == null) {
                 logger.warning("Offre non trouvée avec l'ID: " + offreId);
-                redirectAttributes.addFlashAttribute("error", "Offre non trouvée");
+                redirectAttributes.addFlashAttribute("errorMessage", "Offre non trouvée");
                 return "redirect:/candidats/jobs";
             }
 
@@ -51,7 +51,7 @@ public class DemandeController {
 
             if (candidat == null) {
                 logger.warning("Candidat non trouvé avec l'ID: " + candidatId);
-                redirectAttributes.addFlashAttribute("error", "Candidat non trouvé");
+                redirectAttributes.addFlashAttribute("errorMessage", "Candidat non trouvé");
                 return "redirect:/candidats/jobs";
             }
 
@@ -63,7 +63,7 @@ public class DemandeController {
 
             if (demandeExists) {
                 logger.info("Une demande existe déjà pour ce candidat et cette offre");
-                redirectAttributes.addFlashAttribute("info", "Vous avez déjà postulé à cette offre");
+                redirectAttributes.addFlashAttribute("infoMessage", "Vous avez déjà postulé à cette offre");
                 return "redirect:/candidats/jobs/details/" + offreId;
             }
 
@@ -77,14 +77,14 @@ public class DemandeController {
             demandeService.saveDemande(demande);
 
             logger.info("Demande créée avec succès pour l'offre ID: " + offreId);
-            redirectAttributes.addFlashAttribute("success", "Votre candidature a été envoyée avec succès");
+            redirectAttributes.addFlashAttribute("successMessage", "Votre candidature a été envoyée avec succès");
 
             return "redirect:/candidats/jobs/details/" + offreId;
 
         } catch (Exception e) {
             logger.severe("Erreur lors du traitement de la demande: " + e.getMessage());
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("error", "Une erreur s'est produite: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Une erreur s'est produite: " + e.getMessage());
             return "redirect:/candidats/jobs";
         }
     }

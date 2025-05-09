@@ -199,8 +199,18 @@
                     </div>
                     <div class="card-body">
                         <div class="d-grid gap-2">
-                            <button class="btn btn-outline-primary" type="button">
+                            <a th:if="${cvDocument != null}"
+                               th:href="@{/candidats/documents/download/{id}(id=${cvDocument.id})}"
+                               class="btn btn-outline-primary"
+                               target="_blank">
                                 <i class="fas fa-file-download me-2"></i>Télécharger CV
+                            </a>
+                            <button th:unless="${cvDocument != null}"
+                                    class="btn btn-outline-primary"
+                                    type="button"
+                                    disabled
+                                    title="Aucun CV disponible">
+                                <i class="fas fa-file-download me-2"></i>CV non disponible
                             </button>
                             <button class="btn btn-outline-success" type="button">
                                 <i class="fas fa-user-plus me-2"></i>Inviter à candidater

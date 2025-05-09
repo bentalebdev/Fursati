@@ -44,6 +44,8 @@ public class RecruteurController extends BaseController {
 
     @Autowired
     private CompanyService companyService;
+    @Autowired
+    private DocumentService documentService;
 
     @GetMapping("/dashboard")
     public String dashboard(Model model, HttpServletRequest request) {
@@ -1035,6 +1037,44 @@ public class RecruteurController extends BaseController {
                     .collect(Collectors.toList());
             model.addAttribute("offres", activeOffres);
 
+            // Récupérer le CV du candidat
+            Document cvDocument = null;
+
+            // Récupérer les documents du candidat
+            List<Document> documents = documentService.getAllDocumentsByCandidatId(id);
+
+            // Chercher un document de type CV (par défaut)
+            if (documents != null && !documents.isEmpty()) {
+                // Chercher d'abord un document marqué comme "CV"
+                cvDocument = documents.stream()
+                        .filter(doc -> "CV".equalsIgnoreCase(doc.getDocumentType()) && doc.isDefault())
+                        .findFirst()
+                        .orElse(null);
+
+                // Si aucun CV par défaut n'est trouvé, prendre le premier CV disponible
+                if (cvDocument == null) {
+                    cvDocument = documents.stream()
+                            .filter(doc -> "CV".equalsIgnoreCase(doc.getDocumentType()))
+                            .findFirst()
+                            .orElse(null);
+                }
+
+                // Si toujours aucun CV n'est trouvé, prenons le premier document par défaut
+                if (cvDocument == null) {
+                    cvDocument = documents.stream()
+                            .filter(Document::isDefault)
+                            .findFirst()
+                            .orElse(null);
+                }
+
+                // Si toujours rien, prenons simplement le premier document
+                if (cvDocument == null && !documents.isEmpty()) {
+                    cvDocument = documents.get(0);
+                }
+            }
+
+            model.addAttribute("cvDocument", cvDocument);
+
             // Set the active tab to track navigation
             model.addAttribute("activeTab", "candidate-profile");
 
@@ -1104,7 +1144,6 @@ public class RecruteurController extends BaseController {
 
         return totalYears;
     }
-
     // Helper class for status update requests
     public static class StatusUpdateRequest {
         private String status;

@@ -135,13 +135,11 @@ public class CandidatController {
                 model.addAttribute("offreNotFound", true);
             }
 
-            // Récupérer des offres similaires (par exemple, même type de contrat ou même secteur)
+            // Récupérer des offres similaires
             List<Offre> similarOffers = new ArrayList<>();
             if (offre != null && offre.getContractType() != null) {
                 // On pourrait implémenter une méthode dans le service qui trouve des offres similaires
                 // similarOffers = offreService.findSimilarOffers(offre);
-
-                // Pour l'instant, utiliser une liste vide
                 similarOffers = new ArrayList<>();
             }
 
