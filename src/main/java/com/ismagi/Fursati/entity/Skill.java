@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import jakarta.persistence.Id;
 
 @Entity
 @Table(name = "skills")
@@ -20,18 +19,13 @@ public class Skill {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
-    private Integer level;
+    @Column
+    private String description;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private SkillType type;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "candidat_id")
-    private Candidat candidat;
-
-    public enum SkillType {
-        TECHNICAL, LANGUAGE
-    }
+    // If this skill is related to other entities, add relationships here
+    // For example:
+    /*
+    @ManyToMany(mappedBy = "skills")
+    private Set<CandidateProfile> candidateProfiles = new HashSet<>();
+    */
 }

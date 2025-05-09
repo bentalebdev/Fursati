@@ -11,7 +11,7 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
         </div>
         <div class="modal-body">
-          <form id="personalInfoForm" th:action="@{/candidats/profile/basic-info}" method="post">
+          <form id="personalInfoForm" th:action="@{/candidats/profile/basic-info}" method="post" enctype="multipart/form-data">
             <div class="row mb-3">
               <div class="col-md-6">
                 <label for="firstName" class="form-label">Prénom</label>
@@ -44,7 +44,11 @@
             </div>
             <div class="mb-3">
               <label for="profilePicture" class="form-label">Photo de profil</label>
-              <input class="form-control" type="file" id="profilePicture">
+              <input class="form-control" type="file" id="profilePicture" name="profilePicture" accept="image/jpeg,image/png,image/gif">
+              <div class="form-text">
+                Formats acceptés: JPG, PNG, GIF. Taille maximale: 5MB.
+              </div>
+              <div id="profilePictureError" class="invalid-feedback"></div>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
@@ -191,9 +195,21 @@
     </div>
     <div class="card-body">
       <div class="row">
+        <!-- Replace the avatar container section with this updated code -->
         <div class="col-md-4 text-center mb-4 mb-md-0">
           <div class="avatar-container mb-3">
-            <div class="avatar-placeholder" th:text="${#strings.substring(candidat.firstName,0,1)} + ${#strings.substring(candidat.lastName,0,1)}">AM</div>
+            <!-- Display profile picture if available, otherwise show initials -->
+            <div th:if="${candidat.profilePicture == null || candidat.profilePicture.isEmpty()}"
+                 class="avatar-placeholder"
+                 th:text="${#strings.substring(candidat.firstName,0,1)} + ${#strings.substring(candidat.lastName,0,1)}">
+              AM
+            </div>
+            <!-- Profile picture display when available -->
+            <img th:if="${candidat.profilePicture != null && !candidat.profilePicture.isEmpty()}"
+                 th:src="@{/candidats/profile/picture}"
+                 alt="Profile Picture"
+                 class="img-fluid rounded-circle"
+                 style="width: 150px; height: 150px; object-fit: cover;">
           </div>
           <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#personalInfoModal">Changer la photo</button>
         </div>

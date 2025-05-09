@@ -218,12 +218,6 @@ public class RecruteurController {
                     .collect(Collectors.toList());
         }
 
-        if (skills != null && skills.length > 0) {
-            candidates = candidates.stream()
-                    .filter(c -> c.getSkills().stream()
-                            .anyMatch(s -> Arrays.asList(skills).contains(s.getName())))
-                    .collect(Collectors.toList());
-        }
 
         if (experience != null && !experience.isEmpty()) {
             // Filter by experience level
@@ -397,10 +391,7 @@ public class RecruteurController {
             // Simple match calculation based on skills count (for demonstration)
             double percentage = 50; // Base percentage
 
-            if (candidat.getSkills() != null && !candidat.getSkills().isEmpty()) {
-                // Add up to 40% based on skills
-                percentage += Math.min(40, candidat.getSkills().size() * 5);
-            }
+
 
             // Add some randomness for demonstration
             percentage += (Math.random() * 10);

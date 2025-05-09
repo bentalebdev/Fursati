@@ -3,16 +3,26 @@ package com.ismagi.Fursati.controller;
 import com.ismagi.Fursati.dto.*;
 import com.ismagi.Fursati.entity.Candidat;
 import com.ismagi.Fursati.entity.Demande;
+import com.ismagi.Fursati.entity.Document;
 import com.ismagi.Fursati.entity.Offre;
 import com.ismagi.Fursati.service.CandidatProfileService;
 import com.ismagi.Fursati.service.CandidatService;
 import com.ismagi.Fursati.service.DemandeService;
+import com.ismagi.Fursati.service.DocumentService;
 import com.ismagi.Fursati.service.OffreService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -24,14 +34,23 @@ public class CandidatController {
 
     @Autowired
     private CandidatService candidatService;
+
     @Autowired
     private CandidatProfileService candidatProfileService;
+
     @Autowired
     private OffreService offreService;
+
     @Autowired
     private DemandeService demandeService;
 
-    // API endpoints
+    @Autowired
+    private DocumentService documentService;
+
+    // ===============================
+    // CANDIDAT API ENDPOINTS
+    // ===============================
+
     @GetMapping("/api")
     @ResponseBody
     public List<Candidat> getAllCandidats() {
@@ -56,7 +75,10 @@ public class CandidatController {
         candidatService.deleteCandidat(id);
     }
 
-    // Pages web
+    // ===============================
+    // DASHBOARD & NAVIGATION
+    // ===============================
+
     @GetMapping({"", "/"})
     public String redirectToDashboard() {
         return "redirect:/candidats/dashboard";
@@ -74,6 +96,10 @@ public class CandidatController {
 
         return "candidateboard";
     }
+
+    // ===============================
+    // JOBS SECTION
+    // ===============================
 
     @GetMapping("/jobs")
     public String jobs(Model model) {
@@ -146,6 +172,10 @@ public class CandidatController {
         }
     }
 
+    // ===============================
+    // APPLICATIONS SECTION
+    // ===============================
+
     @GetMapping("/applications")
     public String applications(Model model) {
         logger.info("Loading applications page...");
@@ -175,7 +205,9 @@ public class CandidatController {
         return "candidateboard";
     }
 
-    // === PROFILE ===
+    // ===============================
+    // PROFILE SECTION
+    // ===============================
 
     @GetMapping("/profile")
     public String profile(Model model) {
@@ -194,10 +226,55 @@ public class CandidatController {
         return "candidateboard";
     }
 
+
     @PostMapping("/profile/basic-info")
-    public String updateBasicInfo(@ModelAttribute BasicInfoDTO basicInfoDTO) {
-        candidatProfileService.updateBasicInfo(1L, basicInfoDTO);
+    public String updateBasicInfo(
+            @ModelAttribute BasicInfoDTO basicInfoDTO,
+            @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            candidatProfileService.updateBasicInfo(1L, basicInfoDTO, profilePicture);
+            redirectAttributes.addFlashAttribute("message", "Informations personnelles mises à jour avec succès!");
+            redirectAttributes.addFlashAttribute("alertClass", "alert-success");
+        } catch (Exception e) {
+            logger.severe("Error updating basic info: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("message", "Erreur lors de la mise à jour: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("alertClass", "alert-danger");
+        }
+
         return "redirect:/candidats/profile";
+    }
+
+    @GetMapping("/profile/profilePicture/{id}")
+    public ResponseEntity<Resource> getProfilePicture(@PathVariable Long id) {
+        try {
+            byte[] imageData = candidatProfileService.getProfilePictureData(id);
+            if (imageData != null) {
+                ByteArrayResource resource = new ByteArrayResource(imageData);
+
+                Candidat candidat = candidatProfileService.getCandidatById(id);
+                String contentType = "image/jpeg"; // Default
+
+                // Try to determine content type from filename if available
+                if (candidat.getProfilePicture() != null) {
+                    String fileName = candidat.getProfilePicture();
+                    if (fileName.toLowerCase().endsWith(".png")) {
+                        contentType = "image/png";
+                    } else if (fileName.toLowerCase().endsWith(".jpg") || fileName.toLowerCase().endsWith(".jpeg")) {
+                        contentType = "image/jpeg";
+                    }
+                }
+
+                return ResponseEntity.ok()
+                        .contentType(MediaType.parseMediaType(contentType))
+                        .body(resource);
+            }
+        } catch (Exception e) {
+            logger.severe("Error retrieving profile picture: " + e.getMessage());
+        }
+
+        return ResponseEntity.notFound().build();
     }
 
     @PostMapping("/profile/summary")
@@ -229,7 +306,6 @@ public class CandidatController {
         candidatProfileService.deleteEducation(educationId);
         return "redirect:/candidats/profile";
     }
-    // Add these methods to your existing CandidatController class
 
     @PostMapping("/profile/language")
     public String updateLanguage(@ModelAttribute LanguageListDTO languageListDTO) {
@@ -253,10 +329,19 @@ public class CandidatController {
         return "redirect:/candidats/profile";
     }
 
+    // ===============================
+    // DOCUMENTS SECTION
+    // ===============================
+
     @GetMapping("/documents")
     public String documents(Model model) {
         logger.info("Loading documents page...");
 
+        // Hardcoded candidat ID for now - should come from authentication
+        Long candidatId = 1L;
+
+        List<Document> documents = documentService.getAllDocumentsByCandidatId(candidatId);
+        model.addAttribute("documents", documents);
         model.addAttribute("activeTab", "documents");
 
         // Provide a default Offre object to avoid null pointer exceptions in the view
@@ -266,6 +351,104 @@ public class CandidatController {
 
         return "candidateboard";
     }
+
+    @PostMapping("/documents/upload")
+    public String uploadDocument(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("documentType") String documentType,
+            @RequestParam("documentTitle") String title,
+            @RequestParam(value = "defaultDocument", required = false, defaultValue = "false") boolean isDefault,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            // Hardcoded candidat ID for now - should come from authentication
+            Long candidatId = 1L;
+
+            documentService.saveDocument(candidatId, file, documentType, title, isDefault);
+            redirectAttributes.addFlashAttribute("message", "Document téléchargé avec succès!");
+            redirectAttributes.addFlashAttribute("alertClass", "alert-success");
+
+        } catch (Exception e) {
+            logger.severe("Error uploading document: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("message", "Erreur lors du téléchargement: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("alertClass", "alert-danger");
+        }
+
+        return "redirect:/candidats/documents";
+    }
+
+    @GetMapping("/documents/download/{id}")
+    public ResponseEntity<Resource> downloadDocument(@PathVariable Long id) {
+        try {
+            Document document = documentService.getDocumentById(id);
+            if (document != null) {
+                ByteArrayResource resource = new ByteArrayResource(documentService.getDocumentBytes(id));
+
+                return ResponseEntity.ok()
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + document.getFileName() + "\"")
+                        .contentType(MediaType.parseMediaType(document.getContentType()))
+                        .contentLength(document.getFileSize())
+                        .body(resource);
+            }
+        } catch (IOException e) {
+            logger.severe("Error downloading document: " + e.getMessage());
+        }
+
+        return ResponseEntity.notFound().build();
+    }
+
+    @PostMapping("/documents/delete/{id}")
+    public String deleteDocument(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            documentService.deleteDocument(id);
+            redirectAttributes.addFlashAttribute("message", "Document supprimé avec succès!");
+            redirectAttributes.addFlashAttribute("alertClass", "alert-success");
+        } catch (IOException e) {
+            logger.severe("Error deleting document: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("message", "Erreur lors de la suppression: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("alertClass", "alert-danger");
+        }
+
+        return "redirect:/candidats/documents";
+    }
+
+    @PostMapping("/documents/default/{id}")
+    public String setAsDefaultDocument(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            documentService.setAsDefault(id);
+            redirectAttributes.addFlashAttribute("message", "Document défini comme principal!");
+            redirectAttributes.addFlashAttribute("alertClass", "alert-success");
+        } catch (Exception e) {
+            logger.severe("Error setting default document: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("message", "Erreur: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("alertClass", "alert-danger");
+        }
+
+        return "redirect:/candidats/documents";
+    }
+
+    @PostMapping("/documents/rename/{id}")
+    public String renameDocument(
+            @PathVariable Long id,
+            @RequestParam("newTitle") String newTitle,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            documentService.renameDocument(id, newTitle);
+            redirectAttributes.addFlashAttribute("message", "Document renommé avec succès!");
+            redirectAttributes.addFlashAttribute("alertClass", "alert-success");
+        } catch (Exception e) {
+            logger.severe("Error renaming document: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("message", "Erreur: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("alertClass", "alert-danger");
+        }
+
+        return "redirect:/candidats/documents";
+    }
+
+    // ===============================
+    // SETTINGS SECTION
+    // ===============================
 
     @GetMapping("/settings")
     public String settings(Model model) {

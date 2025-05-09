@@ -45,7 +45,7 @@
                   <i class="bi bi-eye"></i>
                 </a>
                 <button type="button" class="btn btn-sm btn-outline-secondary" title="Voir l'historique"
-                        data-bs-toggle="modal" th:data-bs-target="'#historyModal' + ${demande.id}">
+                        data-bs-toggle="modal" th:data-bs-target="'#historyModal' + ${demande.idDemande}">
                   <i class="bi bi-clock-history"></i>
                 </button>
               </div>
@@ -58,7 +58,7 @@
   </div>
 
   <!-- History modals -->
-  <div th:each="demande : ${demandes}" th:id="'historyModal' + ${demande.id}" class="modal fade" tabindex="-1">
+  <div th:each="demande : ${demandes}" th:id="'historyModal' + ${demande.idDemande}" class="modal fade" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">

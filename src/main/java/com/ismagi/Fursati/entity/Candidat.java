@@ -28,6 +28,8 @@ public class Candidat {
     private String profilePicture;
     private String summary;
 
+
+
     @OneToMany(mappedBy = "candidat", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Experience> experiences = new ArrayList<>();
 

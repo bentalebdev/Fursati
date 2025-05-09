@@ -10,7 +10,7 @@ import java.util.Date;
 public class Demande {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long idDemande;
 
     @ManyToOne
     @JoinColumn(name = "candidat_id")

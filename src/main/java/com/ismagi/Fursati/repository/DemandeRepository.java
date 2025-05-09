@@ -22,5 +22,5 @@ public interface DemandeRepository extends JpaRepository<Demande, Long> {
     // Find applications by candidate ID ordered by date descending (newest first)
     List<Demande> findByCandidatIdOrderByDateDemandeDesc(Long candidatId);
 
-    List<Demande> getDemandeByOffreRecruteur_IdRecruteur(Long recruitId);
+    List<Demande> getDemandeByOffre_Recruteur_IdRecruteur(Long recruitId);
 }

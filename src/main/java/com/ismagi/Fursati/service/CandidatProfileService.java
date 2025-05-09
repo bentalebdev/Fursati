@@ -6,14 +6,23 @@ import com.ismagi.Fursati.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 @Service
 public class CandidatProfileService {
     private static final Logger logger = Logger.getLogger(CandidatProfileService.class.getName());
+    // Directory where profile pictures will be stored
+    private final Path profilePicturePath = Paths.get("uploads/profile-pictures");
 
 
     @Autowired
@@ -38,7 +47,7 @@ public class CandidatProfileService {
 
 
     @Transactional
-    public Candidat updateBasicInfo(Long id, BasicInfoDTO basicInfoDTO) {
+    public Candidat updateBasicInfo(Long id, BasicInfoDTO basicInfoDTO, MultipartFile profilePicture) throws IOException {
         Candidat candidat = getCandidatById(id);
 
         candidat.setFirstName(basicInfoDTO.getFirstName());
@@ -55,9 +64,50 @@ public class CandidatProfileService {
             }
         }
         candidat.setAddress(updatedAddress);
+        // Handle profile picture if provided
+        if (profilePicture != null && !profilePicture.isEmpty()) {
+            String fileName = saveProfilePicture(profilePicture);
+            candidat.setProfilePicture(fileName);
+        }
 
         return candidatRepository.save(candidat);
     }
+    private String saveProfilePicture(MultipartFile file) throws IOException {
+        // Generate a unique filename to avoid collisions
+        String originalFilename = file.getOriginalFilename();
+        String fileExtension = "";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
+
+        String newFilename = UUID.randomUUID().toString() + fileExtension;
+        Path targetLocation = profilePicturePath.resolve(newFilename);
+
+        // Save the file
+        Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+        logger.info("Saved profile picture: " + targetLocation.toAbsolutePath());
+
+        return newFilename;
+    }
+
+    /**
+     * Retrieves the profile picture data as a byte array
+     */
+    public byte[] getProfilePictureData(Long candidatId) throws IOException {
+        Candidat candidat = getCandidatById(candidatId);
+
+        if (candidat.getProfilePicture() == null || candidat.getProfilePicture().isEmpty()) {
+            return null;
+        }
+
+        Path imagePath = profilePicturePath.resolve(candidat.getProfilePicture());
+        if (Files.exists(imagePath)) {
+            return Files.readAllBytes(imagePath);
+        }
+
+        return null;
+    }
+
 
     @Transactional
     public Candidat updateSummary(Long id, SummaryDTO summaryDTO) {
