@@ -13,8 +13,10 @@
                 <h3 class="mb-0" th:text="${offre.title != null ? offre.title : 'Détails de l''offre d''emploi'}">Détails de l'offre d'emploi</h3>
                 <div>
                     <button class="btn btn-outline-primary me-2"><i class="far fa-bookmark me-1"></i>Sauvegarder</button>
-                    <a th:href="@{/candidats/jobs/apply/{id}(id=${offre.id})}" class="btn btn-primary"><i class="fas fa-paper-plane me-1"></i>Postuler</a>
-                </div>
+                    <form th:action="@{/demandes/postuler}" method="post" style="display:inline;">
+                        <input type="hidden" name="offreId" th:value="${offre.id}" />
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane me-1"></i>Postuler</button>
+                    </form>                </div>
             </div>
         </div>
         <div class="card-body">
@@ -121,8 +123,10 @@
             <!-- Boutons d'action -->
             <div class="d-flex justify-content-between">
                 <button class="btn btn-outline-primary share-button"><i class="fas fa-share-alt me-1"></i>Partager</button>
-                <a th:href="@{/candidats/jobs/apply/{id}(id=${offre.id})}" class="btn btn-primary"><i class="fas fa-paper-plane me-1"></i>Postuler maintenant</a>
-            </div>
+                <form th:action="@{/demandes/postuler}" method="post" style="display:inline;">
+                    <input type="hidden" name="offreId" th:value="${offre.id}" />
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane me-1"></i>Postuler maintenant</button>
+                </form>            </div>
         </div>
     </div>
 

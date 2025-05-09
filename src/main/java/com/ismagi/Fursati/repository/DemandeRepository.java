@@ -2,6 +2,8 @@ package com.ismagi.Fursati.repository;
 
 import com.ismagi.Fursati.entity.Demande;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -22,5 +24,7 @@ public interface DemandeRepository extends JpaRepository<Demande, Long> {
     // Find applications by candidate ID ordered by date descending (newest first)
     List<Demande> findByCandidatIdOrderByDateDemandeDesc(Long candidatId);
 
-    List<Demande> getDemandeByOffre_Recruteur_IdRecruteur(Long recruitId);
+    // Get applications by recruiter ID using a custom query
+    @Query("SELECT d FROM Demande d WHERE d.offre.recruteur.idRecruteur = :recruitId")
+    List<Demande> getDemandeByOffre_Recruteur_IdRecruteur(@Param("recruitId") Long recruitId);
 }

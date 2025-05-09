@@ -10,6 +10,7 @@ import com.ismagi.Fursati.service.CandidatService;
 import com.ismagi.Fursati.service.DemandeService;
 import com.ismagi.Fursati.service.DocumentService;
 import com.ismagi.Fursati.service.OffreService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -24,6 +25,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -462,5 +464,62 @@ public class CandidatController {
         }
 
         return "candidateboard";
+    }
+    /**
+     * Endpoint to handle the job application process
+     * This should be added to CandidatController.java
+     */
+    @GetMapping("/jobs/apply/{id}")
+    public String applyToJob(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes, HttpServletRequest request) {
+        try {
+            // Get job details
+            Offre offre = offreService.getOffreById(id);
+            if (offre == null) {
+                redirectAttributes.addFlashAttribute("error", "L'offre d'emploi n'a pas été trouvée");
+                return "redirect:/candidats/jobs";
+            }
+
+            // Get current user/candidate
+            // For now, using hardcoded ID (should come from authentication in production)
+            Long candidatId = 1L; // This should be replaced with actual authenticated user ID
+            Candidat candidat = candidatService.getCandidatById(candidatId);
+
+            if (candidat == null) {
+                redirectAttributes.addFlashAttribute("error", "Votre profil n'a pas été trouvé. Veuillez vous reconnecter.");
+                return "redirect:/login";
+            }
+
+            // Check if candidate has already applied to this job
+            List<Demande> existingApplications = demandeService.getAllDemandes();
+            boolean alreadyApplied = existingApplications.stream()
+                    .anyMatch(d -> d.getCandidat() != null &&
+                            d.getCandidat().getId().equals(candidatId) &&
+                            d.getOffre() != null &&
+                            d.getOffre().getId().equals(id));
+
+            if (alreadyApplied) {
+                redirectAttributes.addFlashAttribute("warning", "Vous avez déjà postulé à cette offre d'emploi");
+                return "redirect:/candidats/jobs/details/" + id;
+            }
+
+            // Create new application
+            Demande demande = new Demande();
+            demande.setCandidat(candidat);
+            demande.setOffre(offre);
+            demande.setDateDemande(new Date());
+            demande.setEtat("PENDING"); // Initial status
+
+            // Save application
+            demandeService.saveDemande(demande);
+
+            // Add success message
+            redirectAttributes.addFlashAttribute("success", "Votre candidature a été envoyée avec succès!");
+            return "redirect:/candidats/applications"; // Redirect to applications page
+
+        } catch (Exception e) {
+            // Log the error
+            redirectAttributes.addFlashAttribute("error", "Une erreur est survenue lors de l'envoi de votre candidature. Veuillez réessayer plus tard.");
+            return "redirect:/candidats/jobs";
+        }
     }
 }

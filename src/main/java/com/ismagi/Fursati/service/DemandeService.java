@@ -18,7 +18,7 @@ public class DemandeService {
     }
 
     public List<Demande> getDemandesByRecruitId(Long recruitId) {
-        return demandeRepository.getDemandeByOffreRecruteur_IdRecruteur(recruitId);
+        return demandeRepository.getDemandeByOffre_Recruteur_IdRecruteur(recruitId);
     }
 
     public Demande getDemandeById(Long id) {
@@ -67,5 +67,14 @@ public class DemandeService {
 
     public void deleteDemande(Long id) {
         demandeRepository.deleteById(id);
+    }
+
+    /**
+     * Find applications by candidate ID and sort by date
+     * @param candidatId ID of the candidate
+     * @return List of applications, sorted by date (newest first)
+     */
+    public List<Demande> getDemandesByCandidatIdSortedByDate(Long candidatId) {
+        return demandeRepository.findByCandidatIdOrderByDateDemandeDesc(candidatId);
     }
 }

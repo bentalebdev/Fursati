@@ -1,9 +1,5 @@
 package com.ismagi.Fursati.entity;
 
-import com.ismagi.Fursati.entity.Education;
-import com.ismagi.Fursati.entity.Experience;
-import com.ismagi.Fursati.entity.Language;
-import com.ismagi.Fursati.entity.Skill;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -27,8 +23,10 @@ public class Candidat {
     private String address;
     private String profilePicture;
     private String summary;
+    private String password;
 
-
+    @Column(name = "status")
+    private String status = "active"; // Default value is "active"
 
     @OneToMany(mappedBy = "candidat", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Experience> experiences = new ArrayList<>();
@@ -39,4 +37,7 @@ public class Candidat {
     @OneToMany(mappedBy = "candidat", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Language> languages = new ArrayList<>();
 
+    // Add the missing skills relationship
+    @OneToMany(mappedBy = "candidat", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Skill> skills = new ArrayList<>();
 }
