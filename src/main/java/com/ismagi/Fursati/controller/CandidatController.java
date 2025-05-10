@@ -28,10 +28,12 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/candidats")
@@ -162,7 +164,18 @@ public class CandidatController extends BaseController {
     // ===============================
 
     @GetMapping("/jobs")
-    public String jobs(Model model, HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public String jobs(Model model,
+                       @RequestParam(required = false) String keyword,
+                       @RequestParam(required = false) String location,
+                       @RequestParam(required = false) String[] contractType,
+                       @RequestParam(required = false) String[] experienceLevel,
+                       @RequestParam(required = false) String industry,
+                       @RequestParam(required = false) String dateRange,
+                       @RequestParam(required = false) String sortBy,
+                       @RequestParam(defaultValue = "0") int page,
+                       @RequestParam(defaultValue = "10") int size,
+                       HttpServletRequest request, HttpServletResponse response) throws IOException {
+
         logger.info("Loading jobs page...");
 
         // Check authentication
@@ -176,24 +189,41 @@ public class CandidatController extends BaseController {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
         }
 
+        // Get all offers from the service
         List<Offre> offres = offreService.getAllOffres();
 
-        // If no offers found, provide an empty list instead of null
-        if (offres == null) {
-            offres = new ArrayList<>();
+        // Apply filters if provided
+        // Here you can implement your filtering logic based on the parameters
+        // This is just a simplified example
+        if (keyword != null && !keyword.isEmpty()) {
+            offres = offres.stream()
+                    .filter(o -> (o.getTitle() != null && o.getTitle().toLowerCase().contains(keyword.toLowerCase())) ||
+                            (o.getDescription() != null && o.getDescription().toLowerCase().contains(keyword.toLowerCase())))
+                    .collect( Collectors.toList());
         }
 
-        model.addAttribute("offres", offres);
+        // Calculate pagination
+        int totalItems = offres.size();
+        int totalPages = (int) Math.ceil((double) totalItems / size);
+
+        // Set page within bounds
+        if (page < 0) page = 0;
+        if (page >= totalPages && totalPages > 0) page = totalPages - 1;
+
+        // Get the subset of offers for the current page
+        int start = page * size;
+        int end = Math.min(start + size, totalItems);
+        List<Offre> pagedOffres = start < totalItems ? offres.subList(start, end) : new ArrayList<>();
+
+        // Add all necessary attributes to the model
+        model.addAttribute("offres", pagedOffres);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("pageSize", size);
         model.addAttribute("activeTab", "jobs");
-
-        // Provide a default Offre object to avoid null pointer exceptions in the view
-        if (!model.containsAttribute("offre")) {
-            model.addAttribute("offre", new Offre());
-        }
 
         return "candidateboard";
     }
-
     @GetMapping("/jobs/details/{id}")
     public String jobDetails(@PathVariable Long id, Model model, HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
