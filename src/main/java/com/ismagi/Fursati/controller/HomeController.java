@@ -4,6 +4,8 @@ import com.ismagi.Fursati.entity.Offre;
 import com.ismagi.Fursati.repository.OffreRepository;
 import com.ismagi.Fursati.service.AuthService;
 import jakarta.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,6 +16,7 @@ import java.util.List;
 
 @Controller
 public class HomeController {
+    private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
     private final OffreRepository offreRepository;
 
     @Autowired
@@ -23,27 +26,33 @@ public class HomeController {
 
     @GetMapping("/")
     public String homePage(HttpSession session, Model model) {
-        // Vérifier si l'utilisateur est déjà authentifié
+        // Check if user is already authenticated
         Boolean isAuthenticated = (Boolean) session.getAttribute("authenticated");
 
         if (isAuthenticated != null && isAuthenticated) {
-            // Récupérer le type d'utilisateur depuis la session
+            // Get user type from session
             AuthService.UserType userType = (AuthService.UserType) session.getAttribute("userType");
 
-            // Rediriger vers le dashboard correspondant
+            // Log user information
+            Object userId = session.getAttribute("userId");
+            String userName = (String) session.getAttribute("userName");
+            logger.info("Authenticated user: {} (ID: {}, Type: {}) accessing home page",
+                    userName, userId, userType);
+
+            // Redirect to the corresponding dashboard
             if (userType != null) {
                 switch (userType) {
                     case ADMIN:
-                        return "redirect:/admin";
+                        return "redirect:/admin/dashboard";
                     case CANDIDAT:
-                        return "redirect:/candidats"; // Path corrigé (était /candidat)
+                        return "redirect:/candidats/dashboard";
                     case RECRUTEUR:
-                        return "redirect:/recruteurs";
+                        return "redirect:/recruteurs/dashboard";
                 }
             }
         }
 
-        // Si non authentifié ou type inconnu, afficher la page d'accueil
+        // If not authenticated or unknown type, display home page
         model.addAttribute("activeTab", "home");
         return "home";
     }

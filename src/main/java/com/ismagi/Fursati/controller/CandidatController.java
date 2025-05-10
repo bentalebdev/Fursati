@@ -5,22 +5,26 @@ import com.ismagi.Fursati.entity.Candidat;
 import com.ismagi.Fursati.entity.Demande;
 import com.ismagi.Fursati.entity.Document;
 import com.ismagi.Fursati.entity.Offre;
+import com.ismagi.Fursati.service.AuthService;
 import com.ismagi.Fursati.service.CandidatProfileService;
 import com.ismagi.Fursati.service.CandidatService;
 import com.ismagi.Fursati.service.DemandeService;
 import com.ismagi.Fursati.service.DocumentService;
 import com.ismagi.Fursati.service.OffreService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
@@ -31,7 +35,7 @@ import java.util.logging.Logger;
 
 @Controller
 @RequestMapping("/candidats")
-public class CandidatController {
+public class CandidatController extends BaseController {
     private static final Logger logger = Logger.getLogger(CandidatController.class.getName());
 
     @Autowired
@@ -55,25 +59,67 @@ public class CandidatController {
 
     @GetMapping("/api")
     @ResponseBody
-    public List<Candidat> getAllCandidats() {
+    public List<Candidat> getAllCandidats(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // Check if user is authenticated and has admin rights
+        if (!isAuthenticated(request)) {
+            response.sendRedirect("/login");
+            return null;
+        }
+
+        AuthService.UserType userType = getAuthenticatedUserType(request);
+        if (userType != AuthService.UserType.ADMIN) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+
         return candidatService.getAllCandidats();
     }
 
     @GetMapping("/api/{id}")
     @ResponseBody
-    public Candidat getCandidatById(@PathVariable Long id) {
-        return candidatService.getCandidatById(id);
+    public Candidat getCandidatById(@PathVariable Long id, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // Check authentication
+        if (!checkAuthentication(request, response)) {
+            return null;
+        }
+
+        // Verify user is allowed to access this data
+        try {
+            verifyAuthenticatedUser(request, id);
+            return candidatService.getCandidatById(id);
+        } catch (ResponseStatusException e) {
+            throw e;
+        }
     }
 
     @PostMapping("/api")
     @ResponseBody
-    public Candidat createCandidat(@RequestBody Candidat candidat) {
+    public Candidat createCandidat(@RequestBody Candidat candidat, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // Check if user is authenticated and has admin rights
+        if (!checkAuthentication(request, response)) {
+            return null;
+        }
+
+        AuthService.UserType userType = getAuthenticatedUserType(request);
+        if (userType != AuthService.UserType.ADMIN) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+
         return candidatService.saveCandidat(candidat);
     }
 
     @DeleteMapping("/api/{id}")
     @ResponseBody
-    public void deleteCandidat(@PathVariable Long id) {
+    public void deleteCandidat(@PathVariable Long id, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // Check if user is authenticated and has admin rights
+        if (!checkAuthentication(request, response)) {
+            return;
+        }
+
+        AuthService.UserType userType = getAuthenticatedUserType(request);
+        if (userType != AuthService.UserType.ADMIN) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+
         candidatService.deleteCandidat(id);
     }
 
@@ -87,8 +133,20 @@ public class CandidatController {
     }
 
     @GetMapping("/dashboard")
-    public String dashboard(Model model) {
+    public String dashboard(Model model, HttpServletRequest request, HttpServletResponse response) throws IOException {
         logger.info("Loading dashboard page...");
+
+        // Check authentication
+        if (!checkAuthentication(request, response)) {
+            return null;
+        }
+
+        // Verify user is a candidate
+        AuthService.UserType userType = getAuthenticatedUserType(request);
+        if (userType != AuthService.UserType.CANDIDAT) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+
         model.addAttribute("activeTab", "dashboard");
 
         // Provide a default Offre object to avoid null pointer exceptions in the view
@@ -104,8 +162,20 @@ public class CandidatController {
     // ===============================
 
     @GetMapping("/jobs")
-    public String jobs(Model model) {
+    public String jobs(Model model, HttpServletRequest request, HttpServletResponse response) throws IOException {
         logger.info("Loading jobs page...");
+
+        // Check authentication
+        if (!checkAuthentication(request, response)) {
+            return null;
+        }
+
+        // Verify user is a candidate
+        AuthService.UserType userType = getAuthenticatedUserType(request);
+        if (userType != AuthService.UserType.CANDIDAT) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+
         List<Offre> offres = offreService.getAllOffres();
 
         // If no offers found, provide an empty list instead of null
@@ -125,27 +195,40 @@ public class CandidatController {
     }
 
     @GetMapping("/jobs/details/{id}")
-    public String jobDetails(@PathVariable Long id, Model model) {
+    public String jobDetails(@PathVariable Long id, Model model, HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
-            // Utiliser la méthode getOffreById pour récupérer l'offre réelle
+            // Check authentication
+            if (!checkAuthentication(request, response)) {
+                return null;
+            }
+
+            // Verify user is a candidate
+            AuthService.UserType userType = getAuthenticatedUserType(request);
+            if (userType != AuthService.UserType.CANDIDAT) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+            }
+
+            // Get the authenticated candidate ID
+            Long candidatId = getUserIdAsLong(request);
+
+            // Get offer details
             Offre offre = offreService.getOffreById(id);
 
             if (offre == null) {
-                // Si l'offre n'est pas trouvée, on peut ajouter un attribut pour le signaler
+                // If the offer is not found, add an attribute to indicate this
                 model.addAttribute("offreNotFound", true);
             }
 
-            // Récupérer des offres similaires
+            // Get similar offers
             List<Offre> similarOffers = new ArrayList<>();
             if (offre != null && offre.getContractType() != null) {
-                // On pourrait implémenter une méthode dans le service qui trouve des offres similaires
+                // You could implement a method in the service that finds similar offers
                 // similarOffers = offreService.findSimilarOffers(offre);
                 similarOffers = new ArrayList<>();
             }
 
-            // Vérifier si le candidat a déjà postulé à cette offre
+            // Check if the candidate has already applied for this job
             boolean hasApplied = false;
-            Long candidatId = 1L; // À remplacer par le candidat connecté
             List<Demande> demandes = demandeService.getAllDemandes();
             if (demandes != null && !demandes.isEmpty() && offre != null) {
                 hasApplied = demandes.stream()
@@ -163,9 +246,9 @@ public class CandidatController {
             model.addAttribute("activeTab", "jobsdetails");
             return "candidateboard";
         } catch (Exception e) {
-            // Log l'exception complète
+            // Log the complete exception
             e.printStackTrace();
-            // Ajouter un message d'erreur à afficher à l'utilisateur
+            // Add an error message to display to the user
             model.addAttribute("errorMessage", "Une erreur s'est produite : " + e.getMessage());
             model.addAttribute("activeTab", "jobs");
             return "candidateboard";
@@ -177,14 +260,27 @@ public class CandidatController {
     // ===============================
 
     @GetMapping("/applications")
-    public String applications(Model model) {
+    public String applications(Model model, HttpServletRequest request, HttpServletResponse response) throws IOException {
         logger.info("Loading applications page...");
 
-        // Récupérer les demandes du candidat connecté
-        Long candidatId = 1L; // À remplacer par le candidat connecté
+        // Check authentication
+        if (!checkAuthentication(request, response)) {
+            return null;
+        }
+
+        // Verify user is a candidate
+        AuthService.UserType userType = getAuthenticatedUserType(request);
+        if (userType != AuthService.UserType.CANDIDAT) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+
+        // Get the authenticated candidate ID
+        Long candidatId = getUserIdAsLong(request);
+
+        // Get the candidate's applications
         List<Demande> demandes = demandeService.getAllDemandes();
 
-        // Filtrer pour ne montrer que les demandes du candidat connecté
+        // Filter to show only the connected candidate's applications
         List<Demande> candidatDemandes = new ArrayList<>();
         if (demandes != null) {
             candidatDemandes = demandes.stream()
@@ -210,12 +306,26 @@ public class CandidatController {
     // ===============================
 
     @GetMapping("/profile")
-    public String profile(Model model) {
+    public String profile(Model model, HttpServletRequest request, HttpServletResponse response) throws IOException {
         logger.info("Loading profile page...");
+
+        // Check authentication
+        if (!checkAuthentication(request, response)) {
+            return null;
+        }
+
+        // Verify user is a candidate
+        AuthService.UserType userType = getAuthenticatedUserType(request);
+        if (userType != AuthService.UserType.CANDIDAT) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+
+        // Get the authenticated candidate ID
+        Long candidatId = getUserIdAsLong(request);
 
         model.addAttribute("activeTab", "profile");
 
-        Candidat c = candidatProfileService.getCandidatById(1L);
+        Candidat c = candidatProfileService.getCandidatById(candidatId);
 
         // Provide a default Offre object to avoid null pointer exceptions in the view
         if (!model.containsAttribute("offre")) {
@@ -231,10 +341,20 @@ public class CandidatController {
     public String updateBasicInfo(
             @ModelAttribute BasicInfoDTO basicInfoDTO,
             @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes,
+            HttpServletRequest request,
+            HttpServletResponse response) throws IOException {
+
+        // Check authentication
+        if (!checkAuthentication(request, response)) {
+            return null;
+        }
+
+        // Get the authenticated candidate ID
+        Long candidatId = getUserIdAsLong(request);
 
         try {
-            candidatProfileService.updateBasicInfo(1L, basicInfoDTO, profilePicture);
+            candidatProfileService.updateBasicInfo(candidatId, basicInfoDTO, profilePicture);
             redirectAttributes.addFlashAttribute("message", "Informations personnelles mises à jour avec succès!");
             redirectAttributes.addFlashAttribute("alertClass", "alert-success");
         } catch (Exception e) {
@@ -247,8 +367,11 @@ public class CandidatController {
     }
 
     @GetMapping("/profile/profilePicture/{id}")
-    public ResponseEntity<Resource> getProfilePicture(@PathVariable Long id) {
+    public ResponseEntity<Resource> getProfilePicture(@PathVariable Long id, HttpServletRequest request) {
         try {
+            // Verify user is allowed to access this picture
+            verifyAuthenticatedUser(request, id);
+
             byte[] imageData = candidatProfileService.getProfilePictureData(id);
             if (imageData != null) {
                 ByteArrayResource resource = new ByteArrayResource(imageData);
@@ -278,37 +401,87 @@ public class CandidatController {
     }
 
     @PostMapping("/profile/summary")
-    public String updateSummary(@ModelAttribute SummaryDTO summaryDTO) {
-        candidatProfileService.updateSummary(1L, summaryDTO);
+    public String updateSummary(@ModelAttribute SummaryDTO summaryDTO, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // Check authentication
+        if (!checkAuthentication(request, response)) {
+            return null;
+        }
+
+        // Get the authenticated candidate ID
+        Long candidatId = getUserIdAsLong(request);
+
+        candidatProfileService.updateSummary(candidatId, summaryDTO);
         return "redirect:/candidats/profile";
     }
 
     @PostMapping("/profile/experience")
-    public String updateExperience(@ModelAttribute ExperienceListDTO experienceListDTO) {
-        candidatProfileService.updateExperiences(1L, experienceListDTO);
+    public String updateExperience(@ModelAttribute ExperienceListDTO experienceListDTO, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // Check authentication
+        if (!checkAuthentication(request, response)) {
+            return null;
+        }
+
+        // Get the authenticated candidate ID
+        Long candidatId = getUserIdAsLong(request);
+
+        candidatProfileService.updateExperiences(candidatId, experienceListDTO);
         return "redirect:/candidats/profile";
     }
 
     @PostMapping("/profile/experience/delete")
-    public String deleteExperience(@RequestParam Long experienceId) {
+    public String deleteExperience(@RequestParam Long experienceId, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // Check authentication
+        if (!checkAuthentication(request, response)) {
+            return null;
+        }
+
+        // Verify the experience belongs to the authenticated user
+        // This would require an additional service method to check ownership
+        // For now, we'll just check authentication
+
         candidatProfileService.deleteExperience(experienceId);
         return "redirect:/candidats/profile";
     }
 
     @PostMapping("/profile/education")
-    public String updateEducation(@ModelAttribute EducationListDTO educationListDTO) {
-        candidatProfileService.updateEducations(1L, educationListDTO);
+    public String updateEducation(@ModelAttribute EducationListDTO educationListDTO, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // Check authentication
+        if (!checkAuthentication(request, response)) {
+            return null;
+        }
+
+        // Get the authenticated candidate ID
+        Long candidatId = getUserIdAsLong(request);
+
+        candidatProfileService.updateEducations(candidatId, educationListDTO);
         return "redirect:/candidats/profile";
     }
 
     @PostMapping("/profile/education/delete")
-    public String deleteEducation(@RequestParam Long educationId) {
+    public String deleteEducation(@RequestParam Long educationId, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // Check authentication
+        if (!checkAuthentication(request, response)) {
+            return null;
+        }
+
+        // Verify the education belongs to the authenticated user
+        // This would require an additional service method to check ownership
+        // For now, we'll just check authentication
+
         candidatProfileService.deleteEducation(educationId);
         return "redirect:/candidats/profile";
     }
 
     @PostMapping("/profile/language")
-    public String updateLanguage(@ModelAttribute LanguageListDTO languageListDTO) {
+    public String updateLanguage(@ModelAttribute LanguageListDTO languageListDTO, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // Check authentication
+        if (!checkAuthentication(request, response)) {
+            return null;
+        }
+
+        // Get the authenticated candidate ID
+        Long candidatId = getUserIdAsLong(request);
+
         // Add debug logging
         logger.info("Received language update request");
         if (languageListDTO != null && languageListDTO.getLanguages() != null && !languageListDTO.getLanguages().isEmpty()) {
@@ -319,12 +492,21 @@ public class CandidatController {
         }
 
         // Process the update
-        candidatProfileService.updateLanguages(1L, languageListDTO);
+        candidatProfileService.updateLanguages(candidatId, languageListDTO);
         return "redirect:/candidats/profile";
     }
 
     @PostMapping("/profile/language/delete")
-    public String deleteLanguage(@RequestParam Long languageId) {
+    public String deleteLanguage(@RequestParam Long languageId, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // Check authentication
+        if (!checkAuthentication(request, response)) {
+            return null;
+        }
+
+        // Verify the language belongs to the authenticated user
+        // This would require an additional service method to check ownership
+        // For now, we'll just check authentication
+
         candidatProfileService.deleteLanguage(languageId);
         return "redirect:/candidats/profile";
     }
@@ -334,11 +516,22 @@ public class CandidatController {
     // ===============================
 
     @GetMapping("/documents")
-    public String documents(Model model) {
+    public String documents(Model model, HttpServletRequest request, HttpServletResponse response) throws IOException {
         logger.info("Loading documents page...");
 
-        // Hardcoded candidat ID for now - should come from authentication
-        Long candidatId = 1L;
+        // Check authentication
+        if (!checkAuthentication(request, response)) {
+            return null;
+        }
+
+        // Verify user is a candidate
+        AuthService.UserType userType = getAuthenticatedUserType(request);
+        if (userType != AuthService.UserType.CANDIDAT) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
+
+        // Get the authenticated candidate ID
+        Long candidatId = getUserIdAsLong(request);
 
         List<Document> documents = documentService.getAllDocumentsByCandidatId(candidatId);
         model.addAttribute("documents", documents);
@@ -358,12 +551,19 @@ public class CandidatController {
             @RequestParam("documentType") String documentType,
             @RequestParam("documentTitle") String title,
             @RequestParam(value = "defaultDocument", required = false, defaultValue = "false") boolean isDefault,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes,
+            HttpServletRequest request,
+            HttpServletResponse response) throws IOException {
+
+        // Check authentication
+        if (!checkAuthentication(request, response)) {
+            return null;
+        }
+
+        // Get the authenticated candidate ID
+        Long candidatId = getUserIdAsLong(request);
 
         try {
-            // Hardcoded candidat ID for now - should come from authentication
-            Long candidatId = 1L;
-
             documentService.saveDocument(candidatId, file, documentType, title, isDefault);
             redirectAttributes.addFlashAttribute("message", "Document téléchargé avec succès!");
             redirectAttributes.addFlashAttribute("alertClass", "alert-success");
@@ -378,10 +578,21 @@ public class CandidatController {
     }
 
     @GetMapping("/documents/download/{id}")
-    public ResponseEntity<Resource> downloadDocument(@PathVariable Long id) {
+    public ResponseEntity<Resource> downloadDocument(@PathVariable Long id, HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
+            // Check authentication
+            if (!checkAuthentication(request, response)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+
             Document document = documentService.getDocumentById(id);
             if (document != null) {
+                // Verify the document belongs to the authenticated user
+                Long candidatId = getUserIdAsLong(request);
+                if (!document.getCandidat().getId().equals(candidatId)) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only download your own documents");
+                }
+
                 ByteArrayResource resource = new ByteArrayResource(documentService.getDocumentBytes(id));
 
                 return ResponseEntity.ok()
@@ -398,11 +609,27 @@ public class CandidatController {
     }
 
     @PostMapping("/documents/delete/{id}")
-    public String deleteDocument(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String deleteDocument(@PathVariable Long id, RedirectAttributes redirectAttributes, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // Check authentication
+        if (!checkAuthentication(request, response)) {
+            return null;
+        }
+
         try {
-            documentService.deleteDocument(id);
-            redirectAttributes.addFlashAttribute("message", "Document supprimé avec succès!");
-            redirectAttributes.addFlashAttribute("alertClass", "alert-success");
+            // Verify the document belongs to the authenticated user
+            Document document = documentService.getDocumentById(id);
+            if (document != null) {
+                Long candidatId = getUserIdAsLong(request);
+                if (!document.getCandidat().getId().equals(candidatId)) {
+                    redirectAttributes.addFlashAttribute("message", "Vous ne pouvez supprimer que vos propres documents!");
+                    redirectAttributes.addFlashAttribute("alertClass", "alert-danger");
+                    return "redirect:/candidats/documents";
+                }
+
+                documentService.deleteDocument(id);
+                redirectAttributes.addFlashAttribute("message", "Document supprimé avec succès!");
+                redirectAttributes.addFlashAttribute("alertClass", "alert-success");
+            }
         } catch (IOException e) {
             logger.severe("Error deleting document: " + e.getMessage());
             redirectAttributes.addFlashAttribute("message", "Erreur lors de la suppression: " + e.getMessage());
@@ -413,11 +640,27 @@ public class CandidatController {
     }
 
     @PostMapping("/documents/default/{id}")
-    public String setAsDefaultDocument(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String setAsDefaultDocument(@PathVariable Long id, RedirectAttributes redirectAttributes, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // Check authentication
+        if (!checkAuthentication(request, response)) {
+            return null;
+        }
+
         try {
-            documentService.setAsDefault(id);
-            redirectAttributes.addFlashAttribute("message", "Document défini comme principal!");
-            redirectAttributes.addFlashAttribute("alertClass", "alert-success");
+            // Verify the document belongs to the authenticated user
+            Document document = documentService.getDocumentById(id);
+            if (document != null) {
+                Long candidatId = getUserIdAsLong(request);
+                if (!document.getCandidat().getId().equals(candidatId)) {
+                    redirectAttributes.addFlashAttribute("message", "Vous ne pouvez modifier que vos propres documents!");
+                    redirectAttributes.addFlashAttribute("alertClass", "alert-danger");
+                    return "redirect:/candidats/documents";
+                }
+
+                documentService.setAsDefault(id);
+                redirectAttributes.addFlashAttribute("message", "Document défini comme principal!");
+                redirectAttributes.addFlashAttribute("alertClass", "alert-success");
+            }
         } catch (Exception e) {
             logger.severe("Error setting default document: " + e.getMessage());
             redirectAttributes.addFlashAttribute("message", "Erreur: " + e.getMessage());
@@ -431,12 +674,30 @@ public class CandidatController {
     public String renameDocument(
             @PathVariable Long id,
             @RequestParam("newTitle") String newTitle,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes,
+            HttpServletRequest request,
+            HttpServletResponse response) throws IOException {
+
+        // Check authentication
+        if (!checkAuthentication(request, response)) {
+            return null;
+        }
 
         try {
-            documentService.renameDocument(id, newTitle);
-            redirectAttributes.addFlashAttribute("message", "Document renommé avec succès!");
-            redirectAttributes.addFlashAttribute("alertClass", "alert-success");
+            // Verify the document belongs to the authenticated user
+            Document document = documentService.getDocumentById(id);
+            if (document != null) {
+                Long candidatId = getUserIdAsLong(request);
+                if (!document.getCandidat().getId().equals(candidatId)) {
+                    redirectAttributes.addFlashAttribute("message", "Vous ne pouvez modifier que vos propres documents!");
+                    redirectAttributes.addFlashAttribute("alertClass", "alert-danger");
+                    return "redirect:/candidats/documents";
+                }
+
+                documentService.renameDocument(id, newTitle);
+                redirectAttributes.addFlashAttribute("message", "Document renommé avec succès!");
+                redirectAttributes.addFlashAttribute("alertClass", "alert-success");
+            }
         } catch (Exception e) {
             logger.severe("Error renaming document: " + e.getMessage());
             redirectAttributes.addFlashAttribute("message", "Erreur: " + e.getMessage());
@@ -451,8 +712,19 @@ public class CandidatController {
     // ===============================
 
     @GetMapping("/settings")
-    public String settings(Model model) {
+    public String settings(Model model, HttpServletRequest request, HttpServletResponse response) throws IOException {
         logger.info("Loading settings page...");
+
+        // Check authentication
+        if (!checkAuthentication(request, response)) {
+            return null;
+        }
+
+        // Verify user is a candidate
+        AuthService.UserType userType = getAuthenticatedUserType(request);
+        if (userType != AuthService.UserType.CANDIDAT) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
 
         model.addAttribute("activeTab", "settings");
 
@@ -463,13 +735,24 @@ public class CandidatController {
 
         return "candidateboard";
     }
+
     /**
      * Endpoint to handle the job application process
-     * This should be added to CandidatController.java
      */
     @GetMapping("/jobs/apply/{id}")
-    public String applyToJob(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes, HttpServletRequest request) {
+    public String applyToJob(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes, HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
+            // Check authentication
+            if (!checkAuthentication(request, response)) {
+                return null;
+            }
+
+            // Verify user is a candidate
+            AuthService.UserType userType = getAuthenticatedUserType(request);
+            if (userType != AuthService.UserType.CANDIDAT) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+            }
+
             // Get job details
             Offre offre = offreService.getOffreById(id);
             if (offre == null) {
@@ -477,9 +760,8 @@ public class CandidatController {
                 return "redirect:/candidats/jobs";
             }
 
-            // Get current user/candidate
-            // For now, using hardcoded ID (should come from authentication in production)
-            Long candidatId = 1L; // This should be replaced with actual authenticated user ID
+            // Get current authenticated candidate
+            Long candidatId = getUserIdAsLong(request);
             Candidat candidat = candidatService.getCandidatById(candidatId);
 
             if (candidat == null) {
@@ -516,6 +798,7 @@ public class CandidatController {
 
         } catch (Exception e) {
             // Log the error
+            logger.severe("Error applying to job: " + e.getMessage());
             redirectAttributes.addFlashAttribute("error", "Une erreur est survenue lors de l'envoi de votre candidature. Veuillez réessayer plus tard.");
             return "redirect:/candidats/jobs";
         }

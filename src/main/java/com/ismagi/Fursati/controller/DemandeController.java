@@ -3,15 +3,21 @@ package com.ismagi.Fursati.controller;
 import com.ismagi.Fursati.entity.Candidat;
 import com.ismagi.Fursati.entity.Demande;
 import com.ismagi.Fursati.entity.Offre;
+import com.ismagi.Fursati.service.AuthService;
 import com.ismagi.Fursati.service.CandidatService;
 import com.ismagi.Fursati.service.DemandeService;
 import com.ismagi.Fursati.service.OffreService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +26,7 @@ import java.util.logging.Logger;
 
 @Controller
 @RequestMapping("/demandes")
-public class DemandeController {
+public class DemandeController extends BaseController {
     private static final Logger logger = Logger.getLogger(DemandeController.class.getName());
 
     @Autowired
@@ -33,11 +39,23 @@ public class DemandeController {
     private OffreService offreService;
 
     @PostMapping("/postuler")
-    public String postuler(@RequestParam Long offreId, RedirectAttributes redirectAttributes) {
+    public String postuler(@RequestParam Long offreId, RedirectAttributes redirectAttributes,
+                           HttpServletRequest request, HttpServletResponse response) throws IOException {
         logger.info("Traitement de la demande pour l'offre ID: " + offreId);
 
+        // Check authentication
+        if (!checkAuthentication(request, response)) {
+            return null;
+        }
+
+        // Verify user is a candidate
+        AuthService.UserType userType = getAuthenticatedUserType(request);
+        if (userType != AuthService.UserType.CANDIDAT) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réservé aux candidats");
+        }
+
         try {
-            // Récupérer l'offre
+            // Get job offer
             Offre offre = offreService.getOffreById(offreId);
             if (offre == null) {
                 logger.warning("Offre non trouvée avec l'ID: " + offreId);
@@ -45,8 +63,8 @@ public class DemandeController {
                 return "redirect:/candidats/jobs";
             }
 
-            // Pour l'instant, on utilise un ID de candidat fixe (à remplacer par l'authentification)
-            Long candidatId = 1L; // À remplacer par le candidat connecté
+            // Get authenticated candidate
+            Long candidatId = getUserIdAsLong(request);
             Candidat candidat = candidatService.getCandidatById(candidatId);
 
             if (candidat == null) {
@@ -55,7 +73,7 @@ public class DemandeController {
                 return "redirect:/candidats/jobs";
             }
 
-            // Vérifier si une demande existe déjà
+            // Check if application already exists
             List<Demande> demandes = demandeService.getAllDemandes();
             boolean demandeExists = demandes.stream()
                     .anyMatch(d -> d.getCandidat().getId().equals(candidatId) &&
@@ -67,12 +85,12 @@ public class DemandeController {
                 return "redirect:/candidats/jobs/details/" + offreId;
             }
 
-            // Créer et sauvegarder la demande
+            // Create and save application
             Demande demande = new Demande();
             demande.setCandidat(candidat);
             demande.setOffre(offre);
             demande.setDateDemande(new Date());
-            demande.setEtat("PENDING"); // État initial standardisé
+            demande.setEtat("PENDING"); // Initial standardized status
 
             demandeService.saveDemande(demande);
 
@@ -90,10 +108,21 @@ public class DemandeController {
     }
 
     @GetMapping("/mes-candidatures")
-    public String mesCandidatures(Model model) {
+    public String mesCandidatures(Model model, HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
-            // Get the authenticated candidate
-            Long candidatId = getCurrentCandidatId();
+            // Check authentication
+            if (!checkAuthentication(request, response)) {
+                return null;
+            }
+
+            // Verify user is a candidate
+            AuthService.UserType userType = getAuthenticatedUserType(request);
+            if (userType != AuthService.UserType.CANDIDAT) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès réservé aux candidats");
+            }
+
+            // Get authenticated candidate ID
+            Long candidatId = getUserIdAsLong(request);
 
             // Get all applications for this candidate, ordered by date (newest first)
             List<Demande> candidatures = demandeService.getDemandesByCandidatIdSortedByDate(candidatId);
@@ -109,24 +138,30 @@ public class DemandeController {
         }
     }
 
-
-    // Helper method to get the current authenticated candidate's ID
-    // This is a simplified example - implement actual authentication in a real app
-    private Long getCurrentCandidatId() {
-        // In a real application, you would use Spring Security to get the authenticated user
-        // Something like:
-        // Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        // return ((CandidatUserDetails) auth.getPrincipal()).getCandidatId();
-
-        // For now, we'll return a dummy ID (replace this with actual authentication)
-        return 1L;
-    }
     @PutMapping("/{id}/status")
     @ResponseBody
-    public Map<String, Object> updateDemandeStatus(@PathVariable Long id, @RequestBody Map<String, Object> request) {
+    public Map<String, Object> updateDemandeStatus(@PathVariable Long id, @RequestBody Map<String, Object> request,
+                                                   HttpServletRequest httpRequest) {
         Map<String, Object> response = new HashMap<>();
 
         try {
+            // Check if user is authenticated
+            if (!isAuthenticated(httpRequest)) {
+                response.put("success", false);
+                response.put("error", "User not authenticated");
+                return response;
+            }
+
+            // Get authenticated user type
+            AuthService.UserType userType = getAuthenticatedUserType(httpRequest);
+
+            // Only recruiters and admins can update application status
+            if (userType != AuthService.UserType.RECRUTEUR && userType != AuthService.UserType.ADMIN) {
+                response.put("success", false);
+                response.put("error", "Access denied");
+                return response;
+            }
+
             String status = (String) request.get("status");
             if (status == null) {
                 response.put("success", false);
@@ -139,6 +174,16 @@ public class DemandeController {
                 response.put("success", false);
                 response.put("error", "Demand not found");
                 return response;
+            }
+
+            // If user is a recruiter, verify they own the job offer
+            if (userType == AuthService.UserType.RECRUTEUR) {
+                Long recruiterId = getUserIdAsLong(httpRequest);
+                if (!demande.getOffre().getRecruteur().getIdRecruteur().equals(recruiterId)) {
+                    response.put("success", false);
+                    response.put("error", "You can only update status for your own job offers");
+                    return response;
+                }
             }
 
             // Update the status
@@ -156,10 +201,28 @@ public class DemandeController {
 
     @PutMapping("/bulk-status")
     @ResponseBody
-    public Map<String, Object> bulkUpdateStatus(@RequestBody Map<String, Object> request) {
+    public Map<String, Object> bulkUpdateStatus(@RequestBody Map<String, Object> request,
+                                                HttpServletRequest httpRequest) {
         Map<String, Object> response = new HashMap<>();
 
         try {
+            // Check if user is authenticated
+            if (!isAuthenticated(httpRequest)) {
+                response.put("success", false);
+                response.put("error", "User not authenticated");
+                return response;
+            }
+
+            // Get authenticated user type
+            AuthService.UserType userType = getAuthenticatedUserType(httpRequest);
+
+            // Only recruiters and admins can update application status
+            if (userType != AuthService.UserType.RECRUTEUR && userType != AuthService.UserType.ADMIN) {
+                response.put("success", false);
+                response.put("error", "Access denied");
+                return response;
+            }
+
             String status = (String) request.get("status");
             List<Long> ids = (List<Long>) request.get("ids");
 
@@ -173,6 +236,15 @@ public class DemandeController {
             for (Long id : ids) {
                 Demande demande = demandeService.getDemandeById(id);
                 if (demande != null) {
+                    // If user is a recruiter, verify they own the job offer
+                    if (userType == AuthService.UserType.RECRUTEUR) {
+                        Long recruiterId = getUserIdAsLong(httpRequest);
+                        if (!demande.getOffre().getRecruteur().getIdRecruteur().equals(recruiterId)) {
+                            // Skip this demande, not owned by this recruiter
+                            continue;
+                        }
+                    }
+
                     demande.setEtat(status);
                     demandeService.saveDemande(demande);
                     updatedCount++;

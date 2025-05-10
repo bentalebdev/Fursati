@@ -2,11 +2,14 @@ package com.ismagi.Fursati.controller;
 
 import com.ismagi.Fursati.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.io.IOException;
 
 /**
  * Base controller that provides common functionality for all controllers
@@ -15,6 +18,29 @@ import org.springframework.web.server.ResponseStatusException;
 public abstract class BaseController {
 
     private static final Logger logger = LoggerFactory.getLogger(BaseController.class);
+
+    /**
+     * Checks if the user is authenticated and returns true/false
+     */
+    protected boolean isAuthenticated(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        return session != null &&
+                session.getAttribute("authenticated") != null &&
+                (Boolean) session.getAttribute("authenticated");
+    }
+
+    /**
+     * Checks if the user is authenticated and redirects to login if not
+     * Returns true if authenticated, false if redirected
+     */
+    protected boolean checkAuthentication(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        if (!isAuthenticated(request)) {
+            logger.warn("Unauthenticated access attempt to: {}", request.getRequestURI());
+            response.sendRedirect("/login");
+            return false;
+        }
+        return true;
+    }
 
     /**
      * Gets the authenticated user ID from the session
