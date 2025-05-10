@@ -5,93 +5,105 @@
             <div class="row">
                 <!-- Filtres latéraux -->
                 <div class="col-lg-3 mb-4">
-                    <div class="card shadow-sm mb-4">
-                        <div class="card-header bg-white">
-                            <h5 class="mb-0">Filtres avancés</h5>
+                    <form id="job-filter-form" th:action="@{/candidats/jobs}" method="get">
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-header bg-white">
+                                <h5 class="mb-0">Filtres avancés</h5>
+                            </div>
+                            <div class="card-body">
+                                <!-- Type de contrat -->
+                                <div class="mb-4">
+                                    <h6 class="mb-3">Type de contrat</h6>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="cdi" name="contractType" value="CDI" th:checked="${param.contractType != null && #lists.contains(param.contractType, 'CDI')}">
+                                        <label class="form-check-label" for="cdi">CDI</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="cdd" name="contractType" value="CDD" th:checked="${param.contractType != null && #lists.contains(param.contractType, 'CDD')}">
+                                        <label class="form-check-label" for="cdd">CDD</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="stage" name="contractType" value="Stage" th:checked="${param.contractType != null && #lists.contains(param.contractType, 'Stage')}">
+                                        <label class="form-check-label" for="stage">Stage</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="freelance" name="contractType" value="Freelance" th:checked="${param.contractType != null && #lists.contains(param.contractType, 'Freelance')}">
+                                        <label class="form-check-label" for="freelance">Freelance</label>
+                                    </div>
+                                </div>
+
+                                <!-- Expérience -->
+                                <div class="mb-4">
+                                    <h6 class="mb-3">Expérience</h6>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="junior" name="experienceLevel" value="Débutant" th:checked="${param.experienceLevel != null && #lists.contains(param.experienceLevel, 'Débutant')}">
+                                        <label class="form-check-label" for="junior">Débutant</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="mid" name="experienceLevel" value="1-3 ans" th:checked="${param.experienceLevel != null && #lists.contains(param.experienceLevel, '1-3 ans')}">
+                                        <label class="form-check-label" for="mid">1-3 ans</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="senior" name="experienceLevel" value="4-6 ans" th:checked="${param.experienceLevel != null && #lists.contains(param.experienceLevel, '4-6 ans')}">
+                                        <label class="form-check-label" for="senior">4-6 ans</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="expert" name="experienceLevel" value="7+ ans" th:checked="${param.experienceLevel != null && #lists.contains(param.experienceLevel, '7+ ans')}">
+                                        <label class="form-check-label" for="expert">7+ ans</label>
+                                    </div>
+                                </div>
+
+                                <!-- Catégories -->
+                                <div class="mb-4">
+                                    <h6 class="mb-3">Secteur d'activité</h6>
+                                    <select class="form-select" name="industry">
+                                        <option value="" selected>Tous les secteurs</option>
+                                        <option value="Informatique & Tech" th:selected="${param.industry == 'Informatique & Tech'}">Informatique & Tech</option>
+                                        <option value="Finance & Comptabilité" th:selected="${param.industry == 'Finance & Comptabilité'}">Finance & Comptabilité</option>
+                                        <option value="Marketing & Communication" th:selected="${param.industry == 'Marketing & Communication'}">Marketing & Communication</option>
+                                        <option value="Santé" th:selected="${param.industry == 'Santé'}">Santé</option>
+                                        <option value="Éducation" th:selected="${param.industry == 'Éducation'}">Éducation</option>
+                                        <option value="Industrie" th:selected="${param.industry == 'Industrie'}">Industrie</option>
+                                        <option value="Services" th:selected="${param.industry == 'Services'}">Services</option>
+                                        <option value="Commerce" th:selected="${param.industry == 'Commerce'}">Commerce</option>
+                                    </select>
+                                </div>
+
+                                <!-- Date de publication -->
+                                <div class="mb-4">
+                                    <h6 class="mb-3">Date de publication</h6>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="dateRange" id="today" value="today" th:checked="${param.dateRange == 'today' || param.dateRange == null}">
+                                        <label class="form-check-label" for="today">Aujourd'hui</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="dateRange" id="week" value="week" th:checked="${param.dateRange == 'week'}">
+                                        <label class="form-check-label" for="week">Cette semaine</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="dateRange" id="month" value="month" th:checked="${param.dateRange == 'month'}">
+                                        <label class="form-check-label" for="month">Ce mois</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="dateRange" id="anytime" value="anytime" th:checked="${param.dateRange == 'anytime'}">
+                                        <label class="form-check-label" for="anytime">Tout moment</label>
+                                    </div>
+                                </div>
+
+                                <!-- Location Filter -->
+                                <div class="mb-4">
+                                    <h6 class="mb-3">Lieu</h6>
+                                    <input type="text" class="form-control" name="location" placeholder="Entrez une ville" th:value="${param.location}">
+                                </div>
+
+                                <input type="hidden" name="sortBy" id="sortByField" th:value="${param.sortBy != null ? param.sortBy : 'relevance'}">
+                                <input type="hidden" name="keyword" th:value="${param.keyword}">
+
+                                <button type="submit" class="btn btn-primary w-100">Appliquer les filtres</button>
+                                <button type="button" id="reset-filters" class="btn btn-outline-secondary w-100 mt-2">Réinitialiser les filtres</button>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <!-- Type de contrat -->
-                            <div class="mb-4">
-                                <h6 class="mb-3">Type de contrat</h6>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="cdi">
-                                    <label class="form-check-label" for="cdi">CDI</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="cdd">
-                                    <label class="form-check-label" for="cdd">CDD</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="stage">
-                                    <label class="form-check-label" for="stage">Stage</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="freelance">
-                                    <label class="form-check-label" for="freelance">Freelance</label>
-                                </div>
-                            </div>
-
-                            <!-- Expérience -->
-                            <div class="mb-4">
-                                <h6 class="mb-3">Expérience</h6>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="junior">
-                                    <label class="form-check-label" for="junior">Débutant</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="mid">
-                                    <label class="form-check-label" for="mid">1-3 ans</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="senior">
-                                    <label class="form-check-label" for="senior">4-6 ans</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="checkbox" id="expert">
-                                    <label class="form-check-label" for="expert">7+ ans</label>
-                                </div>
-                            </div>
-
-                            <!-- Catégories -->
-                            <div class="mb-4">
-                                <h6 class="mb-3">Secteur d'activité</h6>
-                                <select class="form-select">
-                                    <option selected>Tous les secteurs</option>
-                                    <option>Informatique & Tech</option>
-                                    <option>Finance & Comptabilité</option>
-                                    <option>Marketing & Communication</option>
-                                    <option>Santé</option>
-                                    <option>Éducation</option>
-                                    <option>Industrie</option>
-                                    <option>Services</option>
-                                    <option>Commerce</option>
-                                </select>
-                            </div>
-
-                            <!-- Date de publication -->
-                            <div class="mb-4">
-                                <h6 class="mb-3">Date de publication</h6>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="radio" name="publishDate" id="today" checked>
-                                    <label class="form-check-label" for="today">Aujourd'hui</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="radio" name="publishDate" id="week">
-                                    <label class="form-check-label" for="week">Cette semaine</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="radio" name="publishDate" id="month">
-                                    <label class="form-check-label" for="month">Ce mois</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input class="form-check-input" type="radio" name="publishDate" id="anytime">
-                                    <label class="form-check-label" for="anytime">Tout moment</label>
-                                </div>
-                            </div>
-
-                            <button class="btn btn-primary w-100">Appliquer les filtres</button>
-                        </div>
-                    </div>
+                    </form>
                 </div>
 
                 <!-- Liste des offres -->
@@ -99,19 +111,93 @@
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <div>
                             <h2 class="h4 mb-0" th:text="${offres != null && !offres.empty ? offres.size() + ' offres d''emploi disponibles' : '0 offre d''emploi disponible'}">Offres d'emploi disponibles</h2>
-                            <p class="text-muted mb-0">Résultats pour "Tous les emplois" à "Toutes les villes"</p>
+                            <p class="text-muted mb-0" id="searchResultsSummary">
+                                <span th:if="${param.keyword != null && !param.keyword.isEmpty()}">Résultats pour "<span th:text="${param.keyword}"></span>"</span>
+                                <span th:if="${param.location != null && !param.location.isEmpty()}">à "<span th:text="${param.location}"></span>"</span>
+                                <span th:unless="${(param.keyword != null && !param.keyword.isEmpty()) || (param.location != null && !param.location.isEmpty())}">Tous les emplois</span>
+                            </p>
                         </div>
                         <div class="dropdown">
-                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                Trier par: Pertinence
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" id="sortDropdownButton">
+                                Trier par: <span id="currentSortText">Pertinence</span>
                             </button>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#">Pertinence</a></li>
-                                <li><a class="dropdown-item" href="#">Date (plus récente)</a></li>
-                                <li><a class="dropdown-item" href="#">Salaire (plus élevé)</a></li>
-                                <li><a class="dropdown-item" href="#">Entreprise (A-Z)</a></li>
+                                <li><a class="dropdown-item sort-option" href="#" data-sort="relevance">Pertinence</a></li>
+                                <li><a class="dropdown-item sort-option" href="#" data-sort="date">Date (plus récente)</a></li>
+                                <li><a class="dropdown-item sort-option" href="#" data-sort="salary">Salaire (plus élevé)</a></li>
+                                <li><a class="dropdown-item sort-option" href="#" data-sort="company">Entreprise (A-Z)</a></li>
                             </ul>
                         </div>
+                    </div>
+
+                    <!-- Search box -->
+                    <div class="mb-4">
+                        <form id="job-search-form" class="d-flex gap-2" th:action="@{/candidats/jobs}" method="get">
+                            <input type="text" class="form-control" name="keyword" placeholder="Rechercher des offres..." th:value="${param.keyword}">
+                            <input type="text" class="form-control" name="location" placeholder="Ville" th:value="${param.location}">
+                            <button type="submit" class="btn btn-primary">Rechercher</button>
+                            <!-- Hidden fields to maintain filter state -->
+                            <input type="hidden" name="dateRange" th:value="${param.dateRange}">
+                            <input type="hidden" name="industry" th:value="${param.industry}">
+                            <input type="hidden" name="sortBy" th:value="${param.sortBy}">
+                            <!-- We don't copy multi-value params here as they get complex -->
+                        </form>
+                    </div>
+
+                    <!-- Active filters display -->
+                    <div class="mb-4 d-flex flex-wrap gap-2" id="active-filters-container" th:if="${param.contractType != null || param.experienceLevel != null || param.industry != null || param.dateRange != null || param.location != null}">
+                        <div class="d-flex align-items-center">
+                            <span class="me-2">Filtres actifs:</span>
+                        </div>
+
+                        <!-- Contract Type Filters -->
+                        <th:block th:if="${param.contractType != null}">
+                            <div th:each="contract : ${param.contractType}" class="badge bg-primary p-2 d-flex align-items-center active-filter">
+                                <span th:text="${contract}"></span>
+                                <button type="button" class="btn-close btn-close-white ms-2 remove-filter"
+                                        data-filter-type="contractType" th:data-filter-value="${contract}"></button>
+                            </div>
+                        </th:block>
+
+                        <!-- Experience Filters -->
+                        <th:block th:if="${param.experienceLevel != null}">
+                            <div th:each="exp : ${param.experienceLevel}" class="badge bg-primary p-2 d-flex align-items-center active-filter">
+                                <span th:text="${exp}"></span>
+                                <button type="button" class="btn-close btn-close-white ms-2 remove-filter"
+                                        data-filter-type="experienceLevel" th:data-filter-value="${exp}"></button>
+                            </div>
+                        </th:block>
+
+                        <!-- Industry Filter -->
+                        <th:block th:if="${param.industry != null && !param.industry.isEmpty()}">
+                            <div class="badge bg-primary p-2 d-flex align-items-center active-filter">
+                                <span th:text="${param.industry}"></span>
+                                <button type="button" class="btn-close btn-close-white ms-2 remove-filter"
+                                        data-filter-type="industry" th:data-filter-value="${param.industry}"></button>
+                            </div>
+                        </th:block>
+
+                        <!-- Date Range Filter -->
+                        <th:block th:if="${param.dateRange != null && !param.dateRange.isEmpty() && param.dateRange != 'anytime'}">
+                            <div class="badge bg-primary p-2 d-flex align-items-center active-filter">
+                                <span th:text="${param.dateRange == 'today' ? 'Aujourd''hui' : (param.dateRange == 'week' ? 'Cette semaine' : 'Ce mois')}"></span>
+                                <button type="button" class="btn-close btn-close-white ms-2 remove-filter"
+                                        data-filter-type="dateRange" th:data-filter-value="${param.dateRange}"></button>
+                            </div>
+                        </th:block>
+
+                        <!-- Location Filter -->
+                        <th:block th:if="${param.location != null && !param.location.isEmpty()}">
+                            <div class="badge bg-primary p-2 d-flex align-items-center active-filter">
+                                <span th:text="${param.location}"></span>
+                                <button type="button" class="btn-close btn-close-white ms-2 remove-filter"
+                                        data-filter-type="location" th:data-filter-value="${param.location}"></button>
+                            </div>
+                        </th:block>
+
+                        <button id="clear-all-filters" class="badge bg-danger p-2 d-flex align-items-center ms-auto">
+                            Effacer tous les filtres
+                        </button>
                     </div>
 
                     <!-- Cartes d'offres d'emploi -->
@@ -169,23 +255,27 @@
                                     <i class="fas fa-search fa-3x text-muted mb-3"></i>
                                     <h4>Aucune offre d'emploi trouvée</h4>
                                     <p class="text-muted">Aucune offre ne correspond à vos critères de recherche ou aucune offre n'est actuellement disponible.</p>
-                                    <a href="#" class="btn btn-primary mt-3">Modifier les filtres</a>
+                                    <a href="#" id="reset-search" class="btn btn-primary mt-3">Modifier les filtres</a>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Pagination -->
-                        <div class="col-12" th:if="${offres != null && !offres.empty}">
+                        <div class="col-12" th:if="${offres != null && !offres.empty && totalPages > 1}">
                             <nav aria-label="Page navigation">
                                 <ul class="pagination justify-content-center">
-                                    <li class="page-item disabled">
-                                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Précédent</a>
+                                    <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                                        <a class="page-link" th:href="@{/candidats/jobs(page=${currentPage - 1}, size=${pageSize}, keyword=${param.keyword}, location=${param.location}, contractType=${param.contractType}, experienceLevel=${param.experienceLevel}, industry=${param.industry}, dateRange=${param.dateRange}, sortBy=${param.sortBy})}" tabindex="-1" th:aria-disabled="${currentPage == 0}">Précédent</a>
                                     </li>
-                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="#">Suivant</a>
+
+                                    <th:block th:each="i: ${#numbers.sequence(0, totalPages - 1)}">
+                                        <li class="page-item" th:classappend="${currentPage == i ? 'active' : ''}">
+                                            <a class="page-link" th:href="@{/candidats/jobs(page=${i}, size=${pageSize}, keyword=${param.keyword}, location=${param.location}, contractType=${param.contractType}, experienceLevel=${param.experienceLevel}, industry=${param.industry}, dateRange=${param.dateRange}, sortBy=${param.sortBy})}" th:text="${i + 1}">1</a>
+                                        </li>
+                                    </th:block>
+
+                                    <li class="page-item" th:classappend="${currentPage == totalPages - 1 ? 'disabled' : ''}">
+                                        <a class="page-link" th:href="@{/candidats/jobs(page=${currentPage + 1}, size=${pageSize}, keyword=${param.keyword}, location=${param.location}, contractType=${param.contractType}, experienceLevel=${param.experienceLevel}, industry=${param.industry}, dateRange=${param.dateRange}, sortBy=${param.sortBy})}">Suivant</a>
                                     </li>
                                 </ul>
                             </nav>
@@ -255,6 +345,97 @@
                         icon.style.color = '';
                     }
                 });
+            });
+
+            // Sort dropdown handling
+            const sortDropdown = document.querySelectorAll('.sort-option');
+            const sortByField = document.getElementById('sortByField');
+            const currentSortText = document.getElementById('currentSortText');
+
+            // Set initial sort text based on URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentSort = urlParams.get('sortBy') || 'relevance';
+
+            // Update the displayed sort text
+            switch(currentSort) {
+                case 'date':
+                    currentSortText.textContent = 'Date (plus récente)';
+                    break;
+                case 'salary':
+                    currentSortText.textContent = 'Salaire (plus élevé)';
+                    break;
+                case 'company':
+                    currentSortText.textContent = 'Entreprise (A-Z)';
+                    break;
+                default:
+                    currentSortText.textContent = 'Pertinence';
+            }
+
+            // Add click handlers for sort options
+            sortDropdown.forEach(option => {
+                option.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const sortValue = this.getAttribute('data-sort');
+                    sortByField.value = sortValue;
+                    currentSortText.textContent = this.textContent;
+
+                    // Submit the form
+                    document.getElementById('job-filter-form').submit();
+                });
+            });
+
+            // Reset filters button
+            document.getElementById('reset-filters').addEventListener('click', function() {
+                window.location.href = '/candidats/jobs';
+            });
+
+            // Reset search button (for no results found)
+            const resetSearchBtn = document.getElementById('reset-search');
+            if (resetSearchBtn) {
+                resetSearchBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    window.location.href = '/candidats/jobs';
+                });
+            }
+
+            // Remove filter buttons
+            document.querySelectorAll('.remove-filter').forEach(button => {
+                button.addEventListener('click', function() {
+                    const filterType = this.getAttribute('data-filter-type');
+                    const filterValue = this.getAttribute('data-filter-value');
+
+                    // Create a URL with current parameters
+                    const url = new URL(window.location.href);
+                    const params = new URLSearchParams(url.search);
+
+                    // Handle multi-value parameters (like contractType)
+                    if (params.getAll(filterType).length > 1) {
+                        // Get all values for this parameter
+                        const values = params.getAll(filterType);
+
+                        // Remove this parameter completely
+                        params.delete(filterType);
+
+                        // Add back all values except the one being removed
+                        values.forEach(value => {
+                            if (value !== filterValue) {
+                                params.append(filterType, value);
+                            }
+                        });
+                    } else {
+                        // For single-value parameters, just remove it
+                        params.delete(filterType);
+                    }
+
+                    // Update the URL
+                    url.search = params.toString();
+                    window.location.href = url.toString();
+                });
+            });
+
+            // Clear all filters button
+            document.getElementById('clear-all-filters')?.addEventListener('click', function() {
+                window.location.href = '/candidats/jobs';
             });
         });
     </script>
