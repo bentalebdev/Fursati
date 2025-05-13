@@ -11,6 +11,7 @@ import com.ismagi.Fursati.service.DemandeService;
 import com.ismagi.Fursati.service.DocumentService;
 import com.ismagi.Fursati.service.OffreService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -87,9 +88,15 @@ public class CandidatController {
     }
 
     @GetMapping("/dashboard")
-    public String dashboard(Model model) {
+    public String dashboard(Model model, HttpSession session) {
         logger.info("Loading dashboard page...");
         model.addAttribute("activeTab", "dashboard");
+
+        // Retrieve the authenticated candidate's ID from the session
+        Long candidatId = (Long) session.getAttribute("userId");
+        if (candidatId == null) {
+            return "redirect:/login"; // Redirect to login if not authenticated
+        }
 
         // Provide a default Offre object to avoid null pointer exceptions in the view
         if (!model.containsAttribute("offre")) {
@@ -177,14 +184,19 @@ public class CandidatController {
     // ===============================
 
     @GetMapping("/applications")
-    public String applications(Model model) {
+    public String applications(Model model, HttpSession session) {
         logger.info("Loading applications page...");
 
-        // Récupérer les demandes du candidat connecté
-        Long candidatId = 1L; // À remplacer par le candidat connecté
+        // Retrieve the authenticated candidate's ID from the session
+        Long candidatId = (Long) session.getAttribute("userId");
+        if (candidatId == null) {
+            return "redirect:/login"; // Redirect to login if not authenticated
+        }
+
+        // Retrieve the candidate's applications
         List<Demande> demandes = demandeService.getAllDemandes();
 
-        // Filtrer pour ne montrer que les demandes du candidat connecté
+        // Filter to show only the applications of the authenticated candidate
         List<Demande> candidatDemandes = new ArrayList<>();
         if (demandes != null) {
             candidatDemandes = demandes.stream()
@@ -210,12 +222,18 @@ public class CandidatController {
     // ===============================
 
     @GetMapping("/profile")
-    public String profile(Model model) {
+    public String profile(Model model, HttpSession session) {
         logger.info("Loading profile page...");
 
         model.addAttribute("activeTab", "profile");
 
-        Candidat c = candidatProfileService.getCandidatById(1L);
+        // Retrieve the authenticated candidate's ID from the session
+        Long candidatId = (Long) session.getAttribute("userId");
+        if (candidatId == null) {
+            return "redirect:/login"; // Redirect to login if not authenticated
+        }
+
+        Candidat c = candidatProfileService.getCandidatById(candidatId);
 
         // Provide a default Offre object to avoid null pointer exceptions in the view
         if (!model.containsAttribute("offre")) {
@@ -285,8 +303,27 @@ public class CandidatController {
 
     @PostMapping("/profile/experience")
     public String updateExperience(@ModelAttribute ExperienceListDTO experienceListDTO) {
-        candidatProfileService.updateExperiences(1L, experienceListDTO);
-        return "redirect:/candidats/profile";
+        try {
+            // Log the received date formats
+            if (experienceListDTO != null && experienceListDTO.getExperiences() != null && 
+                !experienceListDTO.getExperiences().isEmpty()) {
+                ExperienceDTO exp = experienceListDTO.getExperiences().get(0);
+                logger.info("Received experience form data - Start Date: " + exp.getStartDate() + ", End Date: " + exp.getEndDate());
+
+                // Manual conversion from yyyy-MM string to LocalDate if needed
+                if (exp.getStartDate() == null && exp.getEndDate() == null) {
+                    // This can happen if dates are sent as strings and not converted properly
+                    logger.warning("Date conversion might have failed, dates are null");
+                }
+            }
+
+            candidatProfileService.updateExperiences(1L, experienceListDTO);
+            return "redirect:/candidats/profile";
+        } catch (Exception e) {
+            logger.severe("Error updating experience: " + e.getMessage());
+            e.printStackTrace();
+            return "redirect:/candidats/profile?error=true";
+        }
     }
 
     @PostMapping("/profile/experience/delete")
