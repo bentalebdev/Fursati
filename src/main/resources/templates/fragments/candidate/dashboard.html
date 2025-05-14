@@ -122,15 +122,15 @@
                 <div class="card-footer bg-white">
                     <div class="row text-center">
                         <div class="col-4">
-                            <p class="mb-0 fw-bold text-success">25%</p>
+                            <p class="mb-0 fw-bold text-success" th:text="${acceptedPercentage + '%'}">25%</p>
                             <small class="text-muted">Acceptées</small>
                         </div>
                         <div class="col-4">
-                            <p class="mb-0 fw-bold text-warning">58%</p>
+                            <p class="mb-0 fw-bold text-warning" th:text="${pendingPercentage + '%'}">58%</p>
                             <small class="text-muted">En attente</small>
                         </div>
                         <div class="col-4">
-                            <p class="mb-0 fw-bold text-danger">17%</p>
+                            <p class="mb-0 fw-bold text-danger" th:text="${rejectedPercentage + '%'}">17%</p>
                             <small class="text-muted">Refusées</small>
                         </div>
                     </div>
@@ -252,101 +252,43 @@
                 </div>
                 <div class="card-body">
                     <div class="row job-suggestions">
-                        <!-- Job suggestion cards would come from an API call in a real implementation -->
-                        <div class="col-md-4 mb-3 job-card" data-aos="fade-up" data-aos-delay="100">
-                            <div class="card h-100 shadow-sm">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center mb-3">
-                                        <div class="rounded p-2 bg-light me-3">
-                                            <i class="fas fa-building text-primary"></i>
-                                        </div>
-                                        <div>
-                                            <h6 class="mb-0">Développeur Front-end</h6>
-                                            <p class="text-muted small mb-0">DigiTech Solutions</p>
-                                        </div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <div class="d-flex align-items-center mb-1">
-                                            <i class="fas fa-map-marker-alt text-muted me-2"></i>
-                                            <span class="small">Paris, France</span>
-                                        </div>
-                                        <div class="d-flex align-items-center mb-1">
-                                            <i class="fas fa-clock text-muted me-2"></i>
-                                            <span class="small">CDI - Temps plein</span>
-                                        </div>
-                                        <div class="d-flex align-items-center">
-                                            <i class="fas fa-euro-sign text-muted me-2"></i>
-                                            <span class="small">45 000 - 55 000 € / an</span>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <a href="/candidats/jobs/details/1" class="btn btn-sm btn-primary w-100">Voir l'offre</a>
-                                    </div>
-                                </div>
-                            </div>
+                        <!-- No recommended offers message -->
+                        <div class="col-12 text-center py-3" th:if="${recommendedOffers == null || #lists.isEmpty(recommendedOffers)}">
+                            <p class="text-muted mb-0">Aucune offre d'emploi recommandée pour le moment</p>
                         </div>
-
-                        <div class="col-md-4 mb-3 job-card" data-aos="fade-up" data-aos-delay="200">
+                        
+                        <!-- Dynamic job recommendation cards -->
+                        <div class="col-md-4 mb-3 job-card" data-aos="fade-up" th:data-aos-delay="${iterStat.index * 100}"
+                             th:each="offer, iterStat : ${recommendedOffers}" th:if="${recommendedOffers != null && !#lists.isEmpty(recommendedOffers)}">
                             <div class="card h-100 shadow-sm">
                                 <div class="card-body">
                                     <div class="d-flex align-items-center mb-3">
                                         <div class="rounded p-2 bg-light me-3">
-                                            <i class="fas fa-building text-success"></i>
+                                            <i class="fas fa-building" th:class="${'fas fa-building text-' + (#strings.toLowerCase(offer.company?.industry ?: 'primary'))}"></i>
                                         </div>
                                         <div>
-                                            <h6 class="mb-0">UX/UI Designer</h6>
-                                            <p class="text-muted small mb-0">CreativeWorld</p>
+                                            <h6 class="mb-0" th:text="${offer.title}">Titre du poste</h6>
+                                            <p class="text-muted small mb-0" th:text="${offer.company?.name ?: 'Entreprise'}">Nom de l'entreprise</p>
                                         </div>
                                     </div>
                                     <div class="mb-3">
                                         <div class="d-flex align-items-center mb-1">
                                             <i class="fas fa-map-marker-alt text-muted me-2"></i>
-                                            <span class="small">Lyon, France</span>
+                                            <span class="small" th:text="${offer.location ?: 'Non spécifié'}">Lieu</span>
                                         </div>
                                         <div class="d-flex align-items-center mb-1">
                                             <i class="fas fa-clock text-muted me-2"></i>
-                                            <span class="small">CDI - Temps plein</span>
+                                            <span class="small" th:text="${offer.contractType ?: 'Non spécifié'} + ' - ' + ${offer.workMode ?: 'Non spécifié'}">Type de contrat</span>
                                         </div>
                                         <div class="d-flex align-items-center">
                                             <i class="fas fa-euro-sign text-muted me-2"></i>
-                                            <span class="small">40 000 - 50 000 € / an</span>
+                                            <span class="small" th:text="${(offer.salaryMin != null && offer.salaryMax != null) ? 
+                                                        (offer.salaryMin + ' - ' + offer.salaryMax + ' €' + (offer.salaryCycle ?: '/an')) : 
+                                                        'Salaire non spécifié'}">Salaire</span>
                                         </div>
                                     </div>
                                     <div>
-                                        <a href="/candidats/jobs/details/2" class="btn btn-sm btn-primary w-100">Voir l'offre</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-4 mb-3 job-card" data-aos="fade-up" data-aos-delay="300">
-                            <div class="card h-100 shadow-sm">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center mb-3">
-                                        <div class="rounded p-2 bg-light me-3">
-                                            <i class="fas fa-building text-info"></i>
-                                        </div>
-                                        <div>
-                                            <h6 class="mb-0">Chef de Projet Digital</h6>
-                                            <p class="text-muted small mb-0">InnoTech Media</p>
-                                        </div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <div class="d-flex align-items-center mb-1">
-                                            <i class="fas fa-map-marker-alt text-muted me-2"></i>
-                                            <span class="small">Nantes, France</span>
-                                        </div>
-                                        <div class="d-flex align-items-center mb-1">
-                                            <i class="fas fa-clock text-muted me-2"></i>
-                                            <span class="small">CDI - Temps plein</span>
-                                        </div>
-                                        <div class="d-flex align-items-center">
-                                            <i class="fas fa-euro-sign text-muted me-2"></i>
-                                            <span class="small">50 000 - 60 000 € / an</span>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <a href="/candidats/jobs/details/3" class="btn btn-sm btn-primary w-100">Voir l'offre</a>
+                                        <a th:href="@{'/candidats/jobs/details/' + ${offer.id}}" class="btn btn-sm btn-primary w-100">Voir l'offre</a>
                                     </div>
                                 </div>
                             </div>
@@ -499,7 +441,7 @@
                     data: {
                         labels: ['Acceptées', 'En attente', 'Refusées'],
                         datasets: [{
-                            data: [25, 58, 17],
+                            data: [(${acceptedPercentage}), (${pendingPercentage}), (${rejectedPercentage})],
                             backgroundColor: [
                                 'rgba(25, 135, 84, 0.8)',
                                 'rgba(255, 193, 7, 0.8)',

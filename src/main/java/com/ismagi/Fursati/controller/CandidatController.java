@@ -25,10 +25,10 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/candidats")
@@ -96,6 +96,120 @@ public class CandidatController {
         Long candidatId = (Long) session.getAttribute("userId");
         if (candidatId == null) {
             return "redirect:/login"; // Redirect to login if not authenticated
+        }
+
+        try {
+            // Get candidate data
+            Candidat candidat = candidatService.getCandidatById(candidatId);
+            model.addAttribute("candidat", candidat);
+            
+            // Get applications statistics
+            List<Demande> demandes = demandeService.getAllDemandes();
+            List<Demande> candidatDemandes = new ArrayList<>();
+            if (demandes != null) {
+                candidatDemandes = demandes.stream()
+                        .filter(d -> d.getCandidat() != null &&
+                                d.getCandidat().getId() != null &&
+                                d.getCandidat().getId().equals(candidatId))
+                        .toList();
+            }
+            
+            // Application count
+            int applicationCount = candidatDemandes.size();
+            model.addAttribute("applicationCount", applicationCount);
+            
+            // Interview count (applications with status INTERVIEW)
+            int interviewCount = (int) candidatDemandes.stream()
+                    .filter(d -> "INTERVIEW".equals(d.getEtat()))
+                    .count();
+            model.addAttribute("interviewCount", interviewCount);
+            
+            // Saved offers count - placeholder, replace with real implementation if available
+            int savedOffersCount = 0; // Implement real logic if there's a saved offers feature
+            model.addAttribute("savedOffersCount", savedOffersCount);
+            
+            // Profile views count - placeholder, replace with real implementation if available
+            int profileViewsCount = 0; // Implement real logic if there's a profile views tracking feature
+            model.addAttribute("profileViewsCount", profileViewsCount);
+            
+            // Calculate application status statistics
+            int acceptedCount = (int) candidatDemandes.stream().filter(d -> "ACCEPTED".equals(d.getEtat())).count();
+            int pendingCount = (int) candidatDemandes.stream().filter(d -> "PENDING".equals(d.getEtat())).count();
+            int rejectedCount = (int) candidatDemandes.stream().filter(d -> "REJECTED".equals(d.getEtat())).count();
+            int totalCount = applicationCount > 0 ? applicationCount : 1; // Avoid division by zero
+            
+            model.addAttribute("acceptedPercentage", acceptedCount * 100 / totalCount);
+            model.addAttribute("pendingPercentage", pendingCount * 100 / totalCount);
+            model.addAttribute("rejectedPercentage", rejectedCount * 100 / totalCount);
+            
+            // Recent activities (last 5 applications)
+            List<Map<String, Object>> recentActivities = new ArrayList<>();
+            candidatDemandes.stream()
+                    .sorted((d1, d2) -> {
+                        if (d1.getDateDemande() == null) return 1;
+                        if (d2.getDateDemande() == null) return -1;
+                        return d2.getDateDemande().compareTo(d1.getDateDemande());
+                    })
+                    .limit(5)
+                    .forEach(d -> {
+                        Map<String, Object> activity = new HashMap<>();
+                        activity.put("type", "application");
+                        activity.put("title", d.getOffre() != null ? d.getOffre().getTitle() : "N/A");
+                        activity.put("company", d.getOffre() != null && d.getOffre().getRecruteur().getCompany() != null ? 
+                                d.getOffre().getRecruteur().getCompany().getNomEntreprise() : "N/A");
+                        
+                        // Calculate days ago
+                        int daysAgo = 0;
+                        if (d.getDateDemande() != null) {
+                            long diff = new Date().getTime() - d.getDateDemande().getTime();
+                            daysAgo = (int) (diff / (1000 * 60 * 60 * 24));
+                        }
+                        activity.put("daysAgo", daysAgo);
+                        
+                        recentActivities.add(activity);
+                    });
+            model.addAttribute("recentActivities", recentActivities);
+            
+            // Upcoming interviews
+            List<Map<String, Object>> upcomingInterviews = new ArrayList<>();
+            candidatDemandes.stream()
+                    .filter(d -> "INTERVIEW".equals(d.getEtat()))
+                    .forEach(d -> {
+                        Map<String, Object> interview = new HashMap<>();
+                        interview.put("title", d.getOffre() != null ? d.getOffre().getTitle() : "N/A");
+                        interview.put("company", d.getOffre() != null && d.getOffre().getRecruteur().getCompany() != null ? 
+                                d.getOffre().getRecruteur().getCompany().getNomEntreprise() : "N/A");
+                        
+                        // Format interview date (this is a placeholder since the actual interview date field may differ)
+                        String date = "Bientôt";
+                        // Since getInterviewDate() method doesn't exist, we'll use a generic date or status
+                        // We can use the application date or status change date if available
+                        if (d.getDateDemande() != null) {
+                            // Add 7 days to application date as a placeholder for interview date
+                            Calendar c = Calendar.getInstance();
+                            c.setTime(d.getDateDemande());
+                            c.add(Calendar.DATE, 7);
+                            
+                            // Format date
+                            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                            date = sdf.format(c.getTime());
+                        }
+                        interview.put("date", date);
+                        
+                        upcomingInterviews.add(interview);
+                    });
+            model.addAttribute("upcomingInterviews", upcomingInterviews);
+            
+            // Get recommended job offers (3 most recent active offers)
+            List<Offre> recommendedOffers = offreService.getAllOffres().stream()
+                    .filter(o -> "ACTIVE".equals(o.getStatus()))
+                    .limit(3)
+                    .collect(Collectors.toList());
+            model.addAttribute("recommendedOffers", recommendedOffers);
+
+        } catch (Exception e) {
+            logger.severe("Error loading dashboard data: " + e.getMessage());
+            e.printStackTrace();
         }
 
         // Provide a default Offre object to avoid null pointer exceptions in the view
